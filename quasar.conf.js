@@ -1,6 +1,8 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
+const path = require('path')
+
 module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
@@ -8,7 +10,8 @@ module.exports = function (ctx) {
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
       'i18n',
-      'axios'
+      'axios',
+      'vuikit'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -47,7 +50,10 @@ module.exports = function (ctx) {
       directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [],
+      config: {
+        dark: true
+      }
     },
 
     // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
@@ -56,9 +62,9 @@ module.exports = function (ctx) {
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       scopeHoisting: true,
-      // vueRouterMode: 'history',
-      // showProgress: false,
-      // gzip: true,
+      vueRouterMode: 'history',
+      showProgress: true,
+      gzip: true,
       // analyze: true,
       // preloadChunks: false,
       // extractCSS: false,
@@ -71,9 +77,24 @@ module.exports = function (ctx) {
           loader: 'eslint-loader',
           exclude: /node_modules/,
           options: {
-            formatter: require('eslint').CLIEngine.getFormatter('stylish')
+            formatter: require('eslint').CLIEngine.getFormatter('stylish'),
+            fix: true
           }
         })
+
+        cfg.resolve.alias = {
+          ...cfg.resolve.alias, // This adds the existing alias
+
+
+          // Add your own alias like this
+          '@libs': path.resolve(__dirname, './src/libs'),
+          '@etc': path.resolve(__dirname, './src/etc'),
+          '@components': path.resolve(__dirname, './src/components'),
+          '@mixins': path.resolve(__dirname, './src/components/mixins'),
+          '@wrappers': path.resolve(__dirname, './src/components/wrappers'),
+          '@apps': path.resolve(__dirname, './src/apps'),
+          // '@skins': path.resolve(__dirname, './src/skins')
+        }
       }
     },
 

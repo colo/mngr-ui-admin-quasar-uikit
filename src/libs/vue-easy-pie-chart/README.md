@@ -1,0 +1,1 @@
+Copy this file to "node_modules/vue-easy-pie-chart/dist" to support bar-color Functions

@@ -15,7 +15,16 @@
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
     "quasar": "^1.0.0",
-    "vue-i18n": "^8.0.0"
+    "vue-i18n": "^8.0.0",
+    "@vuikit/icons": "^0.8.1",
+    "@vuikit/theme": "^0.8.1",
+    "debug": "^4.1.1",
+    "js-pipeline": "git+https://github.com/colo/js-pipeline.git",
+    "mngr-ui-admin-charts": "git+https://github.com/colo/mngr-ui-admin-charts.git",
+    "node-app-socket.io-client": "git+https://github.com/colo/node-app-socket.io-client.git",
+    "node-tabular-data": "git+https://github.com/colo/node-tabular-data.git",
+    "vuikit": "^0.8.10",
+    "mootools": "^1.5.2"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0",
