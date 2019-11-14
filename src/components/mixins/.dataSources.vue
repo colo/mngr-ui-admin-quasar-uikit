@@ -144,9 +144,9 @@ export default {
         }
       }
     },
-    __update_component_data: function (component, key, type, payload) {
-      debug('__update_component_data', component, key, type, Object.clone(payload))
-      let callback = this.__get_source_callback_from_key(component.source, key, type)
+    __update_component_data: function (component, key, payload) {
+      debug('__update_component_data', component, key, Object.clone(payload))
+      let callback = this.__get_source_callback_from_key(component.source, key)
 
       debug('__update_component_data', callback)
 
@@ -155,41 +155,38 @@ export default {
         // callback(data)
       }
     },
-    __get_source_callback_from_key: function (source, key, input) {
-      input = input || 'requests'
+    __get_source_callback_from_key: function (source, key) {
       let callback
 
       for (const type in source) {
-        if (type === input) {
-          if (type === 'store') {
-            let reqs = source[type]
+        if (type === 'store') {
+          let reqs = source[type]
+          if (!Array.isArray(reqs)) reqs = [reqs]
+
+          for (let i = 0; i < reqs.length; i++) {
+            if (reqs[i] && reqs[i].params) {
+              let _key = this.__query_to_key(reqs[i].params)
+              if (_key === key || (Array.isArray(_key) && _key.indexOf(key) > -1)) {
+                debug('__get_source_callback_from_key', reqs[i])
+                callback = reqs[i].callback
+              }
+            }
+          }
+        } else {
+          for (const req_type in source[type]) {
+            let reqs = source[type][req_type]
             if (!Array.isArray(reqs)) reqs = [reqs]
 
             for (let i = 0; i < reqs.length; i++) {
               if (reqs[i] && reqs[i].params) {
                 let _key = this.__query_to_key(reqs[i].params)
+                // if(Array.isArray(_key) && _key.indexOf(key) > -1 ){
+                //   let index = _key.indexOf(key)
+                // }
+                // else
                 if (_key === key || (Array.isArray(_key) && _key.indexOf(key) > -1)) {
                   debug('__get_source_callback_from_key', reqs[i])
                   callback = reqs[i].callback
-                }
-              }
-            }
-          } else {
-            for (const req_type in source[type]) {
-              let reqs = source[type][req_type]
-              if (!Array.isArray(reqs)) reqs = [reqs]
-
-              for (let i = 0; i < reqs.length; i++) {
-                if (reqs[i] && reqs[i].params) {
-                  let _key = this.__query_to_key(reqs[i].params)
-                  // if(Array.isArray(_key) && _key.indexOf(key) > -1 ){
-                  //   let index = _key.indexOf(key)
-                  // }
-                  // else
-                  if (_key === key || (Array.isArray(_key) && _key.indexOf(key) > -1)) {
-                    debug('__get_source_callback_from_key', reqs[i])
-                    callback = reqs[i].callback
-                  }
                 }
               }
             }
@@ -200,7 +197,7 @@ export default {
       return callback
     },
     __source_to_keys: function (source, input) {
-      debug('__source_to_keys -> %o %s', source, input)
+      debug('__source_to_keys %s', input)
       input = input || 'requests'
       let keys = []
       for (const type in source) {
@@ -228,8 +225,6 @@ export default {
               let reqs = source[type][req_type]
               if (!Array.isArray(reqs)) reqs = [reqs]
 
-              debug('__source_to_keys REQUEST %o', reqs)
-
               for (let i = 0; i < reqs.length; i++) {
                 if (reqs[i] && reqs[i].params) {
                   let key = this.__query_to_key(reqs[i].params)
@@ -247,7 +242,7 @@ export default {
         }
       }
 
-      debug('__source_to_keys KEYS', keys, input)
+      debug('__source_to_keys', keys)
       return keys
     },
     __query_to_key: function (query) {
@@ -352,12 +347,12 @@ export default {
               components[index].source &&
               this.__source_to_keys(components[index].source, type).contains(key)
             ) {
-              this.__update_component_data(components[index], key, type, payload)
+              this.__update_component_data(components[index], key, payload)
             }
           }
         } else {
           if (components.source && this.__source_to_keys(components.source, type).contains(key)) {
-            this.__update_component_data(components, key, type, payload)
+            this.__update_component_data(components, key, payload)
           }
         }
       }
