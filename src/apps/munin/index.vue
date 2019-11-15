@@ -29,12 +29,10 @@ export default {
   mixins: [DataSourcesMixin],
 
   name: 'Munin',
-  // components: {
-  //   HelloWorld
-  // }
+  pipelines: {},
+  __pipelines_cfg: {},
+  unwatch_store: undefined,
 
-  // pipelines: {},
-  // __pipelines_cfg: {},
   data () {
     return {
       height: '0px',
@@ -45,7 +43,7 @@ export default {
       store: false,
       pipeline_id: 'input.munin',
 
-      id: 'all',
+      id: 'munin',
       path: 'all',
 
       components: {

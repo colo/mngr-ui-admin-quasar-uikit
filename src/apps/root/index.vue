@@ -33,6 +33,11 @@ export default {
   mixins: [DataSourcesMixin],
 
   name: 'Root',
+
+  pipelines: {},
+  __pipelines_cfg: {},
+  unwatch_store: undefined,
+
   data () {
     return {
       height: '0px',
@@ -43,7 +48,7 @@ export default {
       store: true,
       pipeline_id: 'input.root',
 
-      id: 'all',
+      id: 'root',
       path: 'all',
 
       components: {

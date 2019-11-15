@@ -8,16 +8,16 @@ import sourceStore from 'src/store/source'
 
 import { EventBus } from '@libs/eventbus'
 
-import { mapState, mapGetters } from 'vuex'
+// import { mapState, mapGetters } from 'vuex'
 
 let qs = require('qs')
 
 export default {
-  name: 'data-sources',
+  // name: 'data-sources',
 
-  components: {
-
-  },
+  // components: {
+  //
+  // },
 
   pipelines: {},
   __pipelines_cfg: {},
@@ -42,14 +42,14 @@ export default {
   watch: {
     store: function (val) {
       debug('watch store', val)
-      if (val) this.__register_store_module(this.path, sourceStore)
+      if (val) this.__register_store_module(this.id, sourceStore)
     }
   },
   created: function () {
     debug('created')
     EventBus.$on(this.path, this.__process_input_data.bind(this))
 
-    if (this.store) this.__register_store_module(this.path, sourceStore)
+    if (this.store) this.__register_store_module(this.id, sourceStore)
     this.__bind_components_to_sources(this.components)
     this.create_pipelines()
   },
@@ -63,7 +63,7 @@ export default {
   destroy: function () {
     debug('destroy')
     this.destroy_pipelines()
-    this.__unregister_store_module(this.path)
+    this.__unregister_store_module(this.id)
   },
 
   beforeRouteLeave (to, from, next) {
@@ -71,7 +71,7 @@ export default {
     // be navigated away from.
     // has access to `this` component instance.
     this.suspend_pipelines()
-    this.__unregister_store_module(this.path)
+    this.__unregister_store_module(this.id)
     next()
   },
   // computed: mapState({
@@ -275,7 +275,7 @@ export default {
       // this.$store.commit(this.id + '_sources/add', { id: 'periodical?register=periodical&transformation=limit%3A30000', data: { range: [] } })
 
       // this.$store.watch((state) => state[this.id + '_sources']['periodical?register=periodical&transformation=limit%3A30000'], (val, oldVal) => {
-      this.$options.unwatch_store = this.$store.watch((state) => state[this.id + '_sources'], (val, oldVal) => {
+      this.$options.unwatch_store = this.$store.watch((state) => state[id + '_sources'], (val, oldVal) => {
         debug('$store watch %o', val)
         Object.each(val, function (payload, id) {
           this.__process_data(payload, 'store')
@@ -330,7 +330,7 @@ export default {
       //   this.$store.commit(this.id + '_sources/append', { id: payload.id, key: key, data: payload.data[key] })
       // }
       if (this.store === true) {
-        this.$store.commit(this.path + '_sources/add', payload)
+        this.$store.commit(this.id + '_sources/add', payload)
       }
       // else {
       this.__process_data(payload, 'requests')
@@ -627,6 +627,3 @@ export default {
 
 // import 'admin-lte/dist/js/adminlte.min.js'
 </script>
-
-<style>
-</style>
