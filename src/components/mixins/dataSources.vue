@@ -46,8 +46,8 @@ export default {
     }
   },
   created: function () {
-    debug('created')
-    EventBus.$on(this.path, this.__process_input_data.bind(this))
+    debug('lifecycle created')
+    EventBus.$on(this.pipeline_id + '.' + this.path, this.__process_input_data)
 
     if (this.store) this.__register_store_module(this.id, sourceStore)
     this.__bind_components_to_sources(this.components)
@@ -55,23 +55,26 @@ export default {
   },
 
   mounted: function () {
-    debug('mounted')
+    debug('lifecycle mounted')
     this.resume_pipelines()
   },
   // updated: function () {
   // },
   destroy: function () {
-    debug('destroy')
+    debug('lifecycle destroy')
     this.destroy_pipelines()
+    EventBus.$off(this.pipeline_id + '.' + this.path, this.__process_input_data)
     this.__unregister_store_module(this.id)
   },
 
   beforeRouteLeave (to, from, next) {
+    debug('lifecycle beforeRouteLeave')
     // called when the route that renders this component is about to
     // be navigated away from.
     // has access to `this` component instance.
     this.suspend_pipelines()
-    this.__unregister_store_module(this.id)
+    EventBus.$off(this.pipeline_id + '.' + this.path, this.__process_input_data)
+    // this.__unregister_store_module(this.id)
     next()
   },
   // computed: mapState({
@@ -270,41 +273,43 @@ export default {
       // if (!process.env.DEV) { if (old && this.$store.state['data_sources_' + old]) { this.$store.unregisterModule('data_sources_' + old) } }
       // if (old && this.$store.state['dashboard_' + old]) { this.$store.unregisterModule('dashboard_' + old) }
 
-      if (id && !this.$store.state[id + '_sources']) { this.$store.registerModule(id + '_sources', Object.clone(module)) }
+      if (id && !this.$store.state[id + '_sources']) {
+        this.$store.registerModule(id + '_sources', Object.clone(module))
 
-      // this.$store.commit(this.id + '_sources/add', { id: 'periodical?register=periodical&transformation=limit%3A30000', data: { range: [] } })
+        // this.$store.commit(this.id + '_sources/add', { id: 'periodical?register=periodical&transformation=limit%3A30000', data: { range: [] } })
 
-      // this.$store.watch((state) => state[this.id + '_sources']['periodical?register=periodical&transformation=limit%3A30000'], (val, oldVal) => {
-      this.$options.unwatch_store = this.$store.watch((state) => state[id + '_sources'], (val, oldVal) => {
-        debug('$store watch %o', val)
-        Object.each(val, function (payload, id) {
-          this.__process_data(payload, 'store')
-        }.bind(this))
-        //   // if (!this.components_data['periodical?register=periodical&transformation=limit%3A30000']) { this.$set(this.components_data, 'periodical?register=periodical&transformation=limit%3A30000', {}) }
-        //
-        //   debug('watcher', val)
-        //   if (val['range']) {
-        //     for (const index in val['range']) {
-        //       this.$set(this.components['6'][0].options.range, index, val['range'][index])
-        //     }
-        //   }
-        //   // for (const key in val) {
-        //   //   if (Array.isArray(val[key])) {
-        //   //     // if (!this.components_data['periodical?register=periodical&transformation=limit%3A30000'][key]) this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'], key, null)
-        //   //     for (const i in val[key]) {
-        //   //       if (!this.components_data['periodical?register=periodical&transformation=limit%3A30000'][key]) this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'], key, [])
-        //   //       this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'][key], i, val[key][i])
-        //   //     }
-        //   //   } else {
-        //   //     this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'], key, val[key])
-        //   //   }
-        //   // }
-        //   // this.$set(this.components_data, 'periodical?register=periodical&transformation=limit%3A30000', val)
-        //   // this.$set(this.MyRange, 0, val.range[0])
-        //   // this.$set(this.MyRange, 1, val.range[1])
-      }, {
-        deep: true
-      })
+        // this.$store.watch((state) => state[this.id + '_sources']['periodical?register=periodical&transformation=limit%3A30000'], (val, oldVal) => {
+        this.$options.unwatch_store = this.$store.watch((state) => state[id + '_sources'], (val, oldVal) => {
+          debug('$store watch %o', val)
+          Object.each(val, function (payload, id) {
+            this.__process_data(payload, 'store')
+          }.bind(this))
+          //   // if (!this.components_data['periodical?register=periodical&transformation=limit%3A30000']) { this.$set(this.components_data, 'periodical?register=periodical&transformation=limit%3A30000', {}) }
+          //
+          //   debug('watcher', val)
+          //   if (val['range']) {
+          //     for (const index in val['range']) {
+          //       this.$set(this.components['6'][0].options.range, index, val['range'][index])
+          //     }
+          //   }
+          //   // for (const key in val) {
+          //   //   if (Array.isArray(val[key])) {
+          //   //     // if (!this.components_data['periodical?register=periodical&transformation=limit%3A30000'][key]) this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'], key, null)
+          //   //     for (const i in val[key]) {
+          //   //       if (!this.components_data['periodical?register=periodical&transformation=limit%3A30000'][key]) this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'], key, [])
+          //   //       this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'][key], i, val[key][i])
+          //   //     }
+          //   //   } else {
+          //   //     this.$set(this.components_data['periodical?register=periodical&transformation=limit%3A30000'], key, val[key])
+          //   //   }
+          //   // }
+          //   // this.$set(this.components_data, 'periodical?register=periodical&transformation=limit%3A30000', val)
+          //   // this.$set(this.MyRange, 0, val.range[0])
+          //   // this.$set(this.MyRange, 1, val.range[1])
+        }, {
+          deep: true
+        })
+      }
     },
     __unregister_store_module: function (id) {
       debug('__unregister_store_module', id)

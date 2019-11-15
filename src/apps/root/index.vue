@@ -31,12 +31,13 @@ import { requests, store } from './sources/index'
 
 export default {
   mixins: [DataSourcesMixin],
+  // extends: DataSourcesMixin,
 
   name: 'Root',
 
-  pipelines: {},
-  __pipelines_cfg: {},
-  unwatch_store: undefined,
+  // pipelines: {},
+  // __pipelines_cfg: {},
+  // unwatch_store: undefined,
 
   data () {
     return {

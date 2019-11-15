@@ -27,11 +27,12 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 
 export default {
   mixins: [DataSourcesMixin],
+  // extends: DataSourcesMixin,
 
   name: 'Munin',
-  pipelines: {},
-  __pipelines_cfg: {},
-  unwatch_store: undefined,
+  // pipelines: {},
+  // __pipelines_cfg: {},
+  // unwatch_store: undefined,
 
   data () {
     return {

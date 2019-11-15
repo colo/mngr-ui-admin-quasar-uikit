@@ -90,7 +90,7 @@ export default {
     function (payload) {
       debug('OUTPUT', payload)
 
-      if (!payload.err) { EventBus.$emit(payload.metadata.input, payload) }
+      if (!payload.err) { EventBus.$emit('input.root.' + payload.metadata.input, payload) }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
     }
