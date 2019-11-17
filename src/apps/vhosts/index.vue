@@ -5,21 +5,12 @@
     <vk-card class="uk-background-secondary">
 
       <router-link
-        to="/munin"
+        to="/"
         v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
 
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Munin</vk-button-link>
+        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Home</vk-button-link>
       </router-link>
-
-      <router-link
-        to="/vhosts"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Vhosts</vk-button-link>
-      </router-link>
-
     </vk-card>
   </div>
 </template>
@@ -29,10 +20,10 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:root')
+const debug = Debug('apps:vhosts')
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/root/pipelines/index'
+import Pipeline from '@apps/vhosts/pipelines/index'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
@@ -42,7 +33,7 @@ export default {
   mixins: [DataSourcesMixin],
   // extends: DataSourcesMixin,
 
-  name: 'Root',
+  name: 'Vhosts',
 
   // pipelines: {},
   // __pipelines_cfg: {},
@@ -56,9 +47,9 @@ export default {
       * dataSources
       **/
       store: true,
-      pipeline_id: 'input.root',
+      pipeline_id: 'input.vhosts',
 
-      id: 'root',
+      id: 'vhosts',
       path: 'all',
 
       components: {
@@ -154,16 +145,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.root'] && this.$options.pipelines['input.root'].get_input_by_id('input.root')) {
+      if (this.$options.pipelines['input.vhosts'] && this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.root'].get_input_by_id('input.root').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.root'].get_input_by_id('input.root').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.root'].get_input_by_id('input.root').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.root'].get_input_by_id('input.root').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)
