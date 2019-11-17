@@ -9,9 +9,9 @@ const nginx_vhosts_enabled = {
       'index': 'hosts',
       'q': [
         'data',
-        { 'metadata': ['host', 'timestamp'] }// timestamp give us last update
-      ],
-      'filter': [ { 'metadata': { 'path': 'vhosts.nginx.enabled' } } ]
+        { 'metadata': ['host', 'timestamp', 'path'] }// timestamp give us last update
+      ]
+      // 'filter': [ { 'metadata': { 'path': 'vhosts.nginx.enabled' } } ]
     }
   },
   callback: function (tables, metadata, key, vm) {
