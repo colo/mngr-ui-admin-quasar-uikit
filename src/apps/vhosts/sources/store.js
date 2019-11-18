@@ -6,7 +6,7 @@ const nginx_vhosts_enabled = {
     path: 'all',
     query: {
       'from': 'vhosts',
-      'index': 'hosts',
+      'index': false,
       'q': [
         'data',
         { 'metadata': ['host', 'timestamp', 'path'] }// timestamp give us last update

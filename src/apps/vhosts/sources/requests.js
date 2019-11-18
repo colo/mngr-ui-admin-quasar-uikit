@@ -6,7 +6,7 @@ const nginx_vhosts_enabled = {
     path: 'all',
     query: {
       'from': 'vhosts',
-      'index': 'hosts',
+      'index': false,
       'q': [
         'data',
         { 'metadata': ['host', 'timestamp', 'path'] }// timestamp give us last update
@@ -14,8 +14,19 @@ const nginx_vhosts_enabled = {
       // 'filter': [ { 'metadata': { 'path': 'vhosts.nginx.enabled' } } ]
     }
   },
-  callback: function (tables, metadata, key, vm) {
-    debug('All callback', tables, JSON.parse(JSON.stringify(this)))
+  callback: function (data, meta, key, vm) {
+    let _vhosts = []
+    debug('All callback', data.vhosts)
+    Array.each(data.vhosts, function (vhost) {
+      let _vhost = Object.merge(vhost.data, vhost.metadata)
+
+      _vhosts.push(_vhost)
+    })
+
+    _vhosts.sort(function (a, b) { return (a.uri > b.uri) ? 1 : ((b.uri > a.uri) ? -1 : 0) })
+
+    vm.vhosts = _vhosts
+    debug('All callback', _vhosts)
   }
 }
 

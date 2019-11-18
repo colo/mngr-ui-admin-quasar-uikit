@@ -12,6 +12,29 @@
         <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Home</vk-button-link>
       </router-link>
     </vk-card>
+
+    <vk-card class="uk-background-secondary">
+      <!-- <div class="uk-overflow-auto">
+      <vk-table :data="vhosts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
+        <vk-table-column-sort title="URI" cell="uri" linked></vk-table-column-sort>
+        <vk-table-column title="Prot" cell="port"></vk-table-column>
+        <vk-table-column title="Schema" cell="schema"></vk-table-column>
+        <vk-table-column title="Host" cell="host"></vk-table-column>
+        <vk-table-column title="Last Update" cell="timestamp"></vk-table-column>
+        <vk-table-column title="Type" cell="path"></vk-table-column>
+      </vk-table>
+      </div> -->
+      <q-table
+        class="my-sticky-header-table"
+        title="Vhosts"
+        :data="vhosts"
+        :columns="columns"
+        :row-key="row => row.schema +'.'+ row.uri+'.'+ row.port +'.'+ row.host +'.'+ row.path "
+        :pagination.sync="pagination"
+        dark
+        color="amber"
+      />
+    </vk-card>
   </div>
 </template>
 
@@ -42,6 +65,31 @@ export default {
   data () {
     return {
       height: '0px',
+
+      vhosts: [],
+      pagination: {
+        rowsPerPage: 100
+      },
+      columns: [
+        { name: 'schema', label: 'Schema', field: 'schema', sortable: true },
+        {
+          name: 'asc',
+          required: true,
+          label: 'URI',
+          align: 'center',
+          field: 'uri',
+          // field: row => row.name,
+          // format: val => `${val}`,
+          sortable: true
+        },
+        { name: 'port', align: 'center', label: 'Port', field: 'port', sortable: true },
+        { name: 'host', label: 'Host', field: 'host', sortable: true },
+        { name: 'timestamp', label: 'Last Update', field: 'timestamp', sortable: true },
+        { name: 'path', label: 'Type', field: 'path', sortable: true }
+        // { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
+        // { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
+      ],
+      // sortedBy: { uri: 'asc' },
 
       /**
       * dataSources
@@ -195,3 +243,27 @@ export default {
   }
 }
 </script>
+
+  <style lang="sass">
+  .my-sticky-header-table
+    /* max height is important */
+    .q-table__middle
+      max-height: 200px
+
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th
+      /* bg color is important for th; just specify one */
+      background-color: #1d1d1d
+
+    thead tr th
+      position: sticky
+      z-index: 1
+    thead tr:first-child th
+      top: 0
+
+    /* this is when the loading indicator appears */
+    &.q-table--loading thead tr:last-child th
+      /* height of all previous header rows */
+      top: 48px
+  </style>
