@@ -1,5 +1,5 @@
 <template>
-  <div class="uk-container uk-container-expand">
+  <div>
     <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
     <!-- <vk-card class="uk-background-secondary">
@@ -122,7 +122,7 @@
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
             <!-- <div class="text-left">{{ props.row }}.</div> -->
-            <json-viewer :value="props.row" theme="my-awesome-json-theme"></json-viewer>
+            <json-viewer :value="props.row" theme="my-awesome-json-theme" copyable></json-viewer>
           </q-td>
         </q-tr>
         </template>

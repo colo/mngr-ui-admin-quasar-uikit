@@ -114,7 +114,7 @@
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
             <!-- <div class="text-left">{{ props.row }}.</div> -->
-            <json-viewer :value="props.row.data" theme="my-awesome-json-theme" :expand-depth="2"></json-viewer>
+            <json-viewer :value="props.row.data" theme="my-awesome-json-theme" :expand-depth="2" copyable></json-viewer>
           </q-td>
         </q-tr>
         </template>
