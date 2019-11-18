@@ -23,7 +23,7 @@ const nginx_vhosts_enabled = {
       _vhosts.push(_vhost)
     })
 
-    _vhosts.sort(function (a, b) { return (a.uri > b.uri) ? 1 : ((b.uri > a.uri) ? -1 : 0) })
+    _vhosts.sort(function (a, b) { return (a.uri > b.uri) ? 1 : ((b.uri > a.uri) ? -1 : (a.timestamp > b.timestamp) ? 1 : 0) })
 
     vm.vhosts = _vhosts
     vm.loading = false

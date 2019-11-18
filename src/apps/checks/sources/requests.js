@@ -23,7 +23,7 @@ const nginx_vhosts_enabled = {
       _checks.push(_check)
     })
 
-    _checks.sort(function (a, b) { return (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0) })
+    _checks.sort(function (a, b) { return (a.timestamp < b.timestamp) ? 1 : ((b.timestamp < a.timestamp) ? -1 : 0) })
 
     vm.checks = _checks
     vm.loading = false

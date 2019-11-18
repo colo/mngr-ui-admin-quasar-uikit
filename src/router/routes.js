@@ -60,6 +60,32 @@ const routes = [
     // ]
   },
   {
+    path: '/alerts',
+    name: 'alerts',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "munin" */ '@apps/alerts/index.vue'),
+    meta: {
+      breadcrumb: { label: 'Alerts', icon: 'widgets', app: 'alerts' }
+    }
+
+    // children: [
+    //   {
+    //     path: ':host',
+    //     name: 'Host',
+    //     component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/host.vue'),
+    //     meta: {
+    //       breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
+    //     }
+    //   }
+    //   // {
+    //   //   path: 'profile',
+    //   //   component: () => import('pages/user-profile')
+    //   // }
+    // ]
+  },
+  {
     path: '/munin',
     name: 'munin',
     // route level code-splitting

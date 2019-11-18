@@ -1,5 +1,5 @@
 <template>
-  <div class="uk-container uk-container-expand">
+  <div>
     <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
     <!-- <vk-card class="uk-background-secondary">
@@ -20,13 +20,13 @@
         <vk-breadcrumb-item :href="href">Home</vk-breadcrumb-item>
       </router-link>
 
-      <vk-breadcrumb-item disabled>Checks</vk-breadcrumb-item>
+      <vk-breadcrumb-item disabled>Alerts</vk-breadcrumb-item>
     </vk-breadcrumb>
     </vk-card>
 
     <vk-card class="uk-background-secondary">
       <!-- <div class="uk-overflow-auto">
-      <vk-table :data="checks" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
+      <vk-table :data="alerts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
         <vk-table-column-sort title="URI" cell="hostname" linked></vk-table-column-sort>
         <vk-table-column title="Prot" cell="port"></vk-table-column>
         <vk-table-column title="Schema" cell="schema"></vk-table-column>
@@ -37,10 +37,10 @@
       </div> -->
       <q-table
         class="my-sticky-header-table"
-        title="Checks"
-        :data="checks"
+        title="Alerts"
+        :data="alerts"
         :columns="columns"
-        :row-key="row => row.protocol +'.'+ row.hostname+'.'+ row.port +'.'+ row.host +'.'+ row.path +'.'+ row.timestamp"
+        :row-key="row => row.host +'.'+ row.alert+'.'+ row.path +'.'+ row.timestamp"
         :pagination.sync="pagination"
         dark
         color="amber"
@@ -91,26 +91,18 @@
 
         <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="status" :props="props">
-            <!-- {{ props.row.status }} -->
-
-            <q-icon :name="(props.row.code >= 399 || props.row.errno) ? 'error_outline' : 'check_circle_outline' " size="md" :class="(props.row.code >= 399 || props.row.errno) ?  'text-negative' : 'text-positive'"/>
-          </q-td>
-          <q-td key="protocol" :props="props">
-            {{ props.row.protocol }}
-          </q-td>
-          <q-td key="hostname" :props="props">
-            {{ props.row.hostname }}
-            <q-btn dense round flat :icon="props.expand ? 'arrow_drop_up' : 'arrow_drop_down'" @click="props.expand = !props.expand" />
-            <!-- <q-space /> -->
-            <q-btn type="a" v-if="/^http/.test(props.row.protocol)" :href="props.row.protocol+'//'+props.row.hostname+':'+props.row.port" target="_blank" flat icon="open_in_new" />
-
-          </q-td>
-          <q-td key="port" :props="props">
-            {{ props.row.port }}
-          </q-td>
+          <!-- <q-td key="status" :props="props">
+            <q-icon :name="(props.row.code >= 399 || props.row.errno) ? 'error_outline' : 'alert_circle_outline' " size="md" :class="(props.row.code >= 399 || props.row.errno) ?  'text-negative' : 'text-positive'"/>
+          </q-td> -->
           <q-td key="host" :props="props">
             {{ props.row.host }}
+          </q-td>
+          <q-td key="alert" :props="props">
+            {{ props.row.alert }}
+            <q-btn dense round flat :icon="props.expand ? 'arrow_drop_up' : 'arrow_drop_down'" @click="props.expand = !props.expand" />
+            <!-- <q-space /> -->
+            <!-- <q-btn type="a" v-if="/^http/.test(props.row.protocol)" :href="props.row.protocol+'//'+props.row.hostname+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
+
           </q-td>
           <q-td key="timestamp" :props="props">
             {{ props.row.timestamp }}
@@ -122,7 +114,7 @@
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
             <!-- <div class="text-left">{{ props.row }}.</div> -->
-            <json-viewer :value="props.row" theme="my-awesome-json-theme"></json-viewer>
+            <json-viewer :value="props.row.data" theme="my-awesome-json-theme" :expand-depth="2"></json-viewer>
           </q-td>
         </q-tr>
         </template>
@@ -136,12 +128,12 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:checks')
+const debug = Debug('apps:alerts')
 
 import JsonViewer from 'vue-json-viewer'
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/checks/pipelines/index'
+import Pipeline from '@apps/alerts/pipelines/index'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
@@ -153,7 +145,7 @@ export default {
   components: { JsonViewer },
   // extends: DataSourcesMixin,
 
-  name: 'Checks',
+  name: 'Alerts',
 
   // pipelines: {},
   // __pipelines_cfg: {},
@@ -163,40 +155,41 @@ export default {
     return {
       height: '0px',
 
-      checks: [],
+      alerts: [],
 
       filter: '',
       loading: true,
-      allColumns: ['status', 'protocol', 'hostname', 'port', 'host', 'timestamp', 'path'],
-      visibleColumns: ['status', 'hostname'],
+      allColumns: ['host', 'alert', 'timestamp', 'path'],
+      visibleColumns: ['alert'],
       pagination: {
         rowsPerPage: 50
       },
       columns: [
-        { name: 'status',
-          label: 'Status',
-          sort: (a, b, rowA, rowB) => {
-            return ((a.code >= 399 || a.errno) && (b.code < 399 || !b.errno)) ? 1 : ((b.code >= 399 || b.errno) && (a.code < 399 || !a.errno)) ? -1 : 0
-          },
-          field: (row) => row,
-          // format: (val, row) => {
-          //   // debug('format status', val, row)
-          //   if (row.code >= 399 || row.errno) {
-          //     return false
-          //   } else {
-          //     return true
-          //   }
-          // },
-          sortable: true,
-          align: 'left'
-        },
-        { name: 'protocol', label: 'Protocol', field: 'protocol', sortable: true, align: 'left' },
+        // { name: 'status',
+        //   label: 'Status',
+        //   sort: (a, b, rowA, rowB) => {
+        //     return ((a.code >= 399 || a.errno) && (b.code < 399 || !b.errno)) ? 1 : ((b.code >= 399 || b.errno) && (a.code < 399 || !a.errno)) ? -1 : 0
+        //   },
+        //   field: (row) => row,
+        //   // format: (val, row) => {
+        //   //   // debug('format status', val, row)
+        //   //   if (row.code >= 399 || row.errno) {
+        //   //     return false
+        //   //   } else {
+        //   //     return true
+        //   //   }
+        //   // },
+        //   sortable: true,
+        //   align: 'left'
+        // },
+        // { name: 'protocol', label: 'Protocol', field: 'protocol', sortable: true, align: 'left' },
+        { name: 'host', align: 'left', label: 'Host', field: 'host', sortable: true },
         {
-          name: 'hostname',
+          name: 'alert',
           required: true,
-          label: 'Host Name',
+          label: 'Alert',
           align: 'left',
-          field: 'hostname',
+          field: 'alert',
           // field: row => row.name,
           // format: val => `${val}`,
           sortable: true
@@ -204,8 +197,8 @@ export default {
           // style: 'max-width: 100px',
           // headerClasses: 'bg-secondary text-white'
         },
-        { name: 'port', align: 'left', label: 'Port', field: 'port', sortable: true },
-        { name: 'host', align: 'left', label: 'Host', field: 'host', sortable: true },
+        // { name: 'port', align: 'left', label: 'Port', field: 'port', sortable: true },
+        //
         { name: 'timestamp', align: 'left', label: 'Last Update', field: 'timestamp', sortable: true },
         { name: 'path', align: 'left', label: 'Type', field: 'path', sortable: true }
         // { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
@@ -217,9 +210,9 @@ export default {
       * dataSources
       **/
       store: false,
-      pipeline_id: 'input.checks',
+      pipeline_id: 'input.alerts',
 
-      id: 'checks',
+      id: 'alerts',
       path: 'all',
 
       components: {
@@ -246,16 +239,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.checks'] && this.$options.pipelines['input.checks'].get_input_by_id('input.checks')) {
+      if (this.$options.pipelines['input.alerts'] && this.$options.pipelines['input.alerts'].get_input_by_id('input.alerts')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.alerts'].get_input_by_id('input.alerts').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.alerts'].get_input_by_id('input.alerts').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.alerts'].get_input_by_id('input.alerts').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.alerts'].get_input_by_id('input.alerts').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)

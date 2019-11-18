@@ -28,6 +28,13 @@
         <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Checks</vk-button-link>
       </router-link>
 
+      <router-link
+        to="/alerts"
+        v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+
+        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Alerts</vk-button-link>
+      </router-link>
     </vk-card>
   </div>
 </template>
