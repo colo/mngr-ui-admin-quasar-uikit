@@ -29,11 +29,79 @@
         title="Vhosts"
         :data="vhosts"
         :columns="columns"
-        :row-key="row => row.schema +'.'+ row.uri+'.'+ row.port +'.'+ row.host +'.'+ row.path "
+        :row-key="row => row.schema +'.'+ row.uri+'.'+ row.port +'.'+ row.host +'.'+ row.path"
         :pagination.sync="pagination"
+        virtual-scroll
+        :rows-per-page-options="[0]"
         dark
         color="amber"
-      />
+        :visible-columns="($q.screen.lt.sm) ? visibleColumns : allColumns"
+        :loading="loading"
+        :filter="filter"
+      >
+        <template v-slot:top="props">
+          <q-select
+            v-if="$q.screen.lt.sm"
+            v-model="visibleColumns"
+            multiple
+            borderless
+            dense
+            options-dense
+            :display-value="$q.lang.table.columns"
+            emit-value
+            map-options
+            :options="columns"
+            option-value="name"
+            style="min-width: 150px"
+          />
+          <q-space />
+          <!-- <div v-if="$q.screen.gt.xs" class="col">
+            <q-toggle v-model="visibleColumns" val="schema" label="Schema" />
+            <q-toggle v-model="visibleColumns" val="uri" label="URI" />
+            <q-toggle v-model="visibleColumns" val="port" label="Port" />
+            <q-toggle v-model="visibleColumns" val="host" label="Host" />
+            <q-toggle v-model="visibleColumns" val="timestamp" label="Last Update" />
+            <q-toggle v-model="visibleColumns" val="path" label="Type" />
+          </div> -->
+
+          <q-input borderless dense debounce="100" v-model="filter" placeholder="Search">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn
+          flat round dense
+          :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
+          @click="props.toggleFullscreen"
+          class="q-ml-md"
+        />
+        </template>
+
+        <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td key="schema" :props="props">
+            {{ props.row.schema }}
+          </q-td>
+          <q-td key="uri" :props="props">
+            {{ props.row.uri }}
+            <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" />
+
+          </q-td>
+          <q-td key="port" :props="props">
+            {{ props.row.port }}
+          </q-td>
+          <q-td key="host" :props="props">
+            {{ props.row.host }}
+          </q-td>
+          <q-td key="timestamp" :props="props">
+            {{ props.row.timestamp }}
+          </q-td>
+          <q-td key="path" :props="props">
+            {{ props.row.path }}
+          </q-td>
+        </q-tr>
+        </template>
+      </q-table>
     </vk-card>
   </div>
 </template>
@@ -67,25 +135,33 @@ export default {
       height: '0px',
 
       vhosts: [],
+
+      filter: '',
+      loading: true,
+      allColumns: ['schema', 'uri', 'port', 'host', 'timestamp', 'path'],
+      visibleColumns: ['schema', 'uri'],
       pagination: {
-        rowsPerPage: 100
+        rowsPerPage: 50
       },
       columns: [
-        { name: 'schema', label: 'Schema', field: 'schema', sortable: true },
+        { name: 'schema', label: 'Schema', field: 'schema', sortable: true, align: 'left' },
         {
-          name: 'asc',
+          name: 'uri',
           required: true,
           label: 'URI',
-          align: 'center',
+          align: 'left',
           field: 'uri',
           // field: row => row.name,
           // format: val => `${val}`,
           sortable: true
+          // classes: 'bg-grey-2 ellipsis',
+          // style: 'max-width: 100px',
+          // headerClasses: 'bg-secondary text-white'
         },
-        { name: 'port', align: 'center', label: 'Port', field: 'port', sortable: true },
-        { name: 'host', label: 'Host', field: 'host', sortable: true },
-        { name: 'timestamp', label: 'Last Update', field: 'timestamp', sortable: true },
-        { name: 'path', label: 'Type', field: 'path', sortable: true }
+        { name: 'port', align: 'left', label: 'Port', field: 'port', sortable: true },
+        { name: 'host', align: 'left', label: 'Host', field: 'host', sortable: true },
+        { name: 'timestamp', align: 'left', label: 'Last Update', field: 'timestamp', sortable: true },
+        { name: 'path', align: 'left', label: 'Type', field: 'path', sortable: true }
         // { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
         // { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
       ],
@@ -244,26 +320,27 @@ export default {
 }
 </script>
 
-  <style lang="sass">
-  .my-sticky-header-table
-    /* max height is important */
-    .q-table__middle
-      max-height: 200px
+<style lang="sass">
+.my-sticky-header-table
+  /* max height is important */
+  .q-table__middle
+    max-height: 600px
+    // min-height: 600px
 
-    .q-table__top,
-    .q-table__bottom,
-    thead tr:first-child th
-      /* bg color is important for th; just specify one */
-      background-color: #1d1d1d
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th
+    /* bg color is important for th; just specify one */
+    background-color: #1d1d1d
 
-    thead tr th
-      position: sticky
-      z-index: 1
-    thead tr:first-child th
-      top: 0
+  thead tr th
+    position: sticky
+    z-index: 1
+  thead tr:first-child th
+    top: 0
 
-    /* this is when the loading indicator appears */
-    &.q-table--loading thead tr:last-child th
-      /* height of all previous header rows */
-      top: 48px
-  </style>
+  /* this is when the loading indicator appears */
+  &.q-table--loading thead tr:last-child th
+    /* height of all previous header rows */
+    top: 48px
+</style>

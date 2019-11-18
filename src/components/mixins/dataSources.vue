@@ -530,6 +530,7 @@ export default {
       Object.each(this.$options.pipelines, function (pipe, id) { // destroy old ones
         if (id === this.pipeline_id) {
           pipe.fireEvent('onResume')
+          pipe.fireEvent('onOnce')
           // pipe.fireEvent('onExit')
           // pipe.removeEvents()
           //
