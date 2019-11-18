@@ -1,0 +1,1 @@
+/home/colo/projects/mngr-ui-admin-quasar-uikit/src/apps/checks/etc/checks.io.js

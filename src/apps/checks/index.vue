@@ -20,14 +20,14 @@
         <vk-breadcrumb-item :href="href">Home</vk-breadcrumb-item>
       </router-link>
 
-      <vk-breadcrumb-item disabled>Vhosts</vk-breadcrumb-item>
+      <vk-breadcrumb-item disabled>Checks</vk-breadcrumb-item>
     </vk-breadcrumb>
     </vk-card>
 
     <vk-card class="uk-background-secondary">
       <!-- <div class="uk-overflow-auto">
-      <vk-table :data="vhosts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
-        <vk-table-column-sort title="URI" cell="uri" linked></vk-table-column-sort>
+      <vk-table :data="checks" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
+        <vk-table-column-sort title="URI" cell="hostname" linked></vk-table-column-sort>
         <vk-table-column title="Prot" cell="port"></vk-table-column>
         <vk-table-column title="Schema" cell="schema"></vk-table-column>
         <vk-table-column title="Host" cell="host"></vk-table-column>
@@ -37,19 +37,20 @@
       </div> -->
       <q-table
         class="my-sticky-header-table"
-        title="Vhosts"
-        :data="vhosts"
+        title="Checks"
+        :data="checks"
         :columns="columns"
-        :row-key="row => row.schema +'.'+ row.uri+'.'+ row.port +'.'+ row.host +'.'+ row.path"
+        :row-key="row => row.protocol +'.'+ row.hostname+'.'+ row.port +'.'+ row.host +'.'+ row.path +'.'+ row.timestamp"
         :pagination.sync="pagination"
-        virtual-scroll
-        :rows-per-page-options="[0]"
         dark
         color="amber"
         :visible-columns="($q.screen.lt.sm) ? visibleColumns : allColumns"
         :loading="loading"
         :filter="filter"
       >
+      <!-- :rows-per-page-options="[0]"
+      virtual-scroll -->
+
         <template v-slot:top="props">
           <q-select
             v-if="$q.screen.lt.sm"
@@ -68,7 +69,7 @@
           <q-space />
           <!-- <div v-if="$q.screen.gt.xs" class="col">
             <q-toggle v-model="visibleColumns" val="schema" label="Schema" />
-            <q-toggle v-model="visibleColumns" val="uri" label="URI" />
+            <q-toggle v-model="visibleColumns" val="hostname" label="URI" />
             <q-toggle v-model="visibleColumns" val="port" label="Port" />
             <q-toggle v-model="visibleColumns" val="host" label="Host" />
             <q-toggle v-model="visibleColumns" val="timestamp" label="Last Update" />
@@ -90,12 +91,19 @@
 
         <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="schema" :props="props">
-            {{ props.row.schema }}
+          <q-td key="status" :props="props">
+            <!-- {{ props.row.status }} -->
+
+            <q-icon :name="(props.row.code >= 399 || props.row.errno) ? 'error_outline' : 'check_circle_outline' " size="md" :class="(props.row.code >= 399 || props.row.errno) ?  'text-negative' : 'text-positive'"/>
           </q-td>
-          <q-td key="uri" :props="props">
-            {{ props.row.uri }}
-            <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" />
+          <q-td key="protocol" :props="props">
+            {{ props.row.protocol }}
+          </q-td>
+          <q-td key="hostname" :props="props">
+            {{ props.row.hostname }}
+            <q-btn dense round flat :icon="props.expand ? 'arrow_drop_up' : 'arrow_drop_down'" @click="props.expand = !props.expand" />
+            <!-- <q-space /> -->
+            <q-btn type="a" v-if="/^http/.test(props.row.protocol)" :href="props.row.protocol+'//'+props.row.hostname+':'+props.row.port" target="_blank" flat icon="open_in_new" />
 
           </q-td>
           <q-td key="port" :props="props">
@@ -111,6 +119,12 @@
             {{ props.row.path }}
           </q-td>
         </q-tr>
+        <q-tr v-show="props.expand" :props="props">
+          <q-td colspan="100%">
+            <!-- <div class="text-left">{{ props.row }}.</div> -->
+            <json-viewer :value="props.row" theme="my-awesome-json-theme"></json-viewer>
+          </q-td>
+        </q-tr>
         </template>
       </q-table>
     </vk-card>
@@ -122,10 +136,12 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:vhosts')
+const debug = Debug('apps:checks')
+
+import JsonViewer from 'vue-json-viewer'
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/vhosts/pipelines/index'
+import Pipeline from '@apps/checks/pipelines/index'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
@@ -133,9 +149,11 @@ import { requests, store } from './sources/index'
 
 export default {
   mixins: [DataSourcesMixin],
+
+  components: { JsonViewer },
   // extends: DataSourcesMixin,
 
-  name: 'Vhosts',
+  name: 'Checks',
 
   // pipelines: {},
   // __pipelines_cfg: {},
@@ -145,23 +163,40 @@ export default {
     return {
       height: '0px',
 
-      vhosts: [],
+      checks: [],
 
       filter: '',
       loading: true,
-      allColumns: ['schema', 'uri', 'port', 'host', 'timestamp', 'path'],
-      visibleColumns: ['schema', 'uri'],
+      allColumns: ['status', 'protocol', 'hostname', 'port', 'host', 'timestamp', 'path'],
+      visibleColumns: ['status', 'hostname'],
       pagination: {
         rowsPerPage: 50
       },
       columns: [
-        { name: 'schema', label: 'Schema', field: 'schema', sortable: true, align: 'left' },
+        { name: 'status',
+          label: 'Status',
+          sort: (a, b, rowA, rowB) => {
+            return ((a.code >= 399 || a.errno) && (b.code < 399 || !b.errno)) ? 1 : ((b.code >= 399 || b.errno) && (a.code < 399 || !a.errno)) ? -1 : 0
+          },
+          field: (row) => row,
+          // format: (val, row) => {
+          //   // debug('format status', val, row)
+          //   if (row.code >= 399 || row.errno) {
+          //     return false
+          //   } else {
+          //     return true
+          //   }
+          // },
+          sortable: true,
+          align: 'left'
+        },
+        { name: 'protocol', label: 'Protocol', field: 'protocol', sortable: true, align: 'left' },
         {
-          name: 'uri',
+          name: 'hostname',
           required: true,
-          label: 'URI',
+          label: 'Host Name',
           align: 'left',
-          field: 'uri',
+          field: 'hostname',
           // field: row => row.name,
           // format: val => `${val}`,
           sortable: true
@@ -176,15 +211,15 @@ export default {
         // { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
         // { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
       ],
-      // sortedBy: { uri: 'asc' },
+      // sortedBy: { hostname: 'asc' },
 
       /**
       * dataSources
       **/
       store: false,
-      pipeline_id: 'input.vhosts',
+      pipeline_id: 'input.checks',
 
-      id: 'vhosts',
+      id: 'checks',
       path: 'all',
 
       components: {
@@ -195,80 +230,11 @@ export default {
             },
             source: {
               requests: requests,
-              // requests: {
-              //   periodical: [{
-              //     params: {
-              //       path: 'all',
-              //       query: {
-              //         'from': 'educativa',
-              //         'index': 'host',
-              //         'filter': [
-              //           "r.row('metadata')('tag').contains('enabled').and('nginx').and('vhost')",
-              //           "r.row('data')('code').gt(399)",
-              //           "r.row('metadata')('path').eq('educativa.checks.vhosts')",
-              //           "r.row('metadata')('type').eq('check')",
-              //           "r.row('metadata')('host').eq('colo')"
-              //         ]
-              //       }
-              //     },
-              //     callback: function (tables, metadata, key, vm) {
-              //       debug('All callback', tables, vm.$options.grid_template)
-              //     }
-              //   }]
-              // },
-
               store: store
-              // store: [
-              //   {
-              //     params: {
-              //       path: 'all',
-              //       // query: 'all?from=educativa&index=host&filter%5B0%5D=r.row%28%27metadata%27%29%28%27tag%27%29.contains%28%27enabled%27%29.and%28%27nginx%27%29.and%28%27vhost%27%29&filter%5B1%5D=r.row%28%27data%27%29%28%27code%27%29.gt%28399%29&filter%5B2%5D=r.row%28%27metadata%27%29%28%27path%27%29.eq%28%27educativa.checks.vhosts%27%29&filter%5B3%5D=r.row%28%27metadata%27%29%28%27type%27%29.eq%28%27check%27%29&filter%5B4%5D=r.row%28%27metadata%27%29%28%27host%27%29.eq%28%27colo%27%29'
-              //       query: {
-              //         'from': 'educativa',
-              //         'index': 'host',
-              //         'filter': [
-              //           "r.row('metadata')('tag').contains('enabled').and('nginx').and('vhost')",
-              //           "r.row('data')('code').gt(399)",
-              //           "r.row('metadata')('path').eq('educativa.checks.vhosts')",
-              //           "r.row('metadata')('type').eq('check')"
-              //           // "r.row('metadata')('host').eq('colo')"
-              //         ]
-              //       }
-              //     },
-              //     callback: function (tables, metadata, key, vm) {
-              //       debug('STORE callback', tables, vm.$options.grid_template)
-              //     }
-              //   }
-              // ]
+
             }
           }
-          // {
-          //   source: {
-          //     store: store
-          //     // store: [
-          //     //   {
-          //     //     params: {
-          //     //       path: 'all',
-          //     //       // query: 'all?from=educativa&index=host&filter%5B0%5D=r.row%28%27metadata%27%29%28%27tag%27%29.contains%28%27enabled%27%29.and%28%27nginx%27%29.and%28%27vhost%27%29&filter%5B1%5D=r.row%28%27data%27%29%28%27code%27%29.gt%28399%29&filter%5B2%5D=r.row%28%27metadata%27%29%28%27path%27%29.eq%28%27educativa.checks.vhosts%27%29&filter%5B3%5D=r.row%28%27metadata%27%29%28%27type%27%29.eq%28%27check%27%29&filter%5B4%5D=r.row%28%27metadata%27%29%28%27host%27%29.eq%28%27colo%27%29'
-          //     //       query: {
-          //     //         'from': 'educativa',
-          //     //         'index': 'host',
-          //     //         'filter': [
-          //     //           "r.row('metadata')('tag').contains('enabled').and('nginx').and('vhost')",
-          //     //           "r.row('data')('code').gt(399)",
-          //     //           "r.row('metadata')('path').eq('educativa.checks.vhosts')",
-          //     //           "r.row('metadata')('type').eq('check')",
-          //     //           "r.row('metadata')('host').eq('colo')"
-          //     //         ]
-          //     //       }
-          //     //     },
-          //     //     callback: function (tables, metadata, key, vm) {
-          //     //       debug('STORE callback', tables, vm.$options.grid_template)
-          //     //     }
-          //     //   }
-          //     // ]
-          //   }
-          // }
+
         ]
       }
     }
@@ -280,16 +246,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.vhosts'] && this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts')) {
+      if (this.$options.pipelines['input.checks'] && this.$options.pipelines['input.checks'].get_input_by_id('input.checks')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.vhosts'].get_input_by_id('input.vhosts').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.checks'].get_input_by_id('input.checks').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)
@@ -354,4 +320,56 @@ export default {
   &.q-table--loading thead tr:last-child th
     /* height of all previous header rows */
     top: 48px
+
+</style>
+<style>
+// values are default one from jv-light template
+.my-awesome-json-theme {
+  background: #1d1d1d;
+  white-space: nowrap;
+  color: #525252;
+  font-size: 14px;
+  font-family: Consolas, Menlo, Courier, monospace;
+
+  .jv-ellipsis {
+    color: #999;
+    background-color: #eee;
+    display: inline-block;
+    line-height: 0.9;
+    font-size: 0.9em;
+    padding: 0px 4px 2px 4px;
+    border-radius: 3px;
+    vertical-align: 2px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .jv-button { color: #49b3ff }
+  .jv-key { color: #111111 }
+  .jv-item {
+    &.jv-array { color: #111111 }
+    &.jv-boolean { color: #fc1e70 }
+    &.jv-function { color: #067bca }
+    &.jv-number { color: #fc1e70 }
+    &.jv-object { color: #111111 }
+    &.jv-undefined { color: #e08331 }
+    &.jv-string {
+      color: #42b983;
+      word-break: break-word;
+      white-space: normal;
+    }
+  }
+  .jv-code {
+    .jv-toggle {
+      &:before {
+        padding: 0px 2px;
+        border-radius: 2px;
+      }
+      &:hover {
+        &:before {
+          background: #eee;
+        }
+      }
+    }
+  }
+}
 </style>
