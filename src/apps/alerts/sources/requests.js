@@ -37,6 +37,7 @@ const alerts_range = {
   },
   callback: function (data, meta, key, vm) {
   // let _alerts = JSON.parse(JSON.stringify(vm.alerts))
+    debug('All callback RANGE', data)
     if (data && data.educativa && data.educativa.length > 0) {
       let _alerts = []
       debug('All callback RANGE', data)
