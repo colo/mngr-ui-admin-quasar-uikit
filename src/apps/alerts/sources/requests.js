@@ -23,10 +23,14 @@ const alerts_range = {
         range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
         query: {
           'from': 'educativa',
-          'index': false,
+          // 'index': false,
           'q': [
             'data',
             { 'metadata': ['timestamp', 'path'] }// timestamp give us last update
+          ],
+          'transformation': [
+            { 'orderBy': { 'index': 'r.desc(timestamp)' } }
+            // 'slice:0:9'
           ],
           'filter': [ { 'metadata': { 'type': 'alert' } } ]
         }
@@ -100,7 +104,7 @@ const alerts_lasts = {
       })
     })
 
-    _alerts.sort(function (a, b) { return (a.timestamp < b.timestamp) ? 1 : ((b.timestamp < a.timestamp) ? -1 : 0) })
+    _alerts.sort(function (a, b) { return (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0) })
 
     vm.alerts = _alerts
     vm.loading = false
