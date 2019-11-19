@@ -56,8 +56,9 @@ module.exports = {
 
     'camelcase': 'off',
     // 'no-unused-vars': ["error", { "args": "none", "caughtErrors": "none" }],
-    'no-unused-vars': process.env.NODE_ENV === 'production' ? ["error", { "args": "none", "caughtErrors": "none" }] : 'off',
+    // 'no-unused-vars': process.env.NODE_ENV === 'production' ? ["error", { "args": "none", "caughtErrors": "none" }] : 'off',
     // 'vue/no-unused-components': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+    'no-unused-vars': 'off',
     'vue/no-unused-components': 'off'
   }
 }
