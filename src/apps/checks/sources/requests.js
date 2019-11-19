@@ -29,8 +29,8 @@ const checks_range = {
             { 'metadata': ['host', 'timestamp', 'path'] }// timestamp give us last update
           ],
           'transformation': [
-            { 'orderBy': { 'index': 'r.desc(timestamp)' } },
-            'slice:0:9'
+            { 'orderBy': { 'index': 'r.desc(timestamp)' } }
+            // 'slice:0:9'
           ],
           'filter': [ { 'metadata': { 'type': 'check' } } ]
         }
