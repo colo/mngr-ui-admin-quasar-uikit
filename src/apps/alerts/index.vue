@@ -17,7 +17,7 @@
     <vk-breadcrumb>
       <router-link to="/" v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
-        <vk-breadcrumb-item :href="href">Home</vk-breadcrumb-item>
+        <vk-breadcrumb-item :href="href" @click="navigate">Home</vk-breadcrumb-item>
       </router-link>
 
       <vk-breadcrumb-item disabled>Alerts</vk-breadcrumb-item>
