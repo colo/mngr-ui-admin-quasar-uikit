@@ -1,1 +1,1 @@
-/home/colo/projects/mngr-ui-admin-quasar-uikit/src/apps/vhosts/etc/vhosts.io.js
+../apps/vhosts/etc/vhosts.io.js
