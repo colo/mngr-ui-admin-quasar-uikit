@@ -218,9 +218,9 @@ export default {
       components: {
         'all': [
           {
-            some_data: {
-              test: true
-            },
+            // some_data: {
+            //   test: true
+            // },
             source: {
               requests: requests,
               store: store
