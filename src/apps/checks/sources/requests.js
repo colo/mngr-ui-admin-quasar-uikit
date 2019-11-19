@@ -40,9 +40,10 @@ const checks_range = {
     return { key, source }
   },
   callback: function (data, meta, key, vm) {
+    debug('All callback RANGE', data)
+
     if (data && data.educativa && data.educativa.length > 0) {
       let _checks = []
-      debug('All callback RANGE', data)
       Array.each(data.educativa, function (check) {
         let _check = Object.merge(check.data, check.metadata)
 
