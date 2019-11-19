@@ -23,7 +23,7 @@ const alerts_range = {
         range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
         query: {
           'from': 'educativa',
-          // 'index': false,
+          'index': false,
           'q': [
             'data',
             { 'metadata': ['timestamp', 'path'] }// timestamp give us last update
