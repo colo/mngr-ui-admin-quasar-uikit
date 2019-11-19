@@ -98,7 +98,7 @@ const once = [
 ]
 
 const periodical = [
-  // nginx_vhosts_enabled
+  checks_range
 ]
 
 const requests = {
@@ -106,5 +106,5 @@ const requests = {
   once: once
 }
 
-export { periodical, once, checks_lasts }
+export { periodical, once, checks_lasts, checks_range }
 export default requests
