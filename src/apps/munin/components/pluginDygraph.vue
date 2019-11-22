@@ -10,9 +10,9 @@
     <vk-card class="uk-background-secondary uk-light" v-if="config && processed_data.length > 0">
       <vk-card-title>
         <h5 class="uk-light">{{title}}</h5>
+        <p class="uk-light">{{info}}</p>
       </vk-card-title>
 
-      <p>{{info}}</p>
 
       <p v-if="data.minute">
         <q-checkbox :disable="!data.minute" v-model="view.minute" label="Minute" />
