@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:munin:pipelines')
+const debug = Debug('libs:pipelines:munin')
 
 let qs = require('qs')
 
@@ -23,22 +23,22 @@ export default {
       poll: {
         // suspended: true,
         id: 'input.munin',
-        conn: Array.clone([
+        conn: [
 
-          // Object.merge(
-          //   // Object.clone(DefaultConn),
-          {
-            id: 'input.munin',
-            module: InputIO
+          Object.merge(
+            // Object.clone(DefaultConn),
+            {
+              id: 'input.munin',
+              module: InputIO
 
-          }
-          // )
+            }
+          )
 
-        ]),
+        ],
         connect_retry_count: -1,
         connect_retry_periodical: 1000,
         requests: {
-          periodical: 5000
+          periodical: 10000
         }
       }
     }

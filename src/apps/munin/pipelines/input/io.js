@@ -6,10 +6,10 @@
 const App = require ( 'node-app-socket.io-client/index' )
 
 import * as Debug from "debug"
-const debug = Debug("apps:munin:pipelines:input:io")
+const debug = Debug("libs:input:io")
 
-// debug_internals = Debug("mngr-ui:apps:munin:pipelines:input:io:Internals"),
-// debug_events = Debug("mngr-ui:apps:munin:pipelines:input:io:Events");
+// debug_internals = Debug("mngr-ui:libs:input:io:Internals"),
+// debug_events = Debug("mngr-ui:libs:input:io:Events");
 
 // import store from 'src/store'
 
@@ -19,11 +19,11 @@ import IO from '@etc/munin.io'
 export default new Class({
   Extends: App,
 
-  // types: ['count', 'root', 'paths'],
+  // types: ['count', 'munin', 'paths'],
   // recived: [],
 
   options: {
-    // path: '/root',
+    // path: '/munin',
 
     scheme: undefined,
     log: undefined,
@@ -52,7 +52,7 @@ export default new Class({
 
     io: {
 			middlewares: [], //namespace.use(fn)
-			// rooms: ['root'], //atomatically join connected sockets to this rooms
+			// rooms: ['munin'], //atomatically join connected sockets to this rooms
 			routes: {
 				// 'app.doc': [{
 				// 	// path: ':param',
@@ -63,7 +63,7 @@ export default new Class({
         'all': [{
 					// path: ':param',
 					// once: true, //socket.once
-					callbacks: ['root'],
+					callbacks: ['munin'],
 					// middlewares: [], //socket.use(fn)
 				}],
         // 'on': [{
@@ -86,12 +86,12 @@ export default new Class({
   //   debug('register %o', result)
   //
   // },
-  root: function(socket, next, doc){
+  munin: function(socket, next, doc){
     // let {type} = doc
-    debug('root %o', doc)
+    debug('munin %o', doc)
 
     if(doc.status){
-      debug('ERROR root %o', doc)
+      debug('ERROR munin %o', doc)
     }
     else if (doc.metadata && Array.isArray(doc.metadata.from)) {
 
@@ -99,8 +99,8 @@ export default new Class({
     // else if(
     //   doc.data
     //   && (!doc.metadata.opts || !doc.metadata.opts.params || Object.getLength(doc.metadata.opts.params) === 0)){
-    //   debug('root %o', doc)
-    //   // Array.each(doc.root.tags, function(tag){
+    //   debug('munin %o', doc)
+    //   // Array.each(doc.munin.tags, function(tag){
     //   //   debug('TAG %s', tag)
     //   //   // this.io.emit('/tags/'+tag)
     //   //   this.io.emit('/', {
@@ -116,7 +116,7 @@ export default new Class({
     //   //
     //   // }.bind(this))
     //   //
-    //   // Array.each(doc.root.hosts, function(host){
+    //   // Array.each(doc.munin.hosts, function(host){
     //   //   debug('HOST %s', host)
     //   //   // this.io.emit('/tags/'+tag)
     //   //   this.io.emit('/', {
@@ -133,13 +133,13 @@ export default new Class({
     //   // }.bind(this))
     // }
     // else{
-    //   debug('OTHERS root %o', doc)
+    //   debug('OTHERS munin %o', doc)
     // }
 
     this.fireEvent('onDoc', [doc, { input_type: this, app: null }])
 
-    // store.commit('root/clear')
-    // store.commit('root/set', doc[type])
+    // store.commit('munin/clear')
+    // store.commit('munin/set', doc[type])
   },
   // app_doc: function(socket, next){
   //   if(this.recived.length < this.types.length){
@@ -165,7 +165,7 @@ export default new Class({
   //   //   this.io.close()
   //
 	// 	// arguments[1]()
-	// 	// this.io.to('root').emit('response', 'a new user has joined the room saying '+arguments[2]);
+	// 	// this.io.to('munin').emit('response', 'a new user has joined the room saying '+arguments[2]);
 	// 	// next(socket)
 	// },
 
@@ -177,7 +177,7 @@ export default new Class({
     // let _io = new App(DefaultConn)
     this.add_io(IO)
 
-		this.profile('root_init');//start profiling
+		this.profile('munin_init');//start profiling
 
 
     this.addEvent('onConnect', function(){
@@ -199,7 +199,7 @@ export default new Class({
       //
       // }.bind(this), 1000)
 
-      // this.io.emit('on', 'root')
+      // this.io.emit('on', 'munin')
       // this.io.emit('on', 'changes', {
       //   params: { prop: undefined },
       //   // query: {
@@ -347,7 +347,7 @@ export default new Class({
         // this.io.close()
     }.bind(this))
 
-		this.profile('root_init');//end profiling
+		this.profile('munin_init');//end profiling
 
 		this.log('munin', 'info', 'munin started');
   },

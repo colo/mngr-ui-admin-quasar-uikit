@@ -94,22 +94,22 @@ const routes = [
     component: () => import(/* webpackChunkName: "munin" */ '@apps/munin/index.vue'),
     meta: {
       breadcrumb: { label: 'Munin', icon: 'widgets', app: 'munin' }
-    },
+    }
 
-    children: [
-      {
-        path: ':host',
-        name: 'Host',
-        component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/host.vue'),
-        meta: {
-          breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
-        }
-      }
-      // {
-      //   path: 'profile',
-      //   component: () => import('pages/user-profile')
-      // }
-    ]
+    // children: [
+    //   {
+    //     path: ':host',
+    //     name: 'Host',
+    //     component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/host.vue'),
+    //     meta: {
+    //       breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
+    //     }
+    //   }
+    //   // {
+    //   //   path: 'profile',
+    //   //   component: () => import('pages/user-profile')
+    //   // }
+    // ]
   }
   // {
   //   path: '/',

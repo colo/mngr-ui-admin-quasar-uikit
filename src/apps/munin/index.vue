@@ -1,8 +1,9 @@
 <template>
-  <div class="about">
-    <!-- <h1>This is an about page</h1> -->
-    <vk-card class="uk-background-secondary">
-      <!-- <vk-button-link href="/" class="uk-button uk-button-secondary">Home</vk-button-link> -->
+  <div>
+    <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
+    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <!-- <vk-card class="uk-background-secondary">
+
       <router-link
         to="/"
         v-slot="{ href, route, navigate, isActive, isExactActive }"
@@ -10,9 +11,25 @@
 
         <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Home</vk-button-link>
       </router-link>
+    </vk-card> -->
+
+    <vk-card class="uk-background-secondary">
+    <vk-breadcrumb>
+      <router-link to="/" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item :href="href" @click="navigate">Home</vk-breadcrumb-item>
+      </router-link>
+
+      <vk-breadcrumb-item disabled>Munin</vk-breadcrumb-item>
+    </vk-breadcrumb>
+    </vk-card>
+
+    <vk-card class="uk-background-secondary">
+
     </vk-card>
   </div>
 </template>
+
 <script>
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
@@ -25,11 +42,14 @@ import Pipeline from '@apps/munin/pipelines/index'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
+import { requests, store } from './sources/index'
+
 export default {
   mixins: [DataSourcesMixin],
   // extends: DataSourcesMixin,
 
   name: 'Munin',
+
   // pipelines: {},
   // __pipelines_cfg: {},
   // unwatch_store: undefined,
@@ -48,31 +68,16 @@ export default {
       path: 'all',
 
       components: {
-        'all': [{
-          source: {
-            requests: {
-              periodical: [{
-                params: {
-                  path: 'all',
-                  query: {
-                    'from': 'munin',
-                    'index': 'host',
-                    'filter': [
-                      // "r.row('metadata')('tag').contains('enabled').and('nginx').and('vhost')",
-                      // "r.row('data')('code').gt(399)",
-                      // "r.row('metadata')('path').eq('educativa.checks.vhosts')",
-                      // "r.row('metadata')('type').eq('check')",
-                      "r.row('metadata')('host').eq('colo')"
-                    ]
-                  }
-                },
-                callback: function (tables, metadata, key, vm) {
-                  debug('All ABOUT callback', tables, vm.$options.grid_template)
-                }
-              }]
+        'all': [
+          {
+            source: {
+              requests: requests,
+
+              store: store
             }
           }
-        }]
+
+        ]
       }
     }
   },
@@ -97,7 +102,7 @@ export default {
       } else {
         let template = Object.clone(Pipeline)
 
-        let pipeline_id = 'input.munin'
+        let pipeline_id = template.input[0].poll.id
 
         template.input[0].poll.conn[0].requests = this.__components_sources_to_requests(this.components)
 
