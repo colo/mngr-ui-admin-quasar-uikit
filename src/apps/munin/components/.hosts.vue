@@ -1,29 +1,5 @@
 <template>
   <div>
-    <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-    <!-- <vk-card class="uk-background-secondary">
-
-      <router-link
-        to="/"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Home</vk-button-link>
-      </router-link>
-    </vk-card> -->
-
-    <vk-card class="uk-background-secondary">
-    <vk-breadcrumb>
-      <router-link to="/" v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-        <vk-breadcrumb-item :href="href" @click="navigate">Home</vk-breadcrumb-item>
-      </router-link>
-
-      <vk-breadcrumb-item disabled>Munin</vk-breadcrumb-item>
-    </vk-breadcrumb>
-    </vk-card>
-
     <template v-for="(host_categories, host_name) in hosts_categories">
       <munin-host-card
         :key="host_name"
@@ -34,25 +10,6 @@
     </template>
 
     <router-view :key="$route.fullPath"></router-view>
-    <!-- <vk-card class="uk-background-secondary uk-light" v-for="(categories, host) in hosts_categories" :key="host">
-
-      <vk-card-title>
-        <router-link :to="'/munin/hosts/'+host" v-slot="{ href, route, navigate, isActive, isExactActive }"
-        >
-          <h3 class="uk-light"><a class="uk-link-heading" :href="href" @click="navigate">{{host}}</a></h3>
-        </router-link>
-
-      </vk-card-title>
-
-      <ul class="uk-subnav uk-subnav-divider" uk-margin>
-        <li v-for="category in categories" :key="host+'.'+category">
-          <router-link :to="'/munin/hosts/'+host+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }"
-          >
-            <a :href="href" @click="navigate">{{category}}</a>
-          </router-link>
-        </li>
-      </ul>
-    </vk-card> -->
   </div>
 </template>
 
@@ -61,23 +18,23 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:munin')
+const debug = Debug('apps:munin:hosts')
 
 import JSPipeline from 'js-pipeline'
 import Pipeline from '@apps/munin/pipelines/index'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
-import MuninHostCard from './components/hostCard.vue'
+import MuninHostCard from './hostCard.vue'
 
-import { requests, store } from './sources/index'
+import { requests, store } from '../sources/index'
 
 export default {
   mixins: [DataSourcesMixin],
   components: { MuninHostCard },
   // extends: DataSourcesMixin,
 
-  name: 'Munin',
+  name: 'MuninHosts',
 
   // pipelines: {},
   // __pipelines_cfg: {},

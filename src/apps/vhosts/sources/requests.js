@@ -15,18 +15,23 @@ const nginx_vhosts_enabled = {
     }
   },
   callback: function (data, meta, key, vm) {
+    data = JSON.parse(JSON.stringify(data))
     let _vhosts = []
-    debug('All callback', data.vhosts)
+    debug('All callback', data)
     Array.each(data.vhosts, function (vhost) {
-      let _vhost = Object.merge(vhost.data, vhost.metadata)
+      if (vhost && vhost.data && vhost.metadata) {
+        let _vhost = Object.merge(vhost.data, vhost.metadata)
 
-      _vhosts.push(_vhost)
+        _vhosts.push(_vhost)
+      }
     })
 
     _vhosts.sort(function (a, b) { return (a.uri > b.uri) ? 1 : ((b.uri > a.uri) ? -1 : (a.timestamp > b.timestamp) ? 1 : 0) })
 
-    vm.vhosts = _vhosts
-    vm.loading = false
+    if (_vhosts.length > 0) {
+      vm.vhosts = _vhosts
+      vm.loading = false
+    }
     debug('All callback', _vhosts)
   }
 }

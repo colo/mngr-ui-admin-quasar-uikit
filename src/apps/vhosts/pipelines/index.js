@@ -87,10 +87,19 @@ export default {
     }
   ],
   output: [
+    // function (payload) {
+    //   debug('OUTPUT', payload)
+    //
+    //   if (!payload.err) { EventBus.$emit('input.vhosts.' + payload.metadata.input, payload) }
+    //
+    //   // if (!payload.err) { EventBus.$emit('log', payload) }
+    // }
     function (payload) {
-      debug('OUTPUT', payload)
-
-      if (!payload.err) { EventBus.$emit('input.vhosts.' + payload.metadata.input, payload) }
+      if (!payload.err && /^input\.vhosts\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.vhosts[', '').slice(0, -1)
+        debug('OUTPUT', payload)
+        EventBus.$emit('input.vhosts.' + payload.metadata.input, payload)
+      }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
     }

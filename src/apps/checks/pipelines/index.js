@@ -87,10 +87,19 @@ export default {
     }
   ],
   output: [
+    // function (payload) {
+    //   debug('OUTPUT', payload)
+    //
+    //   if (!payload.err) { EventBus.$emit('input.checks.' + payload.metadata.input, payload) }
+    //
+    //   // if (!payload.err) { EventBus.$emit('log', payload) }
+    // }
     function (payload) {
-      debug('OUTPUT', payload)
-
-      if (!payload.err) { EventBus.$emit('input.checks.' + payload.metadata.input, payload) }
+      if (!payload.err && /^input\.checks\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.checks[', '').slice(0, -1)
+        debug('OUTPUT', payload)
+        EventBus.$emit('input.checks.' + payload.metadata.input, payload)
+      }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
     }

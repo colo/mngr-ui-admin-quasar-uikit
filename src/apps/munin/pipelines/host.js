@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('libs:pipelines:alerts')
+const debug = Debug('libs:pipelines:munin:host')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         // suspended: true,
-        id: 'input.alerts',
+        id: 'input.munin.host',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.alerts',
+              id: 'input.munin.host',
               module: InputIO
 
             }
@@ -90,15 +90,15 @@ export default {
     // function (payload) {
     //   debug('OUTPUT', payload)
     //
-    //   if (!payload.err) { EventBus.$emit('input.alerts.' + payload.metadata.input, payload) }
+    //   if (!payload.err) { EventBus.$emit('input.munin.host.' + payload.metadata.input, payload) }
     //
     //   // if (!payload.err) { EventBus.$emit('log', payload) }
     // }
     function (payload) {
-      if (!payload.err && /^input\.alerts\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.alerts[', '').slice(0, -1)
+      if (!payload.err && /^input\.munin.host\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.munin.host[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.alerts.' + payload.metadata.input, payload)
+        EventBus.$emit('input.munin.host.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }

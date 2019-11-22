@@ -454,8 +454,16 @@ export default {
                 }
 
                 for (let i = 0; i < _query.length; i++) {
-                  debug('io EMIT', _query[i])
-                  app.io.emit('/', _query[i])
+                  let emit_query = Object.clone(_query[i])
+
+                  let stringified = qs.stringify(Object.merge(emit_query.query, emit_query.body))
+                  stringified = emit_query.path + '?' + stringified
+
+                  if (!emit_query.params) emit_query.params = {}
+                  emit_query.params.id = (emit_query.params.id) ? self.pipeline_id + '[' + emit_query.params.id + ']' : self.pipeline_id + '[' + stringified + ']'
+
+                  debug('io EMIT', _query[i], emit_query)
+                  app.io.emit('/', emit_query)
                 }
               }
 

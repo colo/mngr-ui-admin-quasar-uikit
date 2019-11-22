@@ -17,6 +17,8 @@ const munin_hosts_categories = {
   callback: function (data, meta, key, vm) {
     // debug('All callback', data)
     let _hosts_categories = {}
+    let _categories = []
+
     if (data && data.munin && data.munin.length > 0) {
       Array.each(data.munin, function (host_group) {
         Array.each(host_group, function (plugin) {
@@ -26,11 +28,16 @@ const munin_hosts_categories = {
 
           if (!_hosts_categories[host]) _hosts_categories[host] = []
           if (category !== undefined && !_hosts_categories[host].contains(category)) _hosts_categories[host].push(category)
+
+          if (!_categories.contains(category)) _categories.push(category)
         })
       })
+
+      vm.hosts_categories = _hosts_categories
+      vm.categories = _categories
     }
 
-    debug('All callback', _hosts_categories)
+    debug('All callback %o %o', _hosts_categories, _categories)
   }
 }
 

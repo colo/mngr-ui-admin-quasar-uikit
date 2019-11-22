@@ -88,9 +88,11 @@ export default {
   ],
   output: [
     function (payload) {
-      debug('OUTPUT', payload)
-
-      if (!payload.err) { EventBus.$emit('input.munin.' + payload.metadata.input, payload) }
+      if (!payload.err && /^input\.munin\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.munin[', '').slice(0, -1)
+        debug('OUTPUT', payload)
+        EventBus.$emit('input.munin.' + payload.metadata.input, payload)
+      }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
     }
