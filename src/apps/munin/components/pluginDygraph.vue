@@ -9,33 +9,33 @@
     <!-- <div v-if="config && processed_data.length > 0"> -->
     <vk-card class="uk-background-secondary uk-light" v-if="config && processed_data.length > 0">
       <vk-card-title>
-        <h4 class="uk-light">{{title}}</h4>
-        <p class="uk-light">{{info}}</p>
+        <h5 class="uk-light">{{title}}</h5>
       </vk-card-title>
 
+      <p class="uk-light">{{info}}</p>
 
-    <p v-if="data.minute">
-      <q-checkbox :disable="!data.minute" v-model="view.minute" label="Minute" />
-      <!-- <span class="circle bg-warning text-white"><i class="fa fa-hashtag" /></span> &nbsp; -->
-      <!-- {{count}} -->
-    </p>
-    <component
-      :is="tabular === false ? 'chart' : 'chart-tabular'"
-      :wrapper="{
-        type: 'dygraph'
-      }"
-      :always_update="true"
-      :ref="id"
-      :id="id"
-      :key="view.minute"
-      :EventBus="eventbus"
-      :stat="{
-        length: 300,
-        data: [processed_data]
-      }"
-      :chart="chart"
-    >
-    </component>
+      <p v-if="data.minute">
+        <q-checkbox :disable="!data.minute" v-model="view.minute" label="Minute" />
+        <!-- <span class="circle bg-warning text-white"><i class="fa fa-hashtag" /></span> &nbsp; -->
+        <!-- {{count}} -->
+      </p>
+      <component
+        :is="tabular === false ? 'chart' : 'chart-tabular'"
+        :wrapper="{
+          type: 'dygraph'
+        }"
+        :always_update="true"
+        :ref="id"
+        :id="id"
+        :key="view.minute"
+        :EventBus="eventbus"
+        :stat="{
+          length: 300,
+          data: [processed_data]
+        }"
+        :chart="chart"
+      >
+      </component>
     </vk-card>
     <!-- </div> -->
   <!-- </Widget> -->
