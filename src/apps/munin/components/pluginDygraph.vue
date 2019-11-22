@@ -8,9 +8,13 @@
     <!-- <p>Status: <strong>Live</strong></p> -->
     <!-- <div v-if="config && processed_data.length > 0"> -->
     <vk-card class="uk-background-secondary uk-light" v-if="config && processed_data.length > 0">
-    <p>{{info}}</p>
+      <vk-card-title>
+        <h3 class="uk-light">{{title}}</h3>
+        <p>{{info}}</p>
+      </vk-card-title>
 
-    <p>
+
+    <p v-if="data.minute">
       <q-checkbox :disable="!data.minute" v-model="view.minute" label="Minute" />
       <!-- <span class="circle bg-warning text-white"><i class="fa fa-hashtag" /></span> &nbsp; -->
       <!-- {{count}} -->
