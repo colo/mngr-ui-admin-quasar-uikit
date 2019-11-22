@@ -12,7 +12,7 @@
         <h5 class="uk-light">{{title}}</h5>
       </vk-card-title>
 
-      <p class="uk-light">{{info}}</p>
+      <p>{{info}}</p>
 
       <p v-if="data.minute">
         <q-checkbox :disable="!data.minute" v-model="view.minute" label="Minute" />
