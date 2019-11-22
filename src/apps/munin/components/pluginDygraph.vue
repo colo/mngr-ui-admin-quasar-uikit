@@ -9,11 +9,10 @@
     <!-- <div v-if="config && processed_data.length > 0"> -->
     <vk-card class="uk-background-secondary uk-light" v-if="config && processed_data.length > 0">
       <vk-card-title>
-        <h5 class="uk-light">{{title}}</h5>
-        <h6 class="uk-light">{{info}}</h6>
+        <h4 class="uk-light">{{title}}</h4>
       </vk-card-title>
 
-
+      <p>{{info}}</p>
       <p v-if="data.minute">
         <q-checkbox :disable="!data.minute" v-model="view.minute" label="Minute" />
         <!-- <span class="circle bg-warning text-white"><i class="fa fa-hashtag" /></span> &nbsp; -->
