@@ -9,8 +9,8 @@
     <!-- <div v-if="config && processed_data.length > 0"> -->
     <vk-card class="uk-background-secondary uk-light" v-if="config && processed_data.length > 0">
       <vk-card-title>
-        <h3 class="uk-light">{{title}}</h3>
-        <p>{{info}}</p>
+        <h4 class="uk-light">{{title}}</h4>
+        <p class="uk-light">{{info}}</p>
       </vk-card-title>
 
 
