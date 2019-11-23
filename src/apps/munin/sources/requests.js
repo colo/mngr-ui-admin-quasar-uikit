@@ -1,19 +1,56 @@
 import * as Debug from 'debug'
 const debug = Debug('apps:munin:sources:requests')
 
+const MINUTE = 60000
+
 const munin_hosts_categories = {
-  params: {
-    path: 'all',
-    query: {
-      'from': 'munin',
-      'index': 'host',
-      'q': [
-        { 'config': 'graph' },
-        { 'metadata': ['host'] } // 'path' ain't needed for first view (categories)
-      ],
-      'aggregation': 'distinct'
+  params: function (_key, vm) {
+    debug('PERIODICAL %o %o', _key, vm)
+
+    let source
+    let key
+
+    if (!_key) {
+      key = ['host_categories.range']
     }
+
+    // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
+
+    if (
+      _key
+    ) {
+      source = [{
+        params: { id: _key },
+        range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+        path: 'all',
+        query: {
+          'from': 'munin',
+          'index': 'host',
+          'q': [
+            { 'config': 'graph' },
+            { 'metadata': ['host'] } // 'path' ain't needed for first view (categories)
+          ],
+          'aggregation': 'distinct'
+        }
+      }]
+    }
+
+    // debug('MyChart periodical KEY ', key, source)
+
+    return { key, source }
   },
+  // params: {
+  //   path: 'all',
+  //   query: {
+  //     'from': 'munin',
+  //     'index': 'host',
+  //     'q': [
+  //       { 'config': 'graph' },
+  //       { 'metadata': ['host'] } // 'path' ain't needed for first view (categories)
+  //     ],
+  //     'aggregation': 'distinct'
+  //   }
+  // },
   callback: function (data, meta, key, vm) {
     // debug('All callback', data)
     let _hosts_categories = {}
