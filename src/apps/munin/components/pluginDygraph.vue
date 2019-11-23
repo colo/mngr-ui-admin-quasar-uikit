@@ -23,7 +23,7 @@
         :wrapper="{
           type: 'dygraph'
         }"
-        :always_update="true"
+        :always_update="false"
         :ref="id"
         :id="id"
         :key="view.minute"
@@ -34,6 +34,7 @@
         }"
         :chart="chart"
       >
+      <!-- :always_update="true" re check this, what was used for?-->
       </component>
     </vk-card>
     <!-- </div> -->
