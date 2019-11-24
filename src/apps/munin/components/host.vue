@@ -17,9 +17,11 @@
         <h3 class="uk-light" :id="category" :name="category">{{category}}</h3>
       </vk-card-title>
       <template v-for="(config, name) in plugins_config_per_category">
-        {{name}}
-        <br :key="category+'.'+name"/>
-        <munin-plugin-dygraph :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'plugin'"/>
+        <!-- {{name}}
+        {{config}}
+        {{plugins[name]}}
+        <br :key="category+'.'+name"/> -->
+        <munin-plugin-dygraph :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/>
       </template>
     </vk-card>
     <!-- <h1 :name="category" :key="category"><a :id="category" />{{category}}</h1> -->
