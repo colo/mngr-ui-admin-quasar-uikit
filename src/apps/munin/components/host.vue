@@ -11,12 +11,12 @@
 
   </template> -->
 
-  <template v-for="(plugins_config, category) in plugins_config">
+  <template v-for="(plugins_config_per_category, category) in plugins_config">
     <vk-card class="uk-background-secondary uk-light" :key="category">
       <vk-card-title>
         <h3 class="uk-light" :id="category" :name="category">{{category}}</h3>
       </vk-card-title>
-      <template v-for="(config, name) in plugins_config">
+      <template v-for="(config, name) in plugins_config_per_category">
         <!-- {{name}}
         <br :key="category+'.'+name"/> -->
         <munin-plugin-dygraph :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name"/>
