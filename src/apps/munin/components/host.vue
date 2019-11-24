@@ -1,13 +1,33 @@
 <template>
   <div>
-  <template v-for="(plugin, name) in plugins">
-    <!-- <b-row :key="name">
-      <b-col lg="12"> -->
+  <!-- <template v-for="(plugin, name) in plugins">
+
     <munin-plugin-dygraph :id="name" :data="plugin" :config="plugins_config[name]" :key="name"/>
-    <!-- {{name}} -->
-        <!-- :feed="(tables_feeds[`${table}`]) ? tables_feeds[`${table}`] : []" -->
-      <!-- </b-col>
-    </b-row> -->
+
+  </template> -->
+  <!-- <template v-for="(config, name) in plugins_config">
+
+    <munin-plugin-dygraph :id="name" :data="plugins[name]" :config="config" :key="name"/>
+
+  </template> -->
+
+  <template v-for="(plugins_config, category) in plugins_config">
+    <vk-card class="uk-background-secondary uk-light" :key="category">
+      <vk-card-title>
+        <h3 class="uk-light" :id="category" :name="category">{{category}}</h3>
+      </vk-card-title>
+      <template v-for="(config, name) in plugins_config">
+        <!-- {{name}}
+        <br :key="category+'.'+name"/> -->
+        <munin-plugin-dygraph :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name"/>
+      </template>
+    </vk-card>
+    <!-- <h1 :name="category" :key="category"><a :id="category" />{{category}}</h1> -->
+    <!-- {{category}} -->
+    <!-- <br :key="category"/> -->
+    <!-- <template v-for="(config, name) in plugins_config">
+      <munin-plugin-dygraph :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name"/>
+    </template> -->
   </template>
 </div>
 </template>
@@ -48,6 +68,7 @@ export default {
 
       plugins: {},
       plugins_config: {},
+      // plugins_categories: ,
 
       components: {
         range: {
@@ -69,7 +90,9 @@ export default {
   },
 
   watch: {
-
+    // 'plugins_config': function (val) {
+    //   debug('watch plugins_config %o', val.graph)
+    // }
   },
   methods: {
 

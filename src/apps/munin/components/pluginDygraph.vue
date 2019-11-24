@@ -176,7 +176,7 @@ export default {
       if (this.config && Object.getLength(this.config) > 0) {
         val = JSON.parse(JSON.stringify(val))
 
-        if (Object.getLength(val.periodical) > 0) {
+        if (val.periodical && Object.getLength(val.periodical) > 0) {
           // debug('data watch %s %o', this.id, JSON.parse(JSON.stringify(this.config)), JSON.parse(JSON.stringify(val.periodical)))
           let periodical = val.periodical
           let minute = val.minute

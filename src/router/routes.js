@@ -99,7 +99,7 @@ const routes = [
     children: [
       {
         path: 'hosts/:host',
-        name: 'Munin Host',
+        name: 'munin_host',
         component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/components/host.vue'),
         meta: {
           breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
