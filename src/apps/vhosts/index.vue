@@ -105,7 +105,10 @@
             {{ props.row.host }}
           </q-td>
           <q-td key="timestamp" :props="props">
-            {{ props.row.timestamp }}
+            {{ format_time(props.row.timestamp) }}
+            <!-- <div v-text="format_time(props.row.timestamp)"></div> -->
+            <!-- {{ props.cols[4].format }} -->
+            <!-- {{ props.row.timestamp }} -->
           </q-td>
           <q-td key="path" :props="props">
             {{ props.row.path }}
@@ -130,6 +133,8 @@ import Pipeline from '@apps/vhosts/pipelines/index'
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import { requests, store } from './sources/index'
+
+import moment from 'moment'
 
 export default {
   mixins: [DataSourcesMixin],
@@ -171,7 +176,15 @@ export default {
         },
         { name: 'port', align: 'left', label: 'Port', field: 'port', sortable: true },
         { name: 'host', align: 'left', label: 'Host', field: 'host', sortable: true },
-        { name: 'timestamp', align: 'left', label: 'Last Update', field: 'timestamp', sortable: true },
+        {
+          name: 'timestamp',
+          align: 'left',
+          label: 'Last Update',
+          field: 'timestamp',
+          sortable: true
+          // format: (val, row) => `${val}%`
+          // format: val => moment(val).format('dddd, MMMM Do YYYY, h:mm:ss a')
+        },
         { name: 'path', align: 'left', label: 'Type', field: 'path', sortable: true }
         // { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
         // { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
@@ -274,6 +287,9 @@ export default {
     }
   },
   methods: {
+    format_time: function (timestamp) {
+      return moment(timestamp).format('dddd, MMMM Do YYYY, h:mm:ss a')
+    },
     /**
     * @start pipelines
     **/

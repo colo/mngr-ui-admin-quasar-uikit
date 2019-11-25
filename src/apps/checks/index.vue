@@ -112,8 +112,14 @@
           <q-td key="host" :props="props">
             {{ props.row.host }}
           </q-td>
-          <q-td key="timestamp" :props="props">
+          <!-- <q-td key="timestamp" :props="props">
             {{ props.row.timestamp }}
+          </q-td> -->
+          <q-td key="timestamp" :props="props">
+            {{ format_time(props.row.timestamp) }}
+            <!-- <div v-text="format_time(props.row.timestamp)"></div> -->
+            <!-- {{ props.cols[4].format }} -->
+            <!-- {{ props.row.timestamp }} -->
           </q-td>
           <q-td key="path" :props="props">
             {{ props.row.path }}
@@ -146,6 +152,8 @@ import Pipeline from '@apps/checks/pipelines/index'
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import { requests, store } from './sources/index'
+
+import moment from 'moment'
 
 export default {
   mixins: [DataSourcesMixin],
@@ -240,6 +248,9 @@ export default {
     }
   },
   methods: {
+    format_time: function (timestamp) {
+      return moment(timestamp).format('dddd, MMMM Do YYYY, h:mm:ss a')
+    },
     /**
     * @start pipelines
     **/

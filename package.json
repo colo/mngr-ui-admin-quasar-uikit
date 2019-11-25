@@ -20,6 +20,7 @@
     "dygraphs": "^2.1.0",
     "js-pipeline": "git+https://github.com/colo/js-pipeline.git",
     "mngr-ui-admin-charts": "git+https://github.com/colo/mngr-ui-admin-charts.git",
+    "moment": "^2.24.0",
     "mootools": "^1.5.2",
     "node-app-socket.io-client": "git+https://github.com/colo/node-app-socket.io-client.git",
     "node-tabular-data": "git+https://github.com/colo/node-tabular-data.git",
