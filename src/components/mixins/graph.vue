@@ -2,7 +2,7 @@
 
   <component
     v-if="chart_init === true"
-    v-observe-visibility="{ callback: visibilityChanged, throttle: 50 }"
+    v-observe-visibility="{ callback: visibilityChanged, throttle: 200 }"
     :is="wrapper.type+'-wrapper'"
     :id="id"
     :ref="id"
