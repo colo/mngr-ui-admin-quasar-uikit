@@ -291,22 +291,31 @@ const host_range_component = {
       //   if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
       //   vm.$set(vm.plugins[name], 'minute', plugin)
       // })
-      let plugins_config = {}
+      let _plugins_config = {}
+      let _plugins_config_sorted = []
       Array.each(data.munin, function (group_path) {
         // debug('PERIODICAL HOST CALLBACK %o %o %s', group_path)
         let config = group_path[0].config // only one per path
         let category = (config && config.graph && config.graph.category) ? config.graph.category : 'uncategorized'
         let path = group_path[0].metadata.path
 
-        if (!plugins_config[category]) plugins_config[category] = {}
+        if (!_plugins_config[category]) _plugins_config[category] = {}
+        if (!_plugins_config_sorted.contains(category)) _plugins_config_sorted.push(category)
 
-        plugins_config[category][path] = config
+        _plugins_config[category][path] = config
         // vm.$set(vm.plugins_config, path, config)
 
         // if (category && !vm.plugins_categories.contains(category)) {
         //   vm.plugins_categories.push(category)
         // }
       })
+
+      _plugins_config_sorted.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
+      let plugins_config = {}
+      for (let i = 0; i < _plugins_config_sorted.length; i++) {
+        let category = _plugins_config_sorted[i]
+        plugins_config[category] = _plugins_config[category]
+      }
 
       if (Object.getLength(plugins_config) > 0) {
         vm.plugins_config = plugins_config

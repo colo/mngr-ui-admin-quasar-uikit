@@ -71,6 +71,12 @@ const munin_hosts_categories = {
         })
       })
 
+      Object.each(_hosts_categories, function (categories, host) {
+        categories.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
+      })
+
+      _categories.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
+
       vm.hosts_categories = _hosts_categories
       vm.categories = _categories
     }
