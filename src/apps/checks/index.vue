@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <q-page>
     <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
     <!-- <vk-card class="uk-background-secondary">
@@ -128,7 +128,7 @@
         </template>
       </q-table>
     </vk-card>
-  </div>
+  </q-page>
 </template>
 
 <script>

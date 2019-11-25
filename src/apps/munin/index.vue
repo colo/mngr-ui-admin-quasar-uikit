@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <q-page>
     <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
     <!-- <vk-card class="uk-background-secondary">
@@ -20,7 +20,13 @@
         <vk-breadcrumb-item :href="href" @click="navigate">Home</vk-breadcrumb-item>
       </router-link>
 
-      <vk-breadcrumb-item disabled>Munin</vk-breadcrumb-item>
+      <router-link to="/munin" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item v-bind="(!host) ? {'disabled' : true} : ''" :href="href" @click="navigate">Munin</vk-breadcrumb-item>
+      </router-link>
+
+      <vk-breadcrumb-item v-if="host">{{host}}</vk-breadcrumb-item>
+
     </vk-breadcrumb>
     </vk-card>
 
@@ -33,7 +39,39 @@
       />
     </template>
 
-    <router-view :key="$route.fullPath"></router-view>
+    <router-view :key="$route.path"></router-view>
+
+    <template v-for="(host_categories, host_name) in hosts_categories">
+      <munin-host-card
+        :key="host_name+'.bottom'"
+        v-if="host_name === host"
+        :categories="host_categories"
+        :host="host_name"
+      />
+    </template>
+
+    <!-- <template v-for="(host_categories, host_name) in hosts_categories">
+      <munin-host-card
+        :key="host_name"
+        v-if="!host"
+        :categories="host_categories"
+        :host="host_name"
+      />
+      <q-page-sticky v-else position="top" :key="host_name+'.sticky'">
+        <munin-host-card
+          v-if="host_name === host"
+          :categories="host_categories"
+          :host="host_name"
+        />
+      </q-page-sticky>
+    </template> -->
+
+    <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
+      <q-btn fab icon="keyboard_arrow_up" color="accent" />
+    </q-page-scroller>
+    <!-- v-if="!host || host_name === host" -->
+
+     <!-- :key="$route.fullPath" -->
     <!-- <vk-card class="uk-background-secondary uk-light" v-for="(categories, host) in hosts_categories" :key="host">
 
       <vk-card-title>
@@ -53,7 +91,7 @@
         </li>
       </ul>
     </vk-card> -->
-  </div>
+  </q-page>
 </template>
 
 <script>

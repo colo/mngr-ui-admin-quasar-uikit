@@ -12,9 +12,29 @@
 
     <ul class="uk-subnav uk-subnav-divider" uk-margin>
       <li v-for="category in categories" :key="host+'.'+category">
-        <!-- <q-btn flat color="primary" :label="category" :to="{name: 'munin_host', params: host, hash: '#'+category}"/> -->
-        <router-link :to="'/munin/hosts/'+host+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }">
+        <!-- <q-btn
+          flat color="primary"
+          :label="category"
+          :to="{
+            name: 'munin_host',
+            params: { host: host },
+            hash: '#'+category
+          }"
+        /> -->
+
+        <!-- <router-link :to="'/munin/hosts/'+host+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }">
           <a :href="href" @click="navigate">{{category}}</a>
+        </router-link> -->
+        <router-link
+          tag="a"
+          :to="{
+            name: 'munin_host',
+            params: { host: host },
+            hash: '#'+category
+          }"
+          :class="'uk-scroll'"
+        >
+        {{category}}
         </router-link>
       </li>
     </ul>

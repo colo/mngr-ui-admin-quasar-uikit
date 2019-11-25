@@ -12,9 +12,10 @@
   </template> -->
 
   <template v-for="(plugins_config_per_category, category) in plugins_config">
+    <a :id="category" :key="category+'.anchor'"/>
     <vk-card class="uk-background-secondary uk-light" :key="category">
       <vk-card-title>
-        <h3 class="uk-light" :id="category" :name="category">{{category}}</h3>
+        <h3 class="uk-light">{{category}}</h3>
       </vk-card-title>
       <template v-for="(config, name) in plugins_config_per_category">
         <!-- {{name}}

@@ -1,7 +1,8 @@
 import * as Debug from 'debug'
 const debug = Debug('apps:munin:sources:requests')
 
-const MINUTE = 60000
+const SECOND = 1000
+const MINUTE = 60 * SECOND
 
 const munin_hosts_categories = {
   params: function (_key, vm) {
@@ -21,7 +22,7 @@ const munin_hosts_categories = {
     ) {
       source = [{
         params: { id: _key },
-        range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+        range: 'posix ' + (Date.now() - (15 * SECOND)) + '-' + Date.now() + '/*',
         path: 'all',
         query: {
           'from': 'munin',

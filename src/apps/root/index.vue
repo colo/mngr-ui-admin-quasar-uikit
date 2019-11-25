@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <q-page>
     <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
     <vk-card class="uk-background-secondary">
@@ -36,7 +36,7 @@
         <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Alerts</vk-button-link>
       </router-link>
     </vk-card>
-  </div>
+  </q-page>
 </template>
 
 <script>
