@@ -58,7 +58,7 @@ const host_range_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (15 * MINUTE)) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin',
               // 'register': 'changes',
@@ -117,7 +117,7 @@ const host_range_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (6 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (16 * MINUTE)) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin_historical',
               // 'register': 'changes',

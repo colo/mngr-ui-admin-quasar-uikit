@@ -28,12 +28,12 @@
         :id="id"
         :EventBus="eventbus"
         :stat="{
-          length: 900,
+          length: 900, // 12 point per minute * 60 min
           data: [processed_data]
         }"
         :chart="chart"
       >
-      <!-- stat -> length: 300, -->
+      <!-- stat -> length: 300 -->
       <!-- :key="view.minute" -->
       <!-- :always_update="true" re check this, what was used for?-->
       </component>
@@ -280,6 +280,14 @@ export default {
                 // }
               })
             }
+
+            // let splice = 180 // 12 points per min * 15 min
+            // let length = processed_data.length
+            //
+            // processed_data.splice(
+            //   (splice * -1) - 1,
+            //   length - splice
+            // )
 
             /**
             * 'munin_historical tabular' order
