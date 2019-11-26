@@ -18,6 +18,11 @@
         <!-- <span class="circle bg-warning text-white"><i class="fa fa-hashtag" /></span> &nbsp; -->
         <!-- {{count}} -->
       </p>
+
+      <!--
+      DON'T REMOVE -> :key="view.minute"
+      needed so component is recreated on key change, so a new Dygraph chart is created with new labels / columns
+      -->
       <component
         :is="tabular === false ? 'chart' : 'chart-tabular'"
         :wrapper="{
@@ -26,6 +31,7 @@
         :always_update="false"
         :ref="id"
         :id="id"
+        :key="view.minute"
         :EventBus="eventbus"
         :stat="{
           length: 900,
@@ -279,6 +285,14 @@ export default {
                 //   processed_data[i].combine([timestamp, 0])
                 // }
               })
+
+              let splice = 900 // 12 points per min * 16 min
+              let length = processed_data.length
+
+              processed_data.splice(
+                (splice * -1) - 1,
+                length - splice
+              )
             }
 
             /**
