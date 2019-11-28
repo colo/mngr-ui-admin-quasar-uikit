@@ -190,8 +190,11 @@ const host_once_component = {
       //   vm.$set(vm.plugins[name], 'periodical', plugin)
       // })
     } else if (key === 'minute.once' && data.munin_historical) {
+      debug('MINUTE HOST ONCE CALLBACK %o ', JSON.parse(JSON.stringify(data.munin_historical)))
+
       Object.each(data.munin_historical, function (plugin, name) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
+
         vm.$set(vm.plugins[name], 'minute', plugin)
       })
       // Object.each(data.munin_historical, function (plugin, name) {
@@ -401,6 +404,7 @@ const host_range_component = {
         }
       })
     } else if (key === 'minute.range' && data.munin_historical) {
+      debug('MINUTE HOST RANGE CALLBACK %o ', JSON.parse(JSON.stringify(data.munin_historical)))
       // Object.each(data.munin_historical, function (plugin, name) {
       //   if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
       //   vm.$set(vm.plugins[name], 'minute', plugin)

@@ -52,7 +52,7 @@ import Pipeline from '@apps/munin/pipelines/host'
 
 import { requests, store } from '../sources/host'
 
-const MAX_FEED_DATA = 10
+// const MAX_FEED_DATA = 10
 
 export default {
   mixins: [DataSourcesMixin],
@@ -67,6 +67,7 @@ export default {
       path: 'all',
 
       // munin: [],
+      store: false,
       pipeline_id: 'input.munin.host',
 
       plugins: {},
@@ -82,9 +83,9 @@ export default {
           //   }
           // }
           source: {
-            requests: requests,
+            requests: requests
 
-            store: store
+            // store: store
           }
         }
 

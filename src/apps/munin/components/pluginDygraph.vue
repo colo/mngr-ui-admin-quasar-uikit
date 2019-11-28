@@ -147,6 +147,8 @@ export default {
     }
   },
 
+  __config_set: false,
+
   data () {
     return {
       // id: 'all',
@@ -166,16 +168,27 @@ export default {
       debug('VIEW MINUTE %o', val, this.id)
       // let options = JSON.parse(JSON.stringify(this.chart.options))
       let data = JSON.parse(JSON.stringify(this.data))
+
+      this.$options.__config_set = false
+
       this.__process_data(data)
       // this.processed_data = data
       // this.chart.options = options
     },
-    'data': {
+    'data.periodical': {
       handler: function (val) {
-        this.__process_data(val)
-      },
-      deep: true
+        // this.__process_data(val)
+        let data = JSON.parse(JSON.stringify(this.data))
+        this.__process_data(data)
+      }
+      // deep: true
     }
+    // 'data': {
+    //   handler: function (val) {
+    //     this.__process_data(val)
+    //   },
+    //   deep: true
+    // }
   },
 
   methods: {
@@ -185,13 +198,16 @@ export default {
 
         if (val.periodical && Object.getLength(val.periodical) > 0) {
           // debug('data watch %s %o', this.id, JSON.parse(JSON.stringify(this.config)), JSON.parse(JSON.stringify(val.periodical)))
+
+          debug('data watch %s %o', this.id, val.minute)
+
           let periodical = val.periodical
           let minute = val.minute
 
-          this.$set(this.chart.options, 'labels', ['Time'])
+          if (this.$options.__config_set === false) { this.$set(this.chart.options, 'labels', ['Time']) }
           // this.$set(this.chart.options, 'sigFigs', 6)
 
-          if (this.view.minute === false && this.config.graph && this.config.graph.args) {
+          if (this.view.minute === false && this.config.graph && this.config.graph.args && this.$options.__config_set === false) {
             let args = this.config.graph.args.split(' ')
             Array.each(args, function (arg) {
               if (arg === '--logarithmic') { this.$set(this.chart.options, 'logscale', true) }
@@ -213,7 +229,8 @@ export default {
               })
             }
             let label = (key_config && key_config.label) ? key_config.label : key
-            this.chart.options.labels.push(label)
+
+            if (this.$options.__config_set === false) { this.chart.options.labels.push(label) }
 
             debug('KEY %s %o', key, this.config)
 
@@ -224,40 +241,42 @@ export default {
             /**
             * if at least one is STAKED, dygraph.options.stackedGraph === true
             **/
-            if (this.view.minute === false) {
-              this.$set(this.chart.options, 'stackedGraph', (this.chart.options.stackedGraph && this.chart.options.stackedGraph === true)
-                ? this.chart.options.stackedGraph
-                : !!((key_config && key_config.draw && key_config.draw === 'STACK'))
-              )
+            if (this.$options.__config_set === false) {
+              if (this.view.minute === false) {
+                this.$set(this.chart.options, 'stackedGraph', (this.chart.options.stackedGraph && this.chart.options.stackedGraph === true)
+                  ? this.chart.options.stackedGraph
+                  : !!((key_config && key_config.draw && key_config.draw === 'STACK'))
+                )
 
-              if (this.chart.options.stackedGraph === true) {
-                this.$set(this.chart.options, 'fillGraph', true)
-                this.$set(this.chart.options, 'fillAlpha', 0.5)
-              }
-
-              if (key_config.min) {
-                if (!this.chart.options.valueRange) {
-                  this.$set(this.chart.options, 'valueRange', [])
-                  this.$set(this.chart.options.valueRange, 0, key_config.min)
+                if (this.chart.options.stackedGraph === true) {
+                  this.$set(this.chart.options, 'fillGraph', true)
+                  this.$set(this.chart.options, 'fillAlpha', 0.5)
                 }
 
-                this.$set(this.chart.options.valueRange, 0,
-                  (this.chart.options.valueRange &&
-                     this.chart.options.valueRange[0] &&
-                     this.chart.options.valueRange[0] * 1 < key_config.min
-                  ) ? this.chart.options.valueRange[0] * 1 : key_config.min
-                )
-              }
+                if (key_config.min) {
+                  if (!this.chart.options.valueRange) {
+                    this.$set(this.chart.options, 'valueRange', [])
+                    this.$set(this.chart.options.valueRange, 0, key_config.min)
+                  }
 
-              if (key_config.max) {
-                if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
-                this.$set(this.chart.options.valueRange, 1, (this.chart.options.valueRange && this.chart.options.valueRange[1] && this.chart.options.valueRange[1] > key_config.max) ? this.chart.options.valueRange[1] : key_config.max)
-              }
-            } else {
-              this.$set(this.chart.options, 'stackedGraph', false)
-              this.$set(this.chart.options, 'fillGraph', false)
+                  this.$set(this.chart.options.valueRange, 0,
+                    (this.chart.options.valueRange &&
+                       this.chart.options.valueRange[0] &&
+                       this.chart.options.valueRange[0] * 1 < key_config.min
+                    ) ? this.chart.options.valueRange[0] * 1 : key_config.min
+                  )
+                }
 
-              this.$delete(this.chart.options, 'valueRange')
+                if (key_config.max) {
+                  if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+                  this.$set(this.chart.options.valueRange, 1, (this.chart.options.valueRange && this.chart.options.valueRange[1] && this.chart.options.valueRange[1] > key_config.max) ? this.chart.options.valueRange[1] : key_config.max)
+                }
+              } else {
+                this.$set(this.chart.options, 'stackedGraph', false)
+                this.$set(this.chart.options, 'fillGraph', false)
+
+                this.$delete(this.chart.options, 'valueRange')
+              }
             }
 
             // if (this.chart.options.logscale === true && this.chart.options.valueRange && this.chart.options.valueRange[0] === 0) {
@@ -310,7 +329,7 @@ export default {
             // debug('MINUTE %o', minute)
 
             if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0) {
-              if (!this.chart.options.labels.contains(label + '(median)')) {
+              if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
                 this.chart.options.labels.push(label + '(median)')
               }
 
@@ -414,7 +433,7 @@ export default {
               })
             }
 
-            if (key_config.max && this.chart.options.valueRange) {
+            if (key_config.max && this.chart.options.valueRange && this.$options.__config_set === false) {
               // if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
               this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
             }
@@ -482,25 +501,26 @@ export default {
             }.bind(this))
           }
 
-          if (this.chart.options.labels.length > 10) {
+          if (this.chart.options.labels.length > 10 && this.$options.__config_set === false) {
             let extra_rows = this.chart.options.labels.length - 10
             let height = 154 + (15 * extra_rows)
             this.chart.style = 'width:100%; height:' + height + 'px;'
           }
 
-          if (this.chart.options.valueRange === null && this.chart.options.logscale === true) {
+          if (this.chart.options.valueRange === null && this.chart.options.logscale === true && this.$options.__config_set === false) {
             this.$set(this.chart.options, 'valueRange', [0.0000000000000001])
           }
 
-          if (this.chart.options.valueRange && !this.chart.options.valueRange[0]) {
+          if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
             this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === true) ? 0.0000000000000001 : 0)
           }
 
-          if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
-            debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
-          }
+          // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
+          //   debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
+          // }
 
           this.processed_data = processed_data
+          this.$options.__config_set = true
         } else {
           debug('No data for %s %o', this.id, val)
         }

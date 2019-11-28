@@ -141,9 +141,9 @@ export default {
         'all': [
           {
             source: {
-              requests: requests,
+              requests: requests
 
-              store: store
+              // store: store
             }
           }
 
