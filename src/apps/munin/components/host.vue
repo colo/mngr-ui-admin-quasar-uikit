@@ -22,7 +22,7 @@
         {{config}}
         {{plugins[name]}}
         <br :key="category+'.'+name"/> -->
-        <munin-plugin-dygraph :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/>
+        <munin-plugin-dygraph :ref="name" :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/>
       </template>
     </vk-card>
     <!-- <h1 :name="category" :key="category"><a :id="category" />{{category}}</h1> -->
