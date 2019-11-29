@@ -2,7 +2,7 @@
 
   <component
     v-if="chart_init === true"
-    v-observe-visibility="{ callback: visibilityChanged, throttle: 200 }"
+    v-observe-visibility="{ callback: visibilityChanged, throttle: 50 }"
     :is="wrapper.type+'-wrapper'"
     :id="id"
     :ref="id"
@@ -138,10 +138,10 @@ export default {
   },
 
   watch: {
-    '$q.appVisible': function (newVal, oldVal) {
-      debug('$q.appVisible', newVal)
-      this.$options.focus = newVal
-    }
+    // '$q.appVisible': function (newVal, oldVal) {
+    //   debug('$q.appVisible', newVal)
+    //   this.$options.focus = newVal
+    // }
 
   },
 

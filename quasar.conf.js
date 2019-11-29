@@ -51,7 +51,9 @@ module.exports = function (ctx) {
       directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: [
+        'AppVisibility'
+      ],
       config: {
         dark: true
       }

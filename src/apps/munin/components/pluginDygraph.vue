@@ -9,14 +9,17 @@
     <!-- <div v-if="config && processed_data.length > 0"> -->
 
      <!-- && processed_data.length > 0 -->
-    <vk-card class="uk-background-secondary uk-light" v-if="config">
+
+   <!-- We use class hidden and not a v-if, becasue they need to be created to be used with their "$refs"-->
+    <vk-card v-if="config" :class="(show === false) ? 'uk-background-secondary uk-light hidden': 'uk-background-secondary uk-light'">
       <vk-card-title>
         <h4 class="uk-light">{{title}}</h4>
       </vk-card-title>
 
       <p>{{info}}</p>
-      <p v-if="data.minute">
-        <q-checkbox :disable="!data.minute" v-model="view.minute" label="Minute" />
+      <p v-if="show_minute">
+        <q-checkbox v-model="view.minute" label="Minute" />
+        <!-- :disable="!data.minute"  -->
         <!-- <span class="circle bg-warning text-white"><i class="fa fa-hashtag" /></span> &nbsp; -->
         <!-- {{count}} -->
       </p>
@@ -162,6 +165,9 @@ export default {
         minute: false
       },
       processed_data: [],
+      show: false,
+      show_minute: false,
+
       eventbus: EventBus,
       chart: Object.clone(dygraph_line_chart)
 
@@ -206,10 +212,14 @@ export default {
         if (val.periodical && Object.getLength(val.periodical) > 0) {
           // debug('data watch %s %o', this.id, JSON.parse(JSON.stringify(this.config)), JSON.parse(JSON.stringify(val.periodical)))
 
-          debug('data watch %s %o', this.id, val)
-
           let periodical = val.periodical
           let minute = val.minute
+
+          if (minute && Object.getLength(minute) > 0) {
+            this.show_minute = true
+          }
+
+          debug('data watch show_minute %s %o', this.id, this.show_minute)
 
           if (this.$options.__config_set === false) { this.$set(this.chart.options, 'labels', ['Time']) }
           // this.$set(this.chart.options, 'sigFigs', 6)
@@ -531,6 +541,7 @@ export default {
           // this.processed_data = processed_data
           this.$refs[this.id].update_stat_data([processed_data])
           this.$options.__config_set = true
+          this.show = true
         } else {
           debug('No data for %s %o', this.id, val)
         }
