@@ -43,6 +43,7 @@
           length: 192,
         }"
         :chart="chart"
+        :reactive="false"
       >
       <!-- data: [processed_data] -->
       <!-- stat -> length: 300, -->

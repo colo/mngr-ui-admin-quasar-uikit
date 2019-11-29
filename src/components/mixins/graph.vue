@@ -104,6 +104,10 @@ export default {
       type: [Object]
       // default: () => ({})
     },
+    reactive: {
+      type: Boolean,
+      default: false
+    },
     // stat: {
     //   type: [Object],
     //   default: () => ({})
@@ -318,14 +322,14 @@ export default {
           } else {
             frameDebounce(this.$refs[name].update(this.$options.tabular.data))
           }
-        } else {
+        } else if (this.reactive === true) {
           if (inmediate === true) {
             this.$set(this, 'tabular', this.$options.tabular)
           } else {
             frameDebounce(this.$set(this, 'tabular', this.$options.tabular))
           }
         }
-        debug('graph update_chart_stat updating', this.id, this.tabular.data.length, this.$options.tabular.data.length)
+        debug('graph update_chart_stat updating %s %o %d %d', name, this.$refs, this.tabular.data.length, this.$options.tabular.data.length)
 
         this.$options.tabular.data = [[]]
 
