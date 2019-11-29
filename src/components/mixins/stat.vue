@@ -112,7 +112,7 @@ export default {
 
     this.$options.stat_data = []
 
-    const DATA_LENGTH = (this.stat && this.stat.data) ? this.stat.data.length : 0
+    // const DATA_LENGTH = (this.stat && this.stat.data) ? this.stat.data.length : 0
     let range_length = (this.stat.range && this.stat.range[1] && this.stat.range[0]) ? (this.stat.range[1] - this.stat.range[0]) / 1000 : undefined
     if (range_length === undefined || range_length <= 1) { this.$options.__range_init = true }
 
@@ -250,77 +250,10 @@ export default {
       //
       // //////////console.log('stat.vue id', this.id, this.$options.type, this.stat.range, this.$options.deque, this.$options.deque.length, QUEUE_SIZE)
       // if(this.stat.data && this.stat.data[0]){
-      this.$options.__stat_unwatcher = this.$watch('stat.data', function (stats, old) {
-        /**
-          * if you don't clone it , you may be manipulating other stats using this sames stats
-          **/
-        stats = Object.clone(stats)// now we are safe to modify
-        let val = (stats) ? stats[0] : undefined
-        /// ///////console.log('stat.data.0', val)
-
-        if (val && val.length > 0) {
-          if (!Array.isArray(val[0])) { // array of array, range data
-            val = [val]
-          }
-
-          let columns = []
-          for (let i = 1; i < DATA_LENGTH; i++) { // ommit timestamp
-            columns.push(this.stat.data[i])
-          }
-
-          // //console.log('MERGED COLUMNS', columns)
-
-          if (columns.length > 0) {
-            let matched_columns = false
-            Array.each(val, function (row, index) {
-              Array.each(columns, function (column, col_index) {
-                // //console.log('COLUMN',column)
-                if (column) {
-                  if (Array.isArray(column[0])) { // array of array, range data
-                    val[index] = this._merge_tabular_data(val[index], column[index])// match columns/rows
-                  } else {
-                    val[index] = this._merge_tabular_data(val[index], column)// fill always with same val
-                  }
-                  matched_columns = true
-                }
-              }.bind(this))
-            }.bind(this))
-
-            /// ///////console.log('__stat_unwatcher merged ', val)
-
-            if (matched_columns === true) {
-              if (this.stat.length === 1) {
-                this.__add_stats(val[val.length - 1])
-              } else {
-                this.__add_stats(val)
-              }
-            }
-          }
-        }
-      }, { deep: true })
+      this.$options.__stat_unwatcher = this.$watch('stat.data', this.update_stat_merged_data.bind(this), { deep: true })
       // }
     } else {
-      this.$options.__stat_unwatcher = this.$watch('stat.data', function (val, old) {
-        // console.log('__stat_unwatcher', this.id, val, this.stat.length)
-        val = JSON.parse(JSON.stringify(val))
-
-        /**
-        * when use "stat.sources" as data, is always an array, even if it's not merged data
-        * so we need to pick the only element (if there are more, is an error)
-        */
-
-        if (Array.isArray(this.stat.data)) { val = val[0] }
-
-        // this.__stat_data_watcher(val)
-        if (val && val.length > 0) {
-          let __cloned = Array.clone(val)
-          if (this.stat.length === 1) {
-            this.__add_stats(__cloned[__cloned.length - 1])
-          } else {
-            this.__add_stats(__cloned)
-          }
-        }
-      }, { deep: true })
+      this.$options.__stat_unwatcher = this.$watch('stat.data', this.update_stat_data.bind(this), { deep: true })
     }
   },
   beforeDestroy () {
@@ -333,6 +266,77 @@ export default {
     this.$off()
   },
   methods: {
+    update_stat_merged_data: function (stats, old) {
+      const DATA_LENGTH = stats.length
+
+      /**
+        * if you don't clone it , you may be manipulating other stats using this sames stats
+        **/
+      stats = Array.clone(stats)// now we are safe to modify
+      let val = (stats) ? stats[0] : undefined
+      /// ///////console.log('stat.data.0', val)
+
+      if (val && val.length > 0) {
+        if (!Array.isArray(val[0])) { // array of array, range data
+          val = [val]
+        }
+
+        let columns = []
+        for (let i = 1; i < DATA_LENGTH; i++) { // ommit timestamp
+          columns.push(stats[i])
+        }
+
+        // //console.log('MERGED COLUMNS', columns)
+
+        if (columns.length > 0) {
+          let matched_columns = false
+          Array.each(val, function (row, index) {
+            Array.each(columns, function (column, col_index) {
+              // //console.log('COLUMN',column)
+              if (column) {
+                if (Array.isArray(column[0])) { // array of array, range data
+                  val[index] = this._merge_tabular_data(val[index], column[index])// match columns/rows
+                } else {
+                  val[index] = this._merge_tabular_data(val[index], column)// fill always with same val
+                }
+                matched_columns = true
+              }
+            }.bind(this))
+          }.bind(this))
+
+          /// ///////console.log('__stat_unwatcher merged ', val)
+
+          if (matched_columns === true) {
+            if (stats.length === 1) {
+              this.__add_stats(val[val.length - 1])
+            } else {
+              this.__add_stats(val)
+            }
+          }
+        }
+      }
+    },
+    update_stat_data: function (val, old) {
+      // console.log('__stat_unwatcher', this.id, val, this.stat.length)
+      val = JSON.parse(JSON.stringify(val))
+
+      /**
+      * when use "stat.sources" as data, is always an array, even if it's not merged data
+      * so we need to pick the only element (if there are more, is an error)
+      */
+
+      if (Array.isArray(val)) { val = val[0] }
+
+      // this.__stat_data_watcher(val)
+      if (val && val.length > 0) {
+        let __cloned = Array.clone(val)
+        if (val.length === 1) {
+          this.__add_stats(__cloned[__cloned.length - 1])
+        } else {
+          this.__add_stats(__cloned)
+        }
+      }
+    },
     /**
     * based on docs (obtained from local DB) and range, defined if we can update stat with this
     * plus a shorter remote range, or we need to clear and obtain all new data from remote

@@ -7,7 +7,9 @@
   > -->
     <!-- <p>Status: <strong>Live</strong></p> -->
     <!-- <div v-if="config && processed_data.length > 0"> -->
-    <vk-card class="uk-background-secondary uk-light" v-if="config && processed_data.length > 0">
+
+     <!-- && processed_data.length > 0 -->
+    <vk-card class="uk-background-secondary uk-light" v-if="config">
       <vk-card-title>
         <h4 class="uk-light">{{title}}</h4>
       </vk-card-title>
@@ -34,11 +36,12 @@
         :key="view.minute"
         :EventBus="eventbus"
         :stat="{
+          data: [],
           length: 900,
-          data: [processed_data]
         }"
         :chart="chart"
       >
+      <!-- data: [processed_data] -->
       <!-- stat -> length: 300, -->
       <!-- :key="view.minute" -->
       <!-- :always_update="true" re check this, what was used for?-->
@@ -148,6 +151,7 @@ export default {
   },
 
   __config_set: false,
+  plugin_data: undefined,
 
   data () {
     return {
@@ -174,15 +178,15 @@ export default {
       this.__process_data(data)
       // this.processed_data = data
       // this.chart.options = options
-    },
-    'data.periodical': {
-      handler: function (val) {
-        // this.__process_data(val)
-        let data = JSON.parse(JSON.stringify(this.data))
-        this.__process_data(data)
-      }
-      // deep: true
     }
+    // 'data.periodical': {
+    //   handler: function (val) {
+    //     // this.__process_data(val)
+    //     let data = JSON.parse(JSON.stringify(this.data))
+    //     this.__process_data(data)
+    //   }
+    //   // deep: true
+    // }
     // 'data': {
     //   handler: function (val) {
     //     this.__process_data(val)
@@ -192,6 +196,9 @@ export default {
   },
 
   methods: {
+    // update: function (val) {
+    //   debug('update method', this.id)
+    // },
     __process_data: function (val) {
       if (this.config && Object.getLength(this.config) > 0) {
         val = JSON.parse(JSON.stringify(val))
@@ -199,7 +206,7 @@ export default {
         if (val.periodical && Object.getLength(val.periodical) > 0) {
           // debug('data watch %s %o', this.id, JSON.parse(JSON.stringify(this.config)), JSON.parse(JSON.stringify(val.periodical)))
 
-          debug('data watch %s %o', this.id, val.minute)
+          debug('data watch %s %o', this.id, val)
 
           let periodical = val.periodical
           let minute = val.minute
@@ -519,7 +526,10 @@ export default {
           //   debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
           // }
 
-          this.processed_data = processed_data
+          debug('processed_data REFS %s %o', this.id, this.$refs)
+
+          // this.processed_data = processed_data
+          this.$refs[this.id].update_stat_data([processed_data])
           this.$options.__config_set = true
         } else {
           debug('No data for %s %o', this.id, val)
