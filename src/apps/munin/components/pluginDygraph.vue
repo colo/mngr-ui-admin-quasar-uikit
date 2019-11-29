@@ -205,6 +205,38 @@ export default {
     // update: function (val) {
     //   debug('update method', this.id)
     // },
+    set_data: function (data) {
+      // debug('set_data', this.id, data)
+      this.$options.plugin_data = Object.merge(this.$options.plugin_data, data)
+
+      if (this.$options.plugin_data.periodical) {
+        let splice = 192 // 12 points per min * 16 min
+        let length
+
+        Object.each(this.$options.plugin_data.periodical, function (periodical, key) {
+          length = periodical.length
+          this.$options.plugin_data.periodical[key].splice(
+            (splice * -1) - 1,
+            length - splice
+          )
+        }.bind(this))
+      } else if (this.$options.plugin_data.minute) {
+        let splice = 16 // 1 points per min * 16 min
+        let length
+
+        Object.each(this.$options.plugin_data.minute, function (minute, key) {
+          length = minute.length
+          this.$options.plugin_data.minute[key].splice(
+            (splice * -1) - 1,
+            length - splice
+          )
+        }.bind(this))
+      }
+
+      debug('set_data2', this.id, this.$options.plugin_data)
+
+      this.__process_data(this.$options.plugin_data)
+    },
     __process_data: function (val) {
       if (this.config && Object.getLength(this.config) > 0) {
         val = JSON.parse(JSON.stringify(val))
@@ -322,13 +354,13 @@ export default {
                 // }
               })
 
-              let splice = 900 // 12 points per min * 16 min
-              let length = processed_data.length
-
-              processed_data.splice(
-                (splice * -1) - 1,
-                length - splice
-              )
+              // let splice = 900 // 12 points per min * 16 min
+              // let length = processed_data.length
+              //
+              // processed_data.splice(
+              //   (splice * -1) - 1,
+              //   length - splice
+              // )
             }
 
             /**

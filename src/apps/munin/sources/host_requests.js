@@ -45,7 +45,7 @@ const host_once_component = {
     let key
 
     if (!_key) {
-      key = ['periodical.once', 'config.once', 'minute.once']
+      key = ['periodical.once', 'config.once', 'minute.once']//
       // key = ['config.once']
     }
 
@@ -160,8 +160,6 @@ const host_once_component = {
     return { key, source }
   },
   callback: function (data, metadata, key, vm) {
-    // debug('PERIODICAL HOST CALLBACK %o %o %s', data, metadata, key)
-
     if (key === 'periodical.once' && data.munin) {
       // Object.each(data.munin, function (plugin, name) {
       //   if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
@@ -173,10 +171,14 @@ const host_once_component = {
       Object.each(data.munin, function (plugin, name) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
 
-        if (!vm.$refs[name][0].plugin_data) vm.$refs[name][0].plugin_data = { periodical: undefined, minute: undefined }
+        // debug('PERIODICAL HOST CALLBACK %o %o %s', vm.$refs[name])
+        vm.$nextTick(function () {
+          if (vm.$refs[name] && vm.$refs[name][0] && !vm.$refs[name][0].$options.plugin_data) vm.$refs[name][0].$options.plugin_data = { periodical: undefined, minute: undefined }
 
-        vm.$refs[name][0].plugin_data.periodical = plugin
-        vm.$refs[name][0].__process_data(vm.$refs[name][0].plugin_data)
+          vm.$refs[name][0].set_data({ periodical: plugin })
+        })
+        // vm.$refs[name][0].$options.plugin_data.periodical = plugin
+        // vm.$refs[name][0].__process_data(vm.$refs[name][0].$options.plugin_data)
       })
     } else if (key === 'minute.once' && data.munin_historical) {
       debug('MINUTE HOST ONCE CALLBACK %o ', JSON.parse(JSON.stringify(data.munin_historical)))
@@ -189,10 +191,14 @@ const host_once_component = {
       Object.each(data.munin_historical, function (plugin, name) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
 
-        if (!vm.$refs[name][0].plugin_data) vm.$refs[name][0].plugin_data = { periodical: undefined, minute: undefined }
+        vm.$nextTick(function () {
+          if (vm.$refs[name] && vm.$refs[name][0] && !vm.$refs[name][0].$options.plugin_data) vm.$refs[name][0].$options.plugin_data = { periodical: undefined, minute: undefined }
 
-        vm.$refs[name][0].plugin_data.minute = plugin
-        vm.$refs[name][0].__process_data(vm.$refs[name][0].plugin_data)
+          vm.$refs[name][0].set_data({ minute: plugin })
+        })
+
+        // vm.$refs[name][0].$options.plugin_data.minute = plugin
+        // vm.$refs[name][0].__process_data(vm.$refs[name][0].$options.plugin_data)
       })
     } else if (key === 'config.once' && data.munin) {
       let _plugins_config = {}
@@ -378,8 +384,8 @@ const host_range_component = {
         //     vm.$set(vm.plugins[name], 'periodical', plugin)
         //   }
         // })
-        if (vm.$refs[name][0].plugin_data.periodical) { // if data already exists
-          let _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].plugin_data.periodical))
+        if (vm.$refs[name] && vm.$refs[name][0] && vm.$refs[name][0].$options.plugin_data && vm.$refs[name][0].$options.plugin_data.periodical) { // if data already exists
+          let _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.periodical))
 
           Object.each(plugin, function (data, prop) {
             _plugin[prop].combine(data)
@@ -390,19 +396,20 @@ const host_range_component = {
             _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
           })
 
-          plugin = _plugin
-
-          vm.$refs[name][0].plugin_data.periodical = plugin
-          // debug('PERIODICAL HOST CALLBACK REFS %o %o %o ', vm.$refs[name])
-          // vm.$refs[name][0].update(plugin)
-
-          vm.$refs[name][0].__process_data(vm.$refs[name][0].plugin_data)
-
-        // vm.$set(vm.plugins[name], 'periodical', plugin)
+          vm.$refs[name][0].set_data({ periodical: _plugin })
+        //   plugin = _plugin
+        //
+        //   vm.$refs[name][0].$options.plugin_data.periodical = plugin
+        //   // debug('PERIODICAL HOST CALLBACK REFS %o %o %o ', vm.$refs[name])
+        //   // vm.$refs[name][0].update(plugin)
+        //
+        //   vm.$refs[name][0].__process_data(vm.$refs[name][0].$options.plugin_data)
+        //
+        // // vm.$set(vm.plugins[name], 'periodical', plugin)
         }
       })
     } else if (key === 'minute.range' && data.munin_historical) {
-      debug('MINUTE HOST RANGE CALLBACK %o ', JSON.parse(JSON.stringify(data.munin_historical)))
+      // debug('MINUTE HOST RANGE CALLBACK %o %o', vm.$refs[name][0])
 
       // Object.each(data.munin_historical, function (plugin, name) {
       //   // if (!vm.plugins[name]) {
@@ -430,8 +437,8 @@ const host_range_component = {
         // if (!vm.plugins[name]) {
         //   vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
         // } else
-        if (vm.$refs[name][0].plugin_data.minute) { // if data already exists
-          let _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].plugin_data.minute))
+        if (vm.$refs[name] && vm.$refs[name][0] && vm.$refs[name][0].$options.plugin_data && vm.$refs[name][0].$options.plugin_data.minute) { // if data already exists
+          let _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.minute))
 
           Object.each(plugin, function (data, prop) {
             _plugin[prop].combine(data)
@@ -440,13 +447,15 @@ const host_range_component = {
             _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
           })
 
-          plugin = _plugin
+          vm.$refs[name][0].set_data({ minute: _plugin })
 
-          vm.$refs[name][0].plugin_data.minute = plugin
-          // debug('PERIODICAL HOST CALLBACK REFS %o %o %o ', vm.$refs[name])
-          // vm.$refs[name][0].update(plugin)
-
-          vm.$refs[name][0].__process_data(vm.$refs[name][0].plugin_data)
+          // plugin = _plugin
+          //
+          // vm.$refs[name][0].$options.plugin_data.minute = plugin
+          // // debug('PERIODICAL HOST CALLBACK REFS %o %o %o ', vm.$refs[name])
+          // // vm.$refs[name][0].update(plugin)
+          //
+          // vm.$refs[name][0].__process_data(vm.$refs[name][0].$options.plugin_data)
         }
       })
     }
