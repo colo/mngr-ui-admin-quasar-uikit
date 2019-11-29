@@ -40,7 +40,7 @@
         :EventBus="eventbus"
         :stat="{
           data: [],
-          length: 900,
+          length: 192,
         }"
         :chart="chart"
       >
@@ -169,7 +169,7 @@ export default {
       show_minute: false,
 
       eventbus: EventBus,
-      chart: Object.clone(dygraph_line_chart)
+      chart: Object.merge(Object.clone(dygraph_line_chart), { interval: 5 })
 
     }
   },

@@ -9,7 +9,7 @@
     :EventBus="EventBus"
     :chart="chart"
     :chart_data="tabular.data"
-    :chart_data_length="stat.length"
+    :chart_data_length="stat.length * chart.interval"
     v-bind="wrapper.props"
   >
   </component>

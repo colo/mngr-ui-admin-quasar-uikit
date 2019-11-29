@@ -44,6 +44,7 @@ export default {
       default: () => ({
         range: [],
         length: undefined,
+        // interval: 1, // in seconds
         merged: false,
         data: [],
         sources: undefined
@@ -587,7 +588,7 @@ export default {
         let splice = this.stat.length
         let length = this.$options.stat_data.length
 
-        debug('__set_stat_data splice', splice, length)
+        debug('__set_stat_data splice %o %o %o', splice, length, this.$options.stat_data)
         this.$options.stat_data.splice(
           (splice * -1) - 1,
           length - splice
