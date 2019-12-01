@@ -572,16 +572,16 @@ export default {
 
           if (this.chart.options.labels.length > 10 && this.$options.__config_set === false) {
             let extra_rows = this.chart.options.labels.length - 10
-            let height = 154 + (15 * extra_rows)
+            let height = 154 + (25 * extra_rows)
             this.chart.style = 'width:100%; height:' + height + 'px;'
           }
 
-          if (this.chart.options.valueRange === null && this.chart.options.logscale === true && this.$options.__config_set === false) {
-            this.$set(this.chart.options, 'valueRange', [0.0000000000000001])
+          if (this.chart.options.valueRange === null && this.chart.options.logscale === 'y' && this.$options.__config_set === false) {
+            this.$set(this.chart.options, 'valueRange', [0.1])
           }
 
           if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
-            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === true) ? 0.0000000000000001 : 0)
+            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? 0.1 : 0)
           }
 
           // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
