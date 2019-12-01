@@ -343,7 +343,7 @@ export default {
               } else {
                 this.$set(this.chart.options, 'stackedGraph', false)
                 this.$set(this.chart.options, 'fillGraph', false)
-
+                this.$set(this.chart.options, 'strokeWidth', 0.7)
                 this.$delete(this.chart.options, 'valueRange')
               }
             }
