@@ -232,6 +232,19 @@ export default {
         **/
         if (this.$options.chart_options.fillGraph !== true && this.smoothness === true) { this.$options.chart_options.plotter = smoothPlotter }
 
+        /**
+        * seting 'ticker' is a really performance improvement
+        **/
+        if (!this.$options.chart_options.axes || this.$options.chart_options.axes.x || this.$options.chart_options.axes.x.ticker) {
+          this.$options.chart_options = Object.merge(this.$options.chart_options, {
+            axes: {
+              x: {
+                ticker: Dygraph.dateTicker
+              }
+            }
+          })
+        }
+
         this.$options.graph = new Dygraph(
           document.getElementById(this.id), // containing div
           data,

@@ -59,7 +59,7 @@ const host_once_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (15 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin',
@@ -119,7 +119,7 @@ const host_once_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (16 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (11 * MINUTE)) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin_historical',
               // 'register': 'changes',

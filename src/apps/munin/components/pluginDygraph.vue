@@ -40,7 +40,7 @@
         :EventBus="eventbus"
         :stat="{
           data: [],
-          length: 192,
+          length: 120,
         }"
         :chart="chart"
         :reactive="false"
@@ -70,6 +70,8 @@ import { EventBus } from '@libs/eventbus'
 import chartTabular from '@components/chart.tabular'
 
 import dygraph_line_chart from 'mngr-ui-admin-charts/defaults/dygraph.line'
+
+import Dygraph from 'dygraphs'
 
 // // import AdminLteMixin from '@components/mixins/adminlte'
 // import DataSourcesMixin from '@components/mixins/dataSources'
@@ -170,7 +172,20 @@ export default {
       show_minute: false,
 
       eventbus: EventBus,
-      chart: Object.merge(Object.clone(dygraph_line_chart), { interval: 5 })
+      chart: Object.merge(Object.clone(dygraph_line_chart), {
+        interval: 5,
+        options: {
+          strokeWidth: 0.7,
+          pixelRatio: null,
+          strokeBorderWidth: 0.0,
+          gridLineWidth: 0.1
+          // axes: {
+          //   x: {
+          //     ticker: Dygraph.dateTicker
+          //   }
+          // }
+        }
+      })
 
     }
   },
@@ -211,7 +226,7 @@ export default {
       this.$options.plugin_data = Object.merge(this.$options.plugin_data, data)
 
       if (this.$options.plugin_data.periodical) {
-        let splice = 192 // 12 points per min * 16 min
+        let splice = 120 // 12 points per min * 16 min
         let length
 
         Object.each(this.$options.plugin_data.periodical, function (periodical, key) {
@@ -260,7 +275,10 @@ export default {
           if (this.view.minute === false && this.config.graph && this.config.graph.args && this.$options.__config_set === false) {
             let args = this.config.graph.args.split(' ')
             Array.each(args, function (arg) {
-              if (arg === '--logarithmic') { this.$set(this.chart.options, 'logscale', true) }
+              if (arg === '--logarithmic') {
+                this.$set(this.chart.options, 'logscale', 'y')
+                this.$set(this.chart.options.axes.y, 'logscale', true)
+              }
             }.bind(this))
           }
 
@@ -301,6 +319,7 @@ export default {
                 if (this.chart.options.stackedGraph === true) {
                   this.$set(this.chart.options, 'fillGraph', true)
                   this.$set(this.chart.options, 'fillAlpha', 0.5)
+                  this.$set(this.chart.options, 'strokeWidth', 0.1)
                 }
 
                 if (key_config.min) {
