@@ -585,17 +585,18 @@ export default {
 
         this.stat_lastupdate = Date.now()
 
-        let splice = this.stat.length
-        let length = this.$options.stat_data.length
-
-        debug('__set_stat_data splice %o %o %o', splice, length, this.$options.stat_data)
-        this.$options.stat_data.splice(
-          (splice * -1) - 1,
-          length - splice
-        )
-
-        // this.$emit('stat_data', this.$options.stat_data)
-        debug('__update_data', this.$options.stat_data.length)
+        // let splice = this.stat.length
+        // let length = this.$options.stat_data.length
+        //
+        // debug('__set_stat_data splice %o %o %o', splice, length, this.$options.stat_data)
+        // this.$options.stat_data.splice(
+        //   // (splice * -1) - 1,
+        //   (splice * -1) + 1,
+        //   length - splice
+        // )
+        //
+        // // this.$emit('stat_data', this.$options.stat_data)
+        // debug('__update_data', this.$options.stat_data.length)
 
         this.__update_data(this.$options.stat_data)
       }

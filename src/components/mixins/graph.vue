@@ -310,7 +310,8 @@ export default {
             (this.$options.focus === true && this.$options.visible === true) &&
             (
               !this.chart.interval ||
-              (Date.now() - ((this.chart.interval * 1000) - 200) >= this.$options.tabular.lastupdate) ||
+              // (Date.now() - ((this.chart.interval * 1000) - 200) >= this.$options.tabular.lastupdate) ||
+              (Date.now() - (this.chart.interval * 1000) >= this.$options.tabular.lastupdate) ||
               this.$options.tabular.lastupdate === 0
             )
           )

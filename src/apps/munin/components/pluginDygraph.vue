@@ -226,26 +226,29 @@ export default {
       this.$options.plugin_data = Object.merge(this.$options.plugin_data, data)
 
       if (this.$options.plugin_data.periodical) {
-        let splice = 120 // 12 points per min * 16 min
+        let splice = 120 // 12 points per min * 10 min
         let length
 
         Object.each(this.$options.plugin_data.periodical, function (periodical, key) {
           length = periodical.length
+          // this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(-1 * splice)
           this.$options.plugin_data.periodical[key].splice(
-            (splice * -1) - 1,
+            (splice * -1) + 1,
             length - splice
           )
+          // // this.$options.plugin_data.periodical[key].splice(0, this.$options.plugin_data.periodical[key].length - splice)
         }.bind(this))
       } else if (this.$options.plugin_data.minute) {
-        let splice = 16 // 1 points per min * 16 min
+        let splice = 10 // 1 points per min * 10 min
         let length
 
         Object.each(this.$options.plugin_data.minute, function (minute, key) {
           length = minute.length
           this.$options.plugin_data.minute[key].splice(
-            (splice * -1) - 1,
+            (splice * -1) + 1,
             length - splice
           )
+          // this.$options.plugin_data.minute[key].splice(0, this.$options.plugin_data.minute[key].length - splice)
         }.bind(this))
       }
 
@@ -360,8 +363,9 @@ export default {
               // }.bind(this))
             } else {
               Array.each(processed_data, function (row, i) {
+                row[0] = roundMilliseconds(row[0])
                 let timestamp = row[0]
-                if (arr[i][0] === timestamp) {
+                if (roundMilliseconds(arr[i][0]) === timestamp) {
                   // arr[i][0] = undefined
                   // arr[i] = arr[i].clean()
                   // processed_data[i].combine(arr[i])
