@@ -254,7 +254,9 @@ export default {
 
       debug('set_data2', this.id, this.$options.plugin_data)
 
-      this.__process_data(this.$options.plugin_data)
+      if (data.periodical) { // only update graph on periodical data
+        this.__process_data(this.$options.plugin_data)
+      }
     },
     __process_data: function (val) {
       if (this.config && Object.getLength(this.config) > 0) {
