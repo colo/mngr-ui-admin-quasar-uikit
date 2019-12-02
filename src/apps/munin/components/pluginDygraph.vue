@@ -193,11 +193,11 @@ export default {
     'view.minute': function (val) {
       debug('VIEW MINUTE %o', val, this.id)
       // let options = JSON.parse(JSON.stringify(this.chart.options))
-      let data = JSON.parse(JSON.stringify(this.data))
+      // let data = JSON.parse(JSON.stringify(this.data))
 
       this.$options.__config_set = false
 
-      this.__process_data(data)
+      // this.__process_data(data)
       // this.processed_data = data
       // this.chart.options = options
     }
@@ -291,7 +291,7 @@ export default {
           let negative_key
           let cdefs = []
 
-          let index = 0
+          let periodical_index = 0
           Object.each(periodical, function (arr, key) {
             let key_config = this.config[key]
             if (!key_config) {
@@ -358,11 +358,9 @@ export default {
             // }
             // debug('data watch STAKED %s %o', this.id, this.chart, key_config.draw)
 
-            if (index === 0) {
+            if (periodical_index === 0) {
               processed_data = Array.clone(arr)
-              // Array.each(processed_data, function (row, i) {
-              //   if (this.chart.options.logscale === true && arr[i][1] === 0) processed_data[i][1] = 0.0000000000000001
-              // }.bind(this))
+              // processed_data = arr
             } else {
               Array.each(processed_data, function (row, i) {
                 row[0] = roundMilliseconds(row[0])
@@ -403,35 +401,35 @@ export default {
 
             // debug('MINUTE %o', minute)
 
-            if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0) {
-              if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
-                this.chart.options.labels.push(label + '(median)')
-              }
+            // if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0) {
+            //   if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
+            //     this.chart.options.labels.push(label + '(median)')
+            //   }
+            //
+            //   let index = this.chart.options.labels.indexOf(label + '(median)')
+            //   let last
+            //
+            //   Array.each(processed_data, function (row, i) {
+            //     let timestamp = row[0]
+            //     let added_minute = false
+            //
+            //     Array.each(Array.clone(minute[key]), function (minute_row) {
+            //       let minute_row_timestamp = minute_row[0]
+            //       // debug('TIMESTAMPs %s %s', new Date(roundSeconds(minute_row_timestamp)), new Date(roundSeconds(timestamp)))
+            //
+            //       if (roundSeconds(minute_row_timestamp) === roundSeconds(timestamp) - MINUTE) {
+            //         processed_data[i][index] = minute_row[3] // median
+            //         added_minute = true
+            //       }
+            //
+            //       last = minute_row[3]
+            //     })
+            //
+            //     if (added_minute === false) { processed_data[i][index] = last }
+            //   })
+            // }
 
-              let index = this.chart.options.labels.indexOf(label + '(median)')
-              let last
-
-              Array.each(processed_data, function (row, i) {
-                let timestamp = row[0]
-                let added_minute = false
-
-                Array.each(minute[key], function (minute_row) {
-                  let minute_row_timestamp = minute_row[0]
-                  // debug('TIMESTAMPs %s %s', new Date(roundSeconds(minute_row_timestamp)), new Date(roundSeconds(timestamp)))
-
-                  if (roundSeconds(minute_row_timestamp) === roundSeconds(timestamp) - MINUTE) {
-                    processed_data[i][index] = minute_row[3] // median
-                    added_minute = true
-                  }
-
-                  last = minute_row[3]
-                })
-
-                if (added_minute === false) { processed_data[i][index] = last }
-              })
-            }
-
-            index++
+            periodical_index++
           }.bind(this))
 
           if (this.view.minute === false) {
