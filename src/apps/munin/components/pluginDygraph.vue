@@ -44,7 +44,7 @@
         }"
         :chart="chart"
         :reactive="false"
-        :no_buffer="true"
+        :no_buffer="false"
       >
       <!-- data: [processed_data] -->
       <!-- stat -> length: 300, -->
@@ -165,6 +165,8 @@ export default {
       // id: 'all',
       path: 'all',
 
+      // no_buffer: true,
+
       view: {
         minute: false
       },
@@ -197,7 +199,7 @@ export default {
       // let data = JSON.parse(JSON.stringify(this.data))
 
       this.$refs[this.id].visibilityChanged(false)
-
+      // this.no_buffer = val !== true
       this.$options.__config_set = false
 
       this.chart = Object.merge(Object.clone(dygraph_line_chart), {
@@ -216,7 +218,7 @@ export default {
       })
       this.__process_data(this.$options.plugin_data)
 
-      this.$refs[this.id].visibilityChanged(true)
+      // this.$refs[this.id].visibilityChanged(true)
       // this.processed_data = data
       // this.chart.options = options
     }
@@ -617,7 +619,11 @@ export default {
           debug('processed_data REFS %s %o', this.id, this.$refs)
 
           // this.processed_data = processed_data
-          this.$refs[this.id].update_stat_data([Array.clone(processed_data)])
+          this.$nextTick(function () {
+            this.$refs[this.id].update_stat_data([Array.clone(processed_data)])
+            this.$refs[this.id].visibilityChanged(true)
+          }.bind(this))
+
           this.$options.__config_set = true
           this.show = true
         } else {
