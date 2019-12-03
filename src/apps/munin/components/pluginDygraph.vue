@@ -239,6 +239,7 @@ export default {
           // // this.$options.plugin_data.periodical[key].splice(0, this.$options.plugin_data.periodical[key].length - splice)
         }.bind(this))
       } else if (this.$options.plugin_data.minute) {
+        debug('this.$options.plugin_data.minute %o', this.$options.plugin_data.minute)
         let splice = 10 // 1 points per min * 10 min
         let length
 
@@ -401,33 +402,33 @@ export default {
 
             // debug('MINUTE %o', minute)
 
-            // if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0) {
-            //   if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
-            //     this.chart.options.labels.push(label + '(median)')
-            //   }
-            //
-            //   let index = this.chart.options.labels.indexOf(label + '(median)')
-            //   let last
-            //
-            //   Array.each(processed_data, function (row, i) {
-            //     let timestamp = row[0]
-            //     let added_minute = false
-            //
-            //     Array.each(Array.clone(minute[key]), function (minute_row) {
-            //       let minute_row_timestamp = minute_row[0]
-            //       // debug('TIMESTAMPs %s %s', new Date(roundSeconds(minute_row_timestamp)), new Date(roundSeconds(timestamp)))
-            //
-            //       if (roundSeconds(minute_row_timestamp) === roundSeconds(timestamp) - MINUTE) {
-            //         processed_data[i][index] = minute_row[3] // median
-            //         added_minute = true
-            //       }
-            //
-            //       last = minute_row[3]
-            //     })
-            //
-            //     if (added_minute === false) { processed_data[i][index] = last }
-            //   })
-            // }
+            if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0) {
+              if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
+                this.chart.options.labels.push(label + '(median)')
+              }
+
+              let index = this.chart.options.labels.indexOf(label + '(median)')
+              let last
+
+              Array.each(processed_data, function (row, i) {
+                let timestamp = row[0]
+                let added_minute = false
+
+                Array.each(Array.clone(minute[key]), function (minute_row) {
+                  let minute_row_timestamp = minute_row[0]
+                  // debug('TIMESTAMPs %s %s', new Date(roundSeconds(minute_row_timestamp)), new Date(roundSeconds(timestamp)))
+
+                  if (roundSeconds(minute_row_timestamp) === roundSeconds(timestamp) - MINUTE) {
+                    processed_data[i][index] = minute_row[3] // median
+                    added_minute = true
+                  }
+
+                  last = minute_row[3]
+                })
+
+                if (added_minute === false) { processed_data[i][index] = last }
+              })
+            }
 
             periodical_index++
           }.bind(this))
