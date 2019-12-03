@@ -61,15 +61,20 @@ export default {
     id: {
       type: [String],
       default: ''
-    }
+    },
     // wrapper_props: {
     //   type: [Object],
     //   default: () => ({})
     // },
-    // merged: {
-    //   type: [Boolean],
-    //   default: false
-    // }
+
+    /**
+    * if you send the complete data set on each update, set this to true,
+    * else it appends data to a buffer
+    **/
+    no_buffer: {
+      type: [Boolean],
+      default: false
+    }
   },
 
   stat_data: [],
@@ -318,6 +323,8 @@ export default {
       }
     },
     update_stat_data: function (val, old) {
+      debug('update_stat_data %s', this.id, val)
+
       // console.log('__stat_unwatcher', this.id, val, this.stat.length)
       val = JSON.parse(JSON.stringify(val))
 
@@ -532,25 +539,30 @@ export default {
       //
       // this.$set(this, 'stat_data', __stat_data)
 
-      if (this.$options.__range_init === false) {
-        // this.$options.__buffer_data.push(JSON.parse(JSON.stringify(data)))
-        this.$options.__buffer_data = this.$options.__buffer_data.append(JSON.parse(JSON.stringify(data)))
+      if (this.no_buffer === false) {
+        if (this.$options.__range_init === false) {
+          // this.$options.__buffer_data.push(JSON.parse(JSON.stringify(data)))
+          this.$options.__buffer_data = this.$options.__buffer_data.append(JSON.parse(JSON.stringify(data)))
 
-        if (this.$options.__buffer_data.length > 10) { this.$options.__range_init = true }
-      } else {
-        // this.$options.__buffer_data.push(JSON.parse(JSON.stringify(data)))
-        this.$options.__buffer_data = this.$options.__buffer_data.append(JSON.parse(JSON.stringify(data)))
+          if (this.$options.__buffer_data.length > 10) { this.$options.__range_init = true }
+        } else {
+          // this.$options.__buffer_data.push(JSON.parse(JSON.stringify(data)))
+          this.$options.__buffer_data = this.$options.__buffer_data.append(JSON.parse(JSON.stringify(data)))
 
-        Array.each(Array.clone(this.$options.__buffer_data), function (val) {
-          let found = false
-          Array.each(this.$options.stat_data, function (stat) {
-            if (stat.timestamp === val.timestamp) { found = true }
-          })
+          Array.each(Array.clone(this.$options.__buffer_data), function (val) {
+            let found = false
+            Array.each(this.$options.stat_data, function (stat) {
+              if (stat.timestamp === val.timestamp) { found = true }
+            })
 
-          if (found === false) { this.$options.stat_data.push(val) }
-        }.bind(this))
+            if (found === false) { this.$options.stat_data.push(val) }
+          }.bind(this))
 
-        this.$options.__buffer_data = []
+          this.$options.__buffer_data = []
+        }
+      } else { // no_buffer
+        this.$options.stat_data = data
+        this.$options.__range_init = true
       }
 
       // if (Array.isArray(data) && this.$options.__range_init === false) {

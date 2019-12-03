@@ -409,8 +409,6 @@ const host_range_component = {
         }
       })
     } else if (key === 'minute.range' && data.munin_historical) {
-      // debug('MINUTE HOST RANGE CALLBACK %o %o', vm.$refs[name][0])
-
       // Object.each(data.munin_historical, function (plugin, name) {
       //   // if (!vm.plugins[name]) {
       //   //   vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
@@ -446,6 +444,8 @@ const host_range_component = {
             // sort by first column, timestamp
             _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
           })
+
+          debug('MINUTE HOST RANGE CALLBACK %o %o', _plugin)
 
           vm.$refs[name][0].set_data({ minute: _plugin })
 

@@ -44,6 +44,7 @@
         }"
         :chart="chart"
         :reactive="false"
+        :no_buffer="true"
       >
       <!-- data: [processed_data] -->
       <!-- stat -> length: 300, -->
@@ -195,9 +196,27 @@ export default {
       // let options = JSON.parse(JSON.stringify(this.chart.options))
       // let data = JSON.parse(JSON.stringify(this.data))
 
+      this.$refs[this.id].visibilityChanged(false)
+
       this.$options.__config_set = false
 
-      // this.__process_data(data)
+      this.chart = Object.merge(Object.clone(dygraph_line_chart), {
+        interval: 5,
+        options: {
+          strokeWidth: 0.7,
+          pixelRatio: null,
+          strokeBorderWidth: 0.0,
+          gridLineWidth: 0.1
+          // axes: {
+          //   x: {
+          //     ticker: Dygraph.dateTicker
+          //   }
+          // }
+        }
+      })
+      this.__process_data(this.$options.plugin_data)
+
+      this.$refs[this.id].visibilityChanged(true)
       // this.processed_data = data
       // this.chart.options = options
     }
@@ -238,7 +257,9 @@ export default {
           )
           // // this.$options.plugin_data.periodical[key].splice(0, this.$options.plugin_data.periodical[key].length - splice)
         }.bind(this))
-      } else if (this.$options.plugin_data.minute) {
+      }
+
+      if (this.$options.plugin_data.minute) {
         debug('this.$options.plugin_data.minute %o', this.$options.plugin_data.minute)
         let splice = 10 // 1 points per min * 10 min
         let length
@@ -414,7 +435,7 @@ export default {
                 let timestamp = row[0]
                 let added_minute = false
 
-                Array.each(Array.clone(minute[key]), function (minute_row) {
+                Array.each(minute[key], function (minute_row) {
                   let minute_row_timestamp = minute_row[0]
                   // debug('TIMESTAMPs %s %s', new Date(roundSeconds(minute_row_timestamp)), new Date(roundSeconds(timestamp)))
 
@@ -596,7 +617,7 @@ export default {
           debug('processed_data REFS %s %o', this.id, this.$refs)
 
           // this.processed_data = processed_data
-          this.$refs[this.id].update_stat_data([processed_data])
+          this.$refs[this.id].update_stat_data([Array.clone(processed_data)])
           this.$options.__config_set = true
           this.show = true
         } else {
