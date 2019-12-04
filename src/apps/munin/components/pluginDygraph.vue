@@ -44,7 +44,7 @@
         }"
         :chart="chart"
         :reactive="false"
-        :no_buffer="false"
+        :no_buffer="true"
       >
       <!-- data: [processed_data] -->
       <!-- stat -> length: 300, -->

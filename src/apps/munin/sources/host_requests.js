@@ -30,29 +30,41 @@ const generic_callback = function (data, metadata, key, vm) {
               _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.periodical))
 
               Object.each(plugin, function (data, prop) {
-                _plugin[prop].combine(data)
+                if (_plugin[prop] && Array.isArray(_plugin[prop])) {
+                  _plugin[prop].combine(data)
 
-                // sort by first column, timestamp
-                _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+                  // sort by first column, timestamp
+                  _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
 
-                // filter based on not repeated timestamp
-                let filtered = _plugin[prop].filter(function (item, index) {
-                  debug('PERIODICAL HOST CALLBACK %s %o', name, item)
-                  // if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
+                  // filter based on not repeated timestamp
+                  // let filtered = _plugin[prop].filter(function (item, index) {
+                  //   debug('PERIODICAL HOST CALLBACK %s %o', name, item, index, _plugin[prop][index - 1])
+                  //   // if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
+                  //   //   return true
+                  //   // } else if (_plugin[prop][index - 1] && !_plugin[prop][index + 1]) {
+                  //   //   return item[0] !== _plugin[prop][index - 1][0]
+                  //   // } else if (!_plugin[prop][index - 1] && _plugin[prop][index + 1]) {
+                  //   //   return item[0] !== _plugin[prop][index + 1][0]
+                  //   // } else {
+                  //   //   return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
+                  //   // }
                   //   return true
-                  // } else if (_plugin[prop][index - 1] && !_plugin[prop][index + 1]) {
-                  //   return item[0] !== _plugin[prop][index - 1][0]
-                  // } else if (!_plugin[prop][index - 1] && _plugin[prop][index + 1]) {
-                  //   return item[0] !== _plugin[prop][index + 1][0]
-                  // } else {
-                  //   return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
-                  // }
-                  return true
-                })
+                  // })
+                  let filtered = []
+                  Array.each(_plugin[prop], function (item, index) {
+                    if (index === 0) { filtered.push(item) } else if (item[0] !== _plugin[prop][index - 1][0]) {
+                      filtered.push(item)
+                    }
+                  })
+                  debug('PERIODICAL HOST CALLBACK %s %o', name, filtered)
 
-                _plugin[prop] = filtered
+                  _plugin[prop] = Array.clone(filtered)
+                } else {
+                  // _plugin[prop] = Array.clone(data)
+                  //
+                  // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+                }
               })
-              debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
             } else {
               debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, plugin, vm.$refs[name][0])
               _plugin = Object.clone(plugin)
@@ -92,21 +104,34 @@ const generic_callback = function (data, metadata, key, vm) {
               _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.minute))
 
               Object.each(plugin, function (data, prop) {
-                _plugin[prop].combine(data)
+                if (_plugin[prop] && Array.isArray(_plugin[prop])) {
+                  _plugin[prop].combine(data)
 
-                // sort by first column, timestamp
-                _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+                  // sort by first column, timestamp
+                  _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
 
-                // filter based on not repeated timestamp
-                let filtered = _plugin[prop].filter(function (item, index) {
-                  if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
-                    return true
-                  } else {
-                    return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
-                  }
-                })
+                  // filter based on not repeated timestamp
+                  // let filtered = _plugin[prop].filter(function (item, index) {
+                  //   if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
+                  //     return true
+                  //   } else {
+                  //     return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
+                  //   }
+                  // })
+                  //
+                  let filtered = []
+                  Array.each(_plugin[prop], function (item, index) {
+                    if (index === 0) { filtered.push(item) } else if (item[0] !== _plugin[prop][index - 1][0]) {
+                      filtered.push(item)
+                    }
+                  })
+                  debug('PERIODICAL HOST CALLBACK %s %o', name, filtered)
 
-                _plugin[prop] = filtered
+                  _plugin[prop] = Array.clone(filtered)
+                } else {
+                  // _plugin[prop] = Array.clone(data)
+                  // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+                }
               })
             } else {
               debug('MINUTE  HOST CALLBACK no prev data %o ', plugin)
