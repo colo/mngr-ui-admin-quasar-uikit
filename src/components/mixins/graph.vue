@@ -236,19 +236,21 @@ export default {
         this.$options.tabular.data.shift()
         this.$options.tabular.data.push(data[0])
       } else if (data.length > 0) {
-        let splice = data.length
-        let length = this.$options.tabular.data.length
+        // let splice = data.length
+        let length = data.length
+        let splice = this.stat.length || this.$options.tabular.data.length
         this.$options.tabular.data = data
 
         this.$options.tabular.data.splice(
-          (splice * -1) - 1,
+          (splice * -1) + 1,
           length - splice
         )
+
+        debug('update_chart_stat %s %d %d %d %o', this.id, this.stat.length, splice, length, this.$options.tabular.data)
       }
 
       this.$options.tabular.data.sort(function (a, b) { return (a[0] > b[0]) ? 1 : ((b[0] > a[0]) ? -1 : 0) })
 
-      debug('graph update_chart_stat skip', this.id, this.chart.skip, this.chart.interval)
       // console.log('graph update_chart_stat skip',this.chart.skip, this.chart.interval)
 
       if (
@@ -330,7 +332,7 @@ export default {
             frameDebounce(this.$set(this, 'tabular', this.$options.tabular))
           }
         }
-        debug('graph update_chart_stat updating %s %o %d %d', name, this.$refs, this.tabular.data.length, this.$options.tabular.data.length)
+        // debug('graph update_chart_stat updating %s %o %d %d', name, this.$refs, this.tabular.data.length, this.$options.tabular.data.length)
 
         this.$options.tabular.data = [[]]
 

@@ -165,7 +165,7 @@ export default {
       // id: 'all',
       path: 'all',
 
-      // no_buffer: true,
+      no_buffer: false,
 
       view: {
         minute: false
@@ -199,7 +199,7 @@ export default {
       // let data = JSON.parse(JSON.stringify(this.data))
 
       this.$refs[this.id].visibilityChanged(false)
-      // this.no_buffer = val !== true
+      // this.no_buffer = true
       this.$options.__config_set = false
 
       this.chart = Object.merge(Object.clone(dygraph_line_chart), {
@@ -243,8 +243,16 @@ export default {
     //   debug('update method', this.id)
     // },
     set_data: function (data) {
-      // debug('set_data', this.id, data)
-      this.$options.plugin_data = Object.merge(this.$options.plugin_data, data)
+      debug('set_data', this.id, data.periodical)
+      // this.$options.plugin_data = Object.merge(data, this.$options.plugin_data)
+      if (data.periodical) {
+        this.$options.plugin_data.periodical = data.periodical
+      }
+      if (data.minute) {
+        this.$options.plugin_data.minute = data.minute
+      }
+
+      debug('set_data', this.id, this.$options.plugin_data.periodical)
 
       if (this.$options.plugin_data.periodical) {
         let splice = 120 // 12 points per min * 10 min
@@ -276,7 +284,7 @@ export default {
         }.bind(this))
       }
 
-      debug('set_data2', this.id, this.$options.plugin_data)
+      debug('----set_data', this.id, this.$options.plugin_data.periodical)
 
       if (data.periodical) { // only update graph on periodical data
         this.__process_data(this.$options.plugin_data)
@@ -486,7 +494,7 @@ export default {
                       * ( (row[0] - processed_data[i + 1][0]) / 1000 )
                       * timestamp of row - timestamp of next row (decreasing timestamps) / 1000 = seconds between rows
                       **/
-                      processed_data[i][index] = (row[index] - processed_data[i + 1][index]) / ((row[0] - processed_data[i + 1][0]) / 1000)
+                      processed_data[i][index] = (row[index] - processed_data[i + 1][index]) / ((row[0] - processed_data[i + 1][0]) / 5000)
                     }
 
                   // })
@@ -620,12 +628,14 @@ export default {
 
           // this.processed_data = processed_data
           this.$nextTick(function () {
+            debug('__process_data %s %o', this.id, processed_data)
             this.$refs[this.id].update_stat_data([Array.clone(processed_data)])
             this.$refs[this.id].visibilityChanged(true)
           }.bind(this))
 
           this.$options.__config_set = true
           this.show = true
+          // this.no_buffer = false
         } else {
           debug('No data for %s %o', this.id, val)
         }

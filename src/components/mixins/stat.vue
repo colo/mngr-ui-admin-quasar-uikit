@@ -506,6 +506,7 @@ export default {
       // }.bind(this))
     },
     __set_stat_data: function (data) {
+      debug('__set_stat_data %s %o', this.id, data)
       // console.log('stat.vue __set_stat_data', this.id, data)
       /**
       * @config: this should be config options

@@ -304,7 +304,7 @@ export default {
 
         this.updateOptions(
           data,
-          Object.merge(this.$options.chart_options, { 'dateWindow': [start, end] }),
+          Object.merge(Object.clone(this.$options.chart_options), { 'dateWindow': [start, end] }),
           false
         )
       }
