@@ -40,17 +40,19 @@ const generic_callback = function (data, metadata, key, vm) {
 
                   // filter based on not repeated timestamp
                   // let filtered = _plugin[prop].filter(function (item, index) {
-                  //   debug('PERIODICAL HOST CALLBACK %s %o', name, item, index, _plugin[prop][index - 1])
-                  //   // if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
-                  //   //   return true
-                  //   // } else if (_plugin[prop][index - 1] && !_plugin[prop][index + 1]) {
-                  //   //   return item[0] !== _plugin[prop][index - 1][0]
-                  //   // } else if (!_plugin[prop][index - 1] && _plugin[prop][index + 1]) {
-                  //   //   return item[0] !== _plugin[prop][index + 1][0]
-                  //   // } else {
-                  //   //   return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
-                  //   // }
-                  //   return true
+                  //   // debug('PERIODICAL HOST CALLBACK %s %o', name, item, index, _plugin[prop][index - 1])
+                  //   if (index === 0)
+                  //     return true
+                  //   else if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
+                  //     return true
+                  //   } else if (_plugin[prop][index - 1] && !_plugin[prop][index + 1]) {
+                  //     return item[0] !== _plugin[prop][index - 1][0]
+                  //   } else if (!_plugin[prop][index - 1] && _plugin[prop][index + 1]) {
+                  //     return item[0] !== _plugin[prop][index + 1][0]
+                  //   } else {
+                  //     return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
+                  //   }
+                  //   // return true
                   // })
                   let filtered = []
                   Array.each(_plugin[prop], function (item, index) {

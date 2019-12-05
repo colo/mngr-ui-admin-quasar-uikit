@@ -243,7 +243,7 @@ export default {
     //   debug('update method', this.id)
     // },
     set_data: function (data) {
-      debug('set_data', this.id, data.periodical)
+      // debug('set_data', this.id, data.periodical)
       // this.$options.plugin_data = Object.merge(data, this.$options.plugin_data)
       if (data.periodical) {
         this.$options.plugin_data.periodical = data.periodical
@@ -252,39 +252,40 @@ export default {
         this.$options.plugin_data.minute = data.minute
       }
 
-      debug('set_data', this.id, this.$options.plugin_data.periodical)
+      // debug('set_data', this.id, this.$options.plugin_data.periodical)
 
       if (this.$options.plugin_data.periodical) {
-        let splice = 120 // 12 points per min * 10 min
-        let length
+        // let splice = 120 // 12 points per min * 10 min
+        // let length
 
         Object.each(this.$options.plugin_data.periodical, function (periodical, key) {
-          length = periodical.length
-          // this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(-1 * splice)
-          this.$options.plugin_data.periodical[key].splice(
-            (splice * -1) + 1,
-            length - splice
-          )
-          // // this.$options.plugin_data.periodical[key].splice(0, this.$options.plugin_data.periodical[key].length - splice)
+          // length = periodical.length
+          this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(0, 121)
+          // this.$options.plugin_data.periodical[key].splice(
+          //   (splice * -1) + 1,
+          //   length - splice
+          // )
+          // // // this.$options.plugin_data.periodical[key].splice(0, this.$options.plugin_data.periodical[key].length - splice)
         }.bind(this))
       }
 
       if (this.$options.plugin_data.minute) {
-        debug('this.$options.plugin_data.minute %o', this.$options.plugin_data.minute)
-        let splice = 10 // 1 points per min * 10 min
-        let length
+        // debug('this.$options.plugin_data.minute %o', this.$options.plugin_data.minute)
+        // let splice = 10 // 1 points per min * 10 min
+        // let length
 
         Object.each(this.$options.plugin_data.minute, function (minute, key) {
-          length = minute.length
-          this.$options.plugin_data.minute[key].splice(
-            (splice * -1) + 1,
-            length - splice
-          )
-          // this.$options.plugin_data.minute[key].splice(0, this.$options.plugin_data.minute[key].length - splice)
+          // length = minute.length
+          this.$options.plugin_data.minute[key] = this.$options.plugin_data.minute[key].slice(0, 11)
+          // this.$options.plugin_data.minute[key].splice(
+          //   (splice * -1) + 1,
+          //   length - splice
+          // )
+          // // this.$options.plugin_data.minute[key].splice(0, this.$options.plugin_data.minute[key].length - splice)
         }.bind(this))
       }
 
-      debug('----set_data', this.id, this.$options.plugin_data.periodical)
+      // debug('----set_data', this.id, this.$options.plugin_data.periodical)
 
       if (data.periodical) { // only update graph on periodical data
         this.__process_data(this.$options.plugin_data)
@@ -304,7 +305,7 @@ export default {
             this.show_minute = true
           }
 
-          debug('data watch show_minute %s %o', this.id, this.show_minute)
+          // debug('data watch show_minute %s %o', this.id, this.show_minute)
 
           if (this.$options.__config_set === false) { this.$set(this.chart.options, 'labels', ['Time']) }
           // this.$set(this.chart.options, 'sigFigs', 6)
@@ -324,9 +325,10 @@ export default {
           let cdefs = []
 
           /**
-          * used to set min valueRange for logscale
+          * used to set valueRange for logscale
           **/
-          // let processed_data_min_value = 1
+          let processed_data_min_value = 0.1
+          let processed_data_max_value = 1
 
           let periodical_index = 0
           Object.each(periodical, function (arr, key) {
@@ -339,10 +341,12 @@ export default {
               })
             }
             let label = (key_config && key_config.label) ? key_config.label : key
-
+            label += '' // cast to string
+            // debug('LABEL ', this.id, label)
+            // label = label.replace('  ', '')
             if (this.$options.__config_set === false) { this.chart.options.labels.push(label) }
 
-            debug('KEY %s %o', key, this.config)
+            // debug('KEY %s %o', key, this.config)
 
             if (key_config.negative) { negative_key = key_config.negative.replace('_', '') }
 
@@ -400,7 +404,8 @@ export default {
               // processed_data = arr
             } else {
               Array.each(processed_data, function (row, i) {
-                // processed_data_min_value = (processed_data_min_value === undefined || row[1] < processed_data_min_value) ? row[1] : processed_data_min_value
+                processed_data_min_value = ((processed_data_min_value === 0.1 || row[1] < processed_data_min_value) && row[1] !== 0) ? row[1] : processed_data_min_value
+                processed_data_max_value = (row[1] > processed_data_max_value) ? row[1] : processed_data_max_value
                 row[0] = roundMilliseconds(row[0])
                 let timestamp = row[0]
                 if (roundMilliseconds(arr[i][0]) === timestamp) {
@@ -411,7 +416,8 @@ export default {
 
                   processed_data[i].push(arr[i][1])
 
-                  // processed_data_min_value = (processed_data_min_value === undefined || arr[i][1] < processed_data_min_value) ? arr[i][1] : processed_data_min_value
+                  processed_data_min_value = ((processed_data_min_value === 0.1 || arr[i][1] < processed_data_min_value) && arr[i][1] !== 0) ? arr[i][1] : processed_data_min_value
+                  processed_data_max_value = (arr[i][1] > processed_data_max_value) ? arr[i][1] : processed_data_max_value
                 }
                 // else {
                 //   processed_data[i].combine([timestamp, 0])
@@ -620,25 +626,27 @@ export default {
             this.chart.style = 'width:100%; height:' + height + 'px;'
           }
 
-          // debug('processed_data_min_value %s', this.id, processed_data_min_value)
+          debug('processed_data_min_value %s', this.id, processed_data_min_value, processed_data_max_value)
 
           if (this.chart.options.valueRange === null && this.chart.options.logscale === 'y' && this.$options.__config_set === false) {
-            this.$set(this.chart.options, 'valueRange', [0.001, 1])
+            this.$set(this.chart.options, 'valueRange', [processed_data_min_value, processed_data_max_value])
           }
 
           if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
-            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [0.001] : 0)
+            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [processed_data_min_value] : 0)
           }
 
           // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
           //   debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
           // }
 
-          debug('processed_data REFS %s %o', this.id, this.$refs)
+          // debug('processed_data REFS %s %o', this.id, this.$refs)
 
           // this.processed_data = processed_data
+
+          debug('__process_data %s %o', this.id, this.chart.options.labels)
           this.$nextTick(function () {
-            debug('__process_data %s %o', this.id, processed_data)
+            // debug('__process_data %s %o', this.id, processed_data)
             this.$refs[this.id].update_stat_data([Array.clone(processed_data)])
             this.$refs[this.id].visibilityChanged(true)
           }.bind(this))
