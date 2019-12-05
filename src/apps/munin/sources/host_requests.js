@@ -14,6 +14,8 @@ const generic_callback = function (data, metadata, key, vm) {
     // })
 
     Object.each(data.munin, function (plugin, name) {
+      debug('PERIODICAL HOST CALLBACK data %s %o', name, plugin)
+
       if (plugin && Object.getLength(plugin) > 0) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
 
@@ -56,18 +58,20 @@ const generic_callback = function (data, metadata, key, vm) {
                       filtered.push(item)
                     }
                   })
-                  debug('PERIODICAL HOST CALLBACK %s %o', name, filtered)
 
-                  _plugin[prop] = Array.clone(filtered)
+                  // debug('PERIODICAL HOST CALLBACK %s %o', name, prop, filtered)
+
+                  _plugin[prop] = filtered
                 } else {
-                  // _plugin[prop] = Array.clone(data)
+                  // debug('PERIODICAL HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
+                  // _plugin[prop] = data
                   //
                   // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
                 }
               })
             } else {
-              debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, plugin, vm.$refs[name][0])
-              _plugin = Object.clone(plugin)
+              // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, plugin, vm.$refs[name][0])
+              _plugin = plugin
               Object.each(_plugin, function (data, prop) {
                 // sort by first column, timestamp
                 _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
@@ -125,17 +129,17 @@ const generic_callback = function (data, metadata, key, vm) {
                       filtered.push(item)
                     }
                   })
-                  debug('PERIODICAL HOST CALLBACK %s %o', name, filtered)
+                  // debug('MINUTE HOST CALLBACK %s %o', name, filtered)
 
-                  _plugin[prop] = Array.clone(filtered)
+                  _plugin[prop] = filtered
                 } else {
                   // _plugin[prop] = Array.clone(data)
                   // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
                 }
               })
             } else {
-              debug('MINUTE  HOST CALLBACK no prev data %o ', plugin)
-              _plugin = Object.clone(plugin)
+              // debug('MINUTE HOST CALLBACK no prev data %o ', plugin)
+              _plugin = plugin
               Object.each(_plugin, function (data, prop) {
                 // sort by first column, timestamp
                 _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
