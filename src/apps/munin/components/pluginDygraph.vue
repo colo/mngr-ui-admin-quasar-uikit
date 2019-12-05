@@ -323,6 +323,11 @@ export default {
           let negative_key
           let cdefs = []
 
+          /**
+          * used to set min valueRange for logscale
+          **/
+          // let processed_data_min_value = 1
+
           let periodical_index = 0
           Object.each(periodical, function (arr, key) {
             let key_config = this.config[key]
@@ -395,6 +400,7 @@ export default {
               // processed_data = arr
             } else {
               Array.each(processed_data, function (row, i) {
+                // processed_data_min_value = (processed_data_min_value === undefined || row[1] < processed_data_min_value) ? row[1] : processed_data_min_value
                 row[0] = roundMilliseconds(row[0])
                 let timestamp = row[0]
                 if (roundMilliseconds(arr[i][0]) === timestamp) {
@@ -404,6 +410,8 @@ export default {
                   // if (this.chart.options.logscale === true && arr[i][1] === 0) arr[i][1] = 0.0000000000000001
 
                   processed_data[i].push(arr[i][1])
+
+                  // processed_data_min_value = (processed_data_min_value === undefined || arr[i][1] < processed_data_min_value) ? arr[i][1] : processed_data_min_value
                 }
                 // else {
                 //   processed_data[i].combine([timestamp, 0])
@@ -612,12 +620,14 @@ export default {
             this.chart.style = 'width:100%; height:' + height + 'px;'
           }
 
+          // debug('processed_data_min_value %s', this.id, processed_data_min_value)
+
           if (this.chart.options.valueRange === null && this.chart.options.logscale === 'y' && this.$options.__config_set === false) {
-            this.$set(this.chart.options, 'valueRange', [0.1])
+            this.$set(this.chart.options, 'valueRange', [0.001, 1])
           }
 
           if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
-            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? 0.1 : 0)
+            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [0.001] : 0)
           }
 
           // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {

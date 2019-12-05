@@ -63,7 +63,7 @@ const generic_callback = function (data, metadata, key, vm) {
 
                   _plugin[prop] = filtered
                 } else {
-                  // debug('PERIODICAL HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
+                  debug('PERIODICAL HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
                   // _plugin[prop] = data
                   //
                   // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
@@ -133,6 +133,7 @@ const generic_callback = function (data, metadata, key, vm) {
 
                   _plugin[prop] = filtered
                 } else {
+                  debug('MINUTE HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
                   // _plugin[prop] = Array.clone(data)
                   // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
                 }
