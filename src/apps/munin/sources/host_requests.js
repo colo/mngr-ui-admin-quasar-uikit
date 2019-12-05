@@ -14,7 +14,7 @@ const generic_callback = function (data, metadata, key, vm) {
     // })
 
     Object.each(data.munin, function (plugin, name) {
-      debug('PERIODICAL HOST CALLBACK data %s %o', name, plugin)
+      // debug('PERIODICAL HOST CALLBACK data %s %o', name, plugin)
 
       if (plugin && Object.getLength(plugin) > 0) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
@@ -69,13 +69,16 @@ const generic_callback = function (data, metadata, key, vm) {
                   // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
                 }
               })
+
+              debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
             } else {
-              // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, plugin, vm.$refs[name][0])
               _plugin = plugin
               Object.each(_plugin, function (data, prop) {
                 // sort by first column, timestamp
                 _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
               })
+
+              debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
             }
 
             if (Object.getLength(_plugin) > 0) { vm.$refs[name][0].set_data({ periodical: _plugin }) }
@@ -417,7 +420,7 @@ const host_range_component = {
   params: function (_key, vm) {
     // debug('PERIODICAL host_range_component %o %o', _key, vm)
 
-    const MINUTE = 60000
+    // const MINUTE = 60000
 
     let source
     let key
