@@ -632,9 +632,9 @@ export default {
             this.$set(this.chart.options, 'valueRange', [processed_data_min_value, processed_data_max_value])
           }
 
-          if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
-            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [processed_data_min_value] : 0)
-          }
+          // if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
+          //   this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [processed_data_min_value] : 0)
+          // }
 
           // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
           //   debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
