@@ -178,6 +178,7 @@ export default {
       chart: Object.merge(Object.clone(dygraph_line_chart), {
         interval: 5,
         options: {
+          digitsAfterDecimal: 16,
           strokeWidth: 0.7,
           pixelRatio: null,
           strokeBorderWidth: 0.0,
@@ -312,13 +313,21 @@ export default {
 
           if (this.view.minute === false && this.config.graph && this.config.graph.args && this.$options.__config_set === false) {
             let args = this.config.graph.args.split(' ')
-            Array.each(args, function (arg) {
-              if (arg === '--logarithmic') {
+            Array.each(args, function (arg, index) {
+              if (arg === '--logarithmic' || arg === '-o') {
                 this.$set(this.chart.options, 'logscale', 'y')
                 this.$set(this.chart.options.axes.y, 'logscale', true)
+              } else if (arg === '--lower-limit' || arg === '-l') {
+                if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+                this.$set(this.chart.options.valueRange, 0, args[index + 1] * 1)
+              } else if (arg === '--upper-limit' || arg === '-u') {
+                if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+                this.$set(this.chart.options.valueRange, 1, args[index + 1] * 1)
               }
             }.bind(this))
           }
+
+          debug('valueRange %o', this.id, this.chart.options.valueRange)
 
           let processed_data = []
           let negative_key
@@ -355,44 +364,44 @@ export default {
             /**
             * if at least one is STAKED, dygraph.options.stackedGraph === true
             **/
-            if (this.$options.__config_set === false) {
-              if (this.view.minute === false) {
-                this.$set(this.chart.options, 'stackedGraph', (this.chart.options.stackedGraph && this.chart.options.stackedGraph === true)
-                  ? this.chart.options.stackedGraph
-                  : !!((key_config && key_config.draw && key_config.draw === 'STACK'))
-                )
+            // if (this.$options.__config_set === false) {
+            if (this.view.minute === false) {
+              this.$set(this.chart.options, 'stackedGraph', (this.chart.options.stackedGraph && this.chart.options.stackedGraph === true)
+                ? this.chart.options.stackedGraph
+                : !!((key_config && key_config.draw && key_config.draw === 'STACK'))
+              )
 
-                if (this.chart.options.stackedGraph === true) {
-                  this.$set(this.chart.options, 'fillGraph', true)
-                  this.$set(this.chart.options, 'fillAlpha', 0.5)
-                  this.$set(this.chart.options, 'strokeWidth', 0.1)
+              if (this.chart.options.stackedGraph === true) {
+                this.$set(this.chart.options, 'fillGraph', true)
+                this.$set(this.chart.options, 'fillAlpha', 0.5)
+                this.$set(this.chart.options, 'strokeWidth', 0.1)
+              }
+
+              if (key_config.min) {
+                if (!this.chart.options.valueRange) {
+                  this.$set(this.chart.options, 'valueRange', [])
+                  this.$set(this.chart.options.valueRange, 0, key_config.min * 1)
                 }
 
-                if (key_config.min) {
-                  if (!this.chart.options.valueRange) {
-                    this.$set(this.chart.options, 'valueRange', [])
-                    this.$set(this.chart.options.valueRange, 0, key_config.min)
-                  }
-
-                  this.$set(this.chart.options.valueRange, 0,
-                    (this.chart.options.valueRange &&
+                this.$set(this.chart.options.valueRange, 0,
+                  (this.chart.options.valueRange &&
                        this.chart.options.valueRange[0] &&
                        this.chart.options.valueRange[0] * 1 < key_config.min
-                    ) ? this.chart.options.valueRange[0] * 1 : key_config.min
-                  )
-                }
-
-                if (key_config.max) {
-                  if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
-                  this.$set(this.chart.options.valueRange, 1, (this.chart.options.valueRange && this.chart.options.valueRange[1] && this.chart.options.valueRange[1] > key_config.max) ? this.chart.options.valueRange[1] : key_config.max)
-                }
-              } else {
-                this.$set(this.chart.options, 'stackedGraph', false)
-                this.$set(this.chart.options, 'fillGraph', false)
-                this.$set(this.chart.options, 'strokeWidth', 0.7)
-                this.$delete(this.chart.options, 'valueRange')
+                  ) ? this.chart.options.valueRange[0] * 1 : key_config.min
+                )
               }
+
+              if (key_config.max) {
+                if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+                this.$set(this.chart.options.valueRange, 1, (this.chart.options.valueRange && this.chart.options.valueRange[1] && this.chart.options.valueRange[1] > key_config.max) ? this.chart.options.valueRange[1] : key_config.max * 1)
+              }
+            } else {
+              this.$set(this.chart.options, 'stackedGraph', false)
+              this.$set(this.chart.options, 'fillGraph', false)
+              this.$set(this.chart.options, 'strokeWidth', 0.7)
+              this.$delete(this.chart.options, 'valueRange')
             }
+            // }
 
             // if (this.chart.options.logscale === true && this.chart.options.valueRange && this.chart.options.valueRange[0] === 0) {
             //   this.chart.options.valueRange[0] = 0.0000000000000001
@@ -508,7 +517,7 @@ export default {
                       * ( (row[0] - processed_data[i + 1][0]) / 1000 )
                       * timestamp of row - timestamp of next row (decreasing timestamps) / 1000 = seconds between rows
                       **/
-                      processed_data[i][index] = (row[index] - processed_data[i + 1][index]) / ((row[0] - processed_data[i + 1][0]) / 5000)
+                      processed_data[i][index] = (row[index] - processed_data[i + 1][index]) / ((row[0] - processed_data[i + 1][0]) / 1000)
                     }
 
                   // })
@@ -552,8 +561,7 @@ export default {
               })
             }
 
-            if (key_config.max && this.chart.options.valueRange && this.$options.__config_set === false) {
-              // if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+            if (key_config.max && this.chart.options.valueRange) { // && this.$options.__config_set === false
               this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
             }
 
@@ -576,6 +584,12 @@ export default {
             }
             // }
             // }.bind(this))
+
+            if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
+              this.$set(this.chart.options, 'fillGraph', true)
+              this.$set(this.chart.options, 'fillAlpha', 0.5)
+              this.$set(this.chart.options, 'strokeWidth', 0.1)
+            }
           }
 
           /**
@@ -644,7 +658,7 @@ export default {
 
           // this.processed_data = processed_data
 
-          debug('__process_data %s %o', this.id, this.chart.options.labels)
+          debug('__process_data %s %o', this.id, this.chart.options)
           this.$nextTick(function () {
             // debug('__process_data %s %o', this.id, processed_data)
             this.$refs[this.id].update_stat_data([Array.clone(processed_data)])
