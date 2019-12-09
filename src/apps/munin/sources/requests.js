@@ -62,7 +62,7 @@ const munin_hosts_categories = {
         Array.each(host_group, function (plugin) {
           let host = plugin.metadata.host
           // debug('All callback', plugin)
-          let category = (plugin.config && plugin.config.graph) ? plugin.config.graph.category : undefined
+          let category = (plugin.config && plugin.config.graph && plugin.config.graph.category) ? plugin.config.graph.category.toLowerCase() : undefined
 
           if (!_hosts_categories[host]) _hosts_categories[host] = []
           if (category !== undefined && !_hosts_categories[host].contains(category)) _hosts_categories[host].push(category)
@@ -81,7 +81,7 @@ const munin_hosts_categories = {
       vm.categories = _categories
     }
 
-    debug('All callback %o %o', _hosts_categories, _categories)
+    debug('CATEGORIES callback %o %o', _hosts_categories, _categories)
   }
 }
 

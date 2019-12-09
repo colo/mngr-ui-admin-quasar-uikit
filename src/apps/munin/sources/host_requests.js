@@ -163,7 +163,7 @@ const generic_callback = function (data, metadata, key, vm) {
     Array.each(data.munin, function (group_path) {
       // debug('PERIODICAL HOST CALLBACK %o %o %s', group_path)
       let config = group_path[0].config // only one per path
-      let category = (config && config.graph && config.graph.category) ? config.graph.category : 'uncategorized'
+      let category = (config && config.graph && config.graph.category) ? config.graph.category.toLowerCase() : 'uncategorized'
       let path = group_path[0].metadata.path
 
       if (!_plugins_config[category]) _plugins_config[category] = {}
