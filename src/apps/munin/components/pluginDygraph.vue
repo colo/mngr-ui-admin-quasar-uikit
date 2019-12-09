@@ -179,7 +179,7 @@ export default {
         interval: 5,
         options: {
           digitsAfterDecimal: 16,
-          strokeWidth: 0.7,
+          strokeWidth: 1.5,
           pixelRatio: null,
           strokeBorderWidth: 0.0,
           gridLineWidth: 0.1
@@ -206,7 +206,7 @@ export default {
       this.chart = Object.merge(Object.clone(dygraph_line_chart), {
         interval: 5,
         options: {
-          strokeWidth: 0.7,
+          strokeWidth: 1.5,
           pixelRatio: null,
           strokeBorderWidth: 0.0,
           gridLineWidth: 0.1
@@ -353,7 +353,7 @@ export default {
             label += '' // cast to string
             // debug('LABEL ', this.id, label)
             // label = label.replace('  ', '')
-            if (this.$options.__config_set === false) { this.chart.options.labels.push(label) }
+            if (this.$options.__config_set === false && (!key_config.graph || key_config.graph !== 'no')) { this.chart.options.labels.push(label) }
 
             // debug('KEY %s %o', key, this.config)
 
@@ -374,7 +374,7 @@ export default {
               if (this.chart.options.stackedGraph === true) {
                 this.$set(this.chart.options, 'fillGraph', true)
                 this.$set(this.chart.options, 'fillAlpha', 0.5)
-                this.$set(this.chart.options, 'strokeWidth', 0.1)
+                this.$set(this.chart.options, 'strokeWidth', 1)
               }
 
               if (key_config.min) {
@@ -398,7 +398,7 @@ export default {
             } else {
               this.$set(this.chart.options, 'stackedGraph', false)
               this.$set(this.chart.options, 'fillGraph', false)
-              this.$set(this.chart.options, 'strokeWidth', 0.7)
+              this.$set(this.chart.options, 'strokeWidth', 2)
               this.$delete(this.chart.options, 'valueRange')
             }
             // }
@@ -408,38 +408,35 @@ export default {
             // }
             // debug('data watch STAKED %s %o', this.id, this.chart, key_config.draw)
 
-            if (periodical_index === 0) {
-              processed_data = Array.clone(arr)
-              // processed_data = arr
-            } else {
-              Array.each(processed_data, function (row, i) {
-                processed_data_min_value = ((processed_data_min_value === 0.1 || row[1] < processed_data_min_value) && row[1] !== 0) ? row[1] : processed_data_min_value
-                processed_data_max_value = (row[1] > processed_data_max_value) ? row[1] : processed_data_max_value
-                row[0] = roundMilliseconds(row[0])
-                let timestamp = row[0]
-                if (roundMilliseconds(arr[i][0]) === timestamp) {
-                  // arr[i][0] = undefined
-                  // arr[i] = arr[i].clean()
-                  // processed_data[i].combine(arr[i])
-                  // if (this.chart.options.logscale === true && arr[i][1] === 0) arr[i][1] = 0.0000000000000001
+            // if (periodical_index === 0 && (!key_config.graph || key_config.graph !== 'no')) {
+            //   processed_data = Array.clone(arr)
+            //   // processed_data = arr
+            // } else
+            if (!key_config.graph || key_config.graph !== 'no') {
+              if (processed_data.length === 0) {
+                processed_data = Array.clone(arr)
+              } else {
+                Array.each(processed_data, function (row, i) {
+                  processed_data_min_value = ((processed_data_min_value === 0.1 || row[1] < processed_data_min_value) && row[1] !== 0) ? row[1] : processed_data_min_value
+                  processed_data_max_value = (row[1] > processed_data_max_value) ? row[1] : processed_data_max_value
+                  row[0] = roundMilliseconds(row[0])
+                  let timestamp = row[0]
+                  if (roundMilliseconds(arr[i][0]) === timestamp) {
+                    // arr[i][0] = undefined
+                    // arr[i] = arr[i].clean()
+                    // processed_data[i].combine(arr[i])
+                    // if (this.chart.options.logscale === true && arr[i][1] === 0) arr[i][1] = 0.0000000000000001
 
-                  processed_data[i].push(arr[i][1])
+                    processed_data[i].push(arr[i][1])
 
-                  processed_data_min_value = ((processed_data_min_value === 0.1 || arr[i][1] < processed_data_min_value) && arr[i][1] !== 0) ? arr[i][1] : processed_data_min_value
-                  processed_data_max_value = (arr[i][1] > processed_data_max_value) ? arr[i][1] : processed_data_max_value
-                }
-                // else {
-                //   processed_data[i].combine([timestamp, 0])
-                // }
-              })
-
-              // let splice = 900 // 12 points per min * 16 min
-              // let length = processed_data.length
-              //
-              // processed_data.splice(
-              //   (splice * -1) - 1,
-              //   length - splice
-              // )
+                    processed_data_min_value = ((processed_data_min_value === 0.1 || arr[i][1] < processed_data_min_value) && arr[i][1] !== 0) ? arr[i][1] : processed_data_min_value
+                    processed_data_max_value = (arr[i][1] > processed_data_max_value) ? arr[i][1] : processed_data_max_value
+                  }
+                  // else {
+                  //   processed_data[i].combine([timestamp, 0])
+                  // }
+                })
+              }
             }
 
             /**
@@ -456,7 +453,7 @@ export default {
 
             // debug('MINUTE %o', minute)
 
-            if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0) {
+            if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0 && (!key_config.graph || key_config.graph !== 'no')) {
               if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
                 this.chart.options.labels.push(label + '(median)')
               }
@@ -588,7 +585,7 @@ export default {
             if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
               this.$set(this.chart.options, 'fillGraph', true)
               this.$set(this.chart.options, 'fillAlpha', 0.5)
-              this.$set(this.chart.options, 'strokeWidth', 0.1)
+              this.$set(this.chart.options, 'strokeWidth', 1)
             }
           }
 
@@ -646,9 +643,9 @@ export default {
             this.$set(this.chart.options, 'valueRange', [processed_data_min_value, processed_data_max_value])
           }
 
-          // if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
-          //   this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [processed_data_min_value] : 0)
-          // }
+          if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
+            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [processed_data_min_value] : 0)
+          }
 
           // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
           //   debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
