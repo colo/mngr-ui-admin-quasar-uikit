@@ -5,14 +5,17 @@ const SECOND = 1000
 const MINUTE = 60 * SECOND
 
 const generic_callback = function (data, metadata, key, vm) {
-  if (/periodical/.test(key) && (data.munin || Object.getLength(data) > 0)) {
-    let _data
-    if (data.munin) _data = data.munin // comes from 'Range'
-    else _data = data // comes from 'register'
+  if (/periodical/.test(key) && data.munin) {
+    // Object.each(data.munin, function (plugin, name) {
+    //   if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
+    //   vm.$set(vm.plugins[name], 'periodical', plugin)
+    //
+    //   debug('PERIODICAL HOST CALLBACK %o ', JSON.parse(JSON.stringify(vm.plugins)))
+    // })
 
-    debug('PERIODICAL HOST CALLBACK data %s %o', key, _data)
+    Object.each(data.munin, function (plugin, name) {
+      // debug('PERIODICAL HOST CALLBACK data %s %o', name, plugin)
 
-    Object.each(_data, function (plugin, name) {
       if (plugin && Object.getLength(plugin) > 0) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
 
@@ -29,7 +32,7 @@ const generic_callback = function (data, metadata, key, vm) {
               _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.periodical))
 
               Object.each(plugin, function (data, prop) {
-                if (_plugin[prop] && Array.isArray(_plugin[prop]) && _plugin[prop].length > 0) {
+                if (_plugin[prop] && Array.isArray(_plugin[prop])) {
                   _plugin[prop].combine(data)
 
                   // sort by first column, timestamp
@@ -69,25 +72,18 @@ const generic_callback = function (data, metadata, key, vm) {
                 }
               })
 
-              // debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
+              debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
             } else {
-              // _plugin = {}
-              Object.each(plugin, function (data, prop) {
+              _plugin = plugin
+              Object.each(_plugin, function (data, prop) {
                 // sort by first column, timestamp
-
-                if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
-                  _plugin[prop] = Array.clone(data)
-                  _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-                }
+                _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
               })
 
-              // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
+              debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
             }
 
-            if (Object.getLength(_plugin) > 0) {
-              debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
-              vm.$refs[name][0].set_data({ periodical: _plugin })
-            }
+            if (Object.getLength(_plugin) > 0) { vm.$refs[name][0].set_data({ periodical: _plugin }) }
           }
         })
       }
@@ -422,132 +418,6 @@ const host_once_component = {
   // }
 }
 
-const host_once_register = {
-  params: function (_key, vm) {
-    // debug('REGISTER host_once_register %o %o', _key, vm)
-
-    let source
-    let key
-
-    if (!_key) {
-      key = ['periodical.register']// , 'config.once', 'minute.once'
-      // key = ['config.once']
-    }
-
-    // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
-
-    if (
-      _key
-    ) {
-      switch (_key) {
-        case 'periodical.register':
-          source = [{
-            params: { id: _key },
-            path: 'all',
-            // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
-            // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
-            query: {
-              'from': 'munin',
-              'register': 'changes',
-              'format': 'tabular',
-              'index': false,
-              /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
-              'q': [
-                // {
-                //   'metadata': [
-                //     'timestamp',
-                //     'path'
-                //   ]
-                // },
-                // 'metadata',
-                'data'
-              ],
-              // 'transformation': [
-              //   {
-              //     'orderBy': { 'index': 'r.desc(timestamp)' }
-              //   }
-              // ],
-              'filter': { 'metadata': { 'host': vm.host } }
-
-            }
-          }]
-          break
-
-        // case 'config.once':
-        //   source = [{
-        //     params: { id: _key },
-        //     range: 'posix ' + (Date.now() - 15 * SECOND) + '-' + Date.now() + '/*',
-        //     path: 'all',
-        //     // range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
-        //     query: {
-        //       'from': 'munin',
-        //       // 'index': false,
-        //
-        //       'q': [
-        //         // 'id',
-        //         'config',
-        //         { 'metadata': ['path'] }
-        //       ],
-        //       // 'transformation': [
-        //       //   { 'orderBy': { 'index': 'r.desc(timestamp)' } }
-        //       //   // 'slice:0:1'
-        //       // ],
-        //       'aggregation': 'distinct',
-        //       'filter': [{ 'metadata': { 'host': vm.host } }]
-        //     }
-        //   }]
-        //
-        //   break
-        case 'minute.once':
-          source = [{
-            params: { id: _key },
-            path: 'all',
-            range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
-            query: {
-              'from': 'munin_historical',
-              // 'register': 'changes',
-              'format': 'tabular',
-              'index': false,
-              /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
-              'q': [
-                // {
-                //   'metadata': [
-                //     'timestamp',
-                //     'path'
-                //   ]
-                // },
-                // 'metadata',
-                'data'
-              ],
-              'transformation': [
-                {
-                  'orderBy': { 'index': 'r.desc(timestamp)' }
-                }
-              ],
-              'filter': [
-                { 'metadata': { 'host': vm.host } },
-                { 'metadata': { 'type': 'minute' } }
-              ]
-
-            }
-          }]
-
-          break
-      }
-    }
-
-    debug('MyChart periodical KEY ', key, source)
-
-    return { key, source }
-  },
-  callback: generic_callback
-
-}
-
 const host_range_component = {
   params: function (_key, vm) {
     // debug('PERIODICAL host_range_component %o %o', _key, vm)
@@ -747,12 +617,11 @@ const host_range_component = {
 }
 
 const once = [
-  host_once_component,
-  host_once_register
+  host_once_component
 ]
 
 const periodical = [
-  // host_range_component
+  host_range_component
 ]
 
 const requests = {
