@@ -362,7 +362,8 @@ const host_once_register = {
                 // },
                 // 'metadata',
                 'id',
-                'data'
+                'data',
+                { 'metadata': ['host'] }
               ],
               // 'transformation': [
               //   {
@@ -397,7 +398,8 @@ const host_once_register = {
                 // },
                 // 'metadata',
                 'id',
-                'data'
+                'data',
+                { 'metadata': ['host', 'type'] }
               ],
               // 'transformation': [
               //   {
