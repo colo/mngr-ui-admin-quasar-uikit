@@ -658,8 +658,10 @@ export default {
           debug('__process_data %s %o', this.id, this.chart.options)
           this.$nextTick(function () {
             // debug('__process_data %s %o', this.id, processed_data)
-            this.$refs[this.id].update_stat_data([Array.clone(processed_data)])
-            this.$refs[this.id].visibilityChanged(true)
+            if (processed_data.length > 1) {
+              this.$refs[this.id].update_stat_data([processed_data])
+              this.$refs[this.id].visibilityChanged(true)
+            }
           }.bind(this))
 
           this.$options.__config_set = true
