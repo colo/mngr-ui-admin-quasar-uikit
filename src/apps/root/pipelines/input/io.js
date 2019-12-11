@@ -335,6 +335,18 @@ export default new Class({
 
     }.bind(this))
 
+    this.addEvent('onSuspend', function(){
+      debug('onSuspend')
+
+      // this.io.on('off', 'all')
+      this.io.emit('off')
+
+      // this.remove_io_routes()
+
+      // if(this.io.disconnected == false)
+        // this.io.close()
+    }.bind(this))
+    
     this.addEvent('onExit', function(){
       debug('onExit')
 
