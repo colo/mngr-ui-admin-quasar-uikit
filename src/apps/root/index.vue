@@ -5,6 +5,14 @@
     <vk-card class="uk-background-secondary">
 
       <router-link
+        to="/os"
+        v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+
+        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">OS</vk-button-link>
+      </router-link>
+
+      <router-link
         to="/munin"
         v-slot="{ href, route, navigate, isActive, isExactActive }"
       >

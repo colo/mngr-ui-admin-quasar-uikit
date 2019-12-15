@@ -18,7 +18,7 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "munin" */ '@apps/vhosts/index.vue'),
+        component: () => import(/* webpackChunkName: "vhosts" */ '@apps/vhosts/index.vue'),
         meta: {
           breadcrumb: { label: 'Vhosts', icon: 'widgets', app: 'vhosts' }
         }
@@ -44,7 +44,7 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "munin" */ '@apps/checks/index.vue'),
+        component: () => import(/* webpackChunkName: "checks" */ '@apps/checks/index.vue'),
         meta: {
           breadcrumb: { label: 'Checks', icon: 'widgets', app: 'checks' }
         }
@@ -70,7 +70,7 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "munin" */ '@apps/alerts/index.vue'),
+        component: () => import(/* webpackChunkName: "alerts" */ '@apps/alerts/index.vue'),
         meta: {
           breadcrumb: { label: 'Alerts', icon: 'widgets', app: 'alerts' }
         }
@@ -108,6 +108,32 @@ const routes = [
             component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/components/host.vue'),
             meta: {
               breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
+            }
+          }
+          // {
+          //   path: 'profile',
+          //   component: () => import('pages/user-profile')
+          // }
+        ]
+      },
+      {
+        path: 'os',
+        name: 'os',
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "os" */ '@apps/os/index.vue'),
+        meta: {
+          breadcrumb: { label: 'OS', icon: 'widgets', app: 'os' }
+        },
+
+        children: [
+          {
+            path: 'hosts/:host',
+            name: 'os_host',
+            component: () => import(/* webpackChunkName: os.host" */ '@apps/os/components/host.vue'),
+            meta: {
+              breadcrumb: { label: 'OS Host', icon: 'widgets', app: 'os' }
             }
           }
           // {
