@@ -11,7 +11,8 @@
      <!-- && processed_data.length > 0 -->
 
    <!-- We use class hidden and not a v-if, becasue they need to be created to be used with their "$refs"-->
-    <vk-card v-if="config" :class="(show === false) ? 'uk-background-secondary uk-light hidden': 'uk-background-secondary uk-light'">
+   <!-- v-if="config"  -->
+    <vk-card :class="(show === false) ? 'uk-background-secondary uk-light hidden': 'uk-background-secondary uk-light'">
       <vk-card-title>
         <h4 class="uk-light">{{title}}</h4>
       </vk-card-title>
@@ -40,7 +41,7 @@
         :EventBus="eventbus"
         :stat="{
           data: [],
-          length: 120,
+          length: 600,
         }"
         :chart="chart"
         :reactive="false"
@@ -176,7 +177,7 @@ export default {
 
       eventbus: EventBus,
       chart: Object.merge(Object.clone(dygraph_line_chart), {
-        interval: 5,
+        interval: 1,
         options: {
           digitsAfterDecimal: 16,
           strokeWidth: 1.5,
@@ -204,7 +205,7 @@ export default {
       this.$options.__config_set = false
 
       this.chart = Object.merge(Object.clone(dygraph_line_chart), {
-        interval: 5,
+        interval: 1,
         options: {
           strokeWidth: 1.5,
           pixelRatio: null,
@@ -261,7 +262,7 @@ export default {
 
         Object.each(this.$options.plugin_data.periodical, function (periodical, key) {
           // length = periodical.length
-          this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(0, 121)
+          this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(0, 601)
           // this.$options.plugin_data.periodical[key].splice(
           //   (splice * -1) + 1,
           //   length - splice
@@ -293,153 +294,154 @@ export default {
       }
     },
     __process_data: function (val) {
-      if (this.config && Object.getLength(this.config) > 0) {
-        val = JSON.parse(JSON.stringify(val))
+      // if (this.config && Object.getLength(this.config) > 0) {
+      val = JSON.parse(JSON.stringify(val))
 
-        if (val.periodical && Object.getLength(val.periodical) > 0) {
-          // debug('data watch %s %o', this.id, JSON.parse(JSON.stringify(this.config)), JSON.parse(JSON.stringify(val.periodical)))
+      if (val.periodical && Object.getLength(val.periodical) > 0) {
+        // debug('data watch %s %o', this.id, JSON.parse(JSON.stringify(this.config)), JSON.parse(JSON.stringify(val.periodical)))
 
-          let periodical = val.periodical
-          let minute = val.minute
+        let periodical = val.periodical
+        let minute = val.minute
 
-          if (minute && Object.getLength(minute) > 0) {
-            this.show_minute = true
-          }
+        if (minute && Object.getLength(minute) > 0) {
+          this.show_minute = true
+        }
 
-          // debug('data watch show_minute %s %o', this.id, this.show_minute)
+        // debug('data watch show_minute %s %o', this.id, this.show_minute)
 
-          if (this.$options.__config_set === false) { this.$set(this.chart.options, 'labels', ['Time']) }
-          // this.$set(this.chart.options, 'sigFigs', 6)
+        if (this.$options.__config_set === false) { this.$set(this.chart.options, 'labels', ['Time']) }
+        // this.$set(this.chart.options, 'sigFigs', 6)
 
-          if (this.view.minute === false && this.config.graph && this.config.graph.args && this.$options.__config_set === false) {
-            let args = this.config.graph.args.split(' ')
-            Array.each(args, function (arg, index) {
-              if (arg === '--logarithmic' || arg === '-o') {
-                this.$set(this.chart.options, 'logscale', 'y')
-                this.$set(this.chart.options.axes.y, 'logscale', true)
-              } else if (arg === '--lower-limit' || arg === '-l') {
-                if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
-                this.$set(this.chart.options.valueRange, 0, args[index + 1] * 1)
-              } else if (arg === '--upper-limit' || arg === '-u') {
-                if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
-                this.$set(this.chart.options.valueRange, 1, args[index + 1] * 1)
-              }
-            }.bind(this))
-          }
+        // if (this.view.minute === false && this.config.graph && this.config.graph.args && this.$options.__config_set === false) {
+        //   let args = this.config.graph.args.split(' ')
+        //   Array.each(args, function (arg, index) {
+        //     if (arg === '--logarithmic' || arg === '-o') {
+        //       this.$set(this.chart.options, 'logscale', 'y')
+        //       this.$set(this.chart.options.axes.y, 'logscale', true)
+        //     } else if (arg === '--lower-limit' || arg === '-l') {
+        //       if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+        //       this.$set(this.chart.options.valueRange, 0, args[index + 1] * 1)
+        //     } else if (arg === '--upper-limit' || arg === '-u') {
+        //       if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+        //       this.$set(this.chart.options.valueRange, 1, args[index + 1] * 1)
+        //     }
+        //   }.bind(this))
+        // }
 
-          debug('valueRange %o', this.id, this.chart.options.valueRange)
+        // debug('valueRange %o', this.id, this.chart.options.valueRange)
 
-          let processed_data = []
-          let negative_key
-          let cdefs = []
+        let processed_data = []
+        let negative_key
+        let cdefs = []
 
-          /**
+        /**
           * used to set valueRange for logscale
           **/
-          let processed_data_min_value = 0.1
-          let processed_data_max_value = 1
+        let processed_data_min_value = 0.1
+        let processed_data_max_value = 1
 
-          let periodical_index = 0
-          Object.each(periodical, function (arr, key) {
-            let key_config = this.config[key]
-            if (!key_config) {
-              Object.each(this.config, function (conf, conf_key) {
-                if (conf_key.replace('_', '').replace('.', '') === key) {
-                  key_config = conf
-                }
-              })
-            }
-            let label = (key_config && key_config.label) ? key_config.label : key
-            label += '' // cast to string
-            // debug('LABEL ', this.id, label)
-            // label = label.replace('  ', '')
-            if (this.$options.__config_set === false && (!key_config.graph || key_config.graph !== 'no')) { this.chart.options.labels.push(label) }
+        let periodical_index = 0
+        Object.each(periodical, function (arr, key) {
+          let key_config = (this.config && this.config[key]) ? this.config[key] : undefined
+          // if (!key_config) {
+          //   Object.each(this.config, function (conf, conf_key) {
+          //     if (conf_key.replace('_', '').replace('.', '') === key) {
+          //       key_config = conf
+          //     }
+          //   })
+          // }
+          let label = (key_config && key_config.label) ? key_config.label : key
+          label += '' // cast to string
+          // debug('LABEL ', this.id, label)
+          // label = label.replace('  ', '')
+          // if (this.$options.__config_set === false && (!key_config.graph || key_config.graph !== 'no'))
+          if (this.$options.__config_set === false) { this.chart.options.labels.push(label) }
 
-            // debug('KEY %s %o', key, this.config)
+          // debug('KEY %s %o', key, this.config)
 
-            if (key_config.negative) { negative_key = key_config.negative.replace('_', '') }
+          // if (key_config.negative) { negative_key = key_config.negative.replace('_', '') }
 
-            if (key_config.cdef) { cdefs.push(key_config.cdef) }
+          // if (key_config.cdef) { cdefs.push(key_config.cdef) }
 
-            /**
+          /**
             * if at least one is STAKED, dygraph.options.stackedGraph === true
             **/
-            // if (this.$options.__config_set === false) {
-            if (this.view.minute === false) {
-              this.$set(this.chart.options, 'stackedGraph', (this.chart.options.stackedGraph && this.chart.options.stackedGraph === true)
-                ? this.chart.options.stackedGraph
-                : !!((key_config && key_config.draw && key_config.draw === 'STACK'))
-              )
+          // if (this.$options.__config_set === false) {
+          if (this.view.minute === false) {
+            this.$set(this.chart.options, 'stackedGraph', (this.chart.options.stackedGraph && this.chart.options.stackedGraph === true)
+              ? this.chart.options.stackedGraph
+              : !!((key_config && key_config.draw && key_config.draw === 'STACK'))
+            )
 
-              if (this.chart.options.stackedGraph === true) {
-                this.$set(this.chart.options, 'fillGraph', true)
-                this.$set(this.chart.options, 'fillAlpha', 0.5)
-                this.$set(this.chart.options, 'strokeWidth', 1)
-              }
-
-              if (key_config.min) {
-                if (!this.chart.options.valueRange) {
-                  this.$set(this.chart.options, 'valueRange', [])
-                  this.$set(this.chart.options.valueRange, 0, key_config.min * 1)
-                }
-
-                this.$set(this.chart.options.valueRange, 0,
-                  (this.chart.options.valueRange &&
-                       this.chart.options.valueRange[0] &&
-                       this.chart.options.valueRange[0] * 1 < key_config.min
-                  ) ? this.chart.options.valueRange[0] * 1 : key_config.min
-                )
-              }
-
-              if (key_config.max) {
-                if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
-                this.$set(this.chart.options.valueRange, 1, (this.chart.options.valueRange && this.chart.options.valueRange[1] && this.chart.options.valueRange[1] > key_config.max) ? this.chart.options.valueRange[1] : key_config.max * 1)
-              }
-            } else {
-              this.$set(this.chart.options, 'stackedGraph', false)
-              this.$set(this.chart.options, 'fillGraph', false)
-              this.$set(this.chart.options, 'strokeWidth', 2)
-              this.$delete(this.chart.options, 'valueRange')
-            }
-            // }
-
-            // if (this.chart.options.logscale === true && this.chart.options.valueRange && this.chart.options.valueRange[0] === 0) {
-            //   this.chart.options.valueRange[0] = 0.0000000000000001
-            // }
-            // debug('data watch STAKED %s %o', this.id, this.chart, key_config.draw)
-
-            // if (periodical_index === 0 && (!key_config.graph || key_config.graph !== 'no')) {
-            //   processed_data = Array.clone(arr)
-            //   // processed_data = arr
-            // } else
-            if (!key_config.graph || key_config.graph !== 'no') {
-              if (processed_data.length === 0) {
-                processed_data = Array.clone(arr)
-              } else {
-                Array.each(processed_data, function (row, i) {
-                  processed_data_min_value = ((processed_data_min_value === 0.1 || row[1] < processed_data_min_value) && row[1] !== 0) ? row[1] : processed_data_min_value
-                  processed_data_max_value = (row[1] > processed_data_max_value) ? row[1] : processed_data_max_value
-                  row[0] = roundMilliseconds(row[0])
-                  let timestamp = row[0]
-                  if (roundMilliseconds(arr[i][0]) === timestamp) {
-                    // arr[i][0] = undefined
-                    // arr[i] = arr[i].clean()
-                    // processed_data[i].combine(arr[i])
-                    // if (this.chart.options.logscale === true && arr[i][1] === 0) arr[i][1] = 0.0000000000000001
-
-                    processed_data[i].push(arr[i][1])
-
-                    processed_data_min_value = ((processed_data_min_value === 0.1 || arr[i][1] < processed_data_min_value) && arr[i][1] !== 0) ? arr[i][1] : processed_data_min_value
-                    processed_data_max_value = (arr[i][1] > processed_data_max_value) ? arr[i][1] : processed_data_max_value
-                  }
-                  // else {
-                  //   processed_data[i].combine([timestamp, 0])
-                  // }
-                })
-              }
+            if (this.chart.options.stackedGraph === true) {
+              this.$set(this.chart.options, 'fillGraph', true)
+              this.$set(this.chart.options, 'fillAlpha', 0.5)
+              this.$set(this.chart.options, 'strokeWidth', 1)
             }
 
-            /**
+            // if (key_config.min) {
+            //   if (!this.chart.options.valueRange) {
+            //     this.$set(this.chart.options, 'valueRange', [])
+            //     this.$set(this.chart.options.valueRange, 0, key_config.min * 1)
+            //   }
+            //
+            //   this.$set(this.chart.options.valueRange, 0,
+            //     (this.chart.options.valueRange &&
+            //            this.chart.options.valueRange[0] &&
+            //            this.chart.options.valueRange[0] * 1 < key_config.min
+            //     ) ? this.chart.options.valueRange[0] * 1 : key_config.min
+            //   )
+            // }
+
+            // if (key_config.max) {
+            //   if (!this.chart.options.valueRange) this.$set(this.chart.options, 'valueRange', [])
+            //   this.$set(this.chart.options.valueRange, 1, (this.chart.options.valueRange && this.chart.options.valueRange[1] && this.chart.options.valueRange[1] > key_config.max) ? this.chart.options.valueRange[1] : key_config.max * 1)
+            // }
+          } else {
+            this.$set(this.chart.options, 'stackedGraph', false)
+            this.$set(this.chart.options, 'fillGraph', false)
+            this.$set(this.chart.options, 'strokeWidth', 2)
+            this.$delete(this.chart.options, 'valueRange')
+          }
+          // }
+
+          // if (this.chart.options.logscale === true && this.chart.options.valueRange && this.chart.options.valueRange[0] === 0) {
+          //   this.chart.options.valueRange[0] = 0.0000000000000001
+          // }
+          // debug('data watch STAKED %s %o', this.id, this.chart, key_config.draw)
+
+          // if (periodical_index === 0 && (!key_config.graph || key_config.graph !== 'no')) {
+          //   processed_data = Array.clone(arr)
+          //   // processed_data = arr
+          // } else
+          // if (!key_config.graph || key_config.graph !== 'no') {
+          if (processed_data.length === 0) {
+            processed_data = Array.clone(arr)
+          } else {
+            Array.each(processed_data, function (row, i) {
+              processed_data_min_value = ((processed_data_min_value === 0.1 || row[1] < processed_data_min_value) && row[1] !== 0) ? row[1] : processed_data_min_value
+              processed_data_max_value = (row[1] > processed_data_max_value) ? row[1] : processed_data_max_value
+              row[0] = roundMilliseconds(row[0])
+              let timestamp = row[0]
+              if (roundMilliseconds(arr[i][0]) === timestamp) {
+                // arr[i][0] = undefined
+                // arr[i] = arr[i].clean()
+                // processed_data[i].combine(arr[i])
+                // if (this.chart.options.logscale === true && arr[i][1] === 0) arr[i][1] = 0.0000000000000001
+
+                processed_data[i].push(arr[i][1])
+
+                processed_data_min_value = ((processed_data_min_value === 0.1 || arr[i][1] < processed_data_min_value) && arr[i][1] !== 0) ? arr[i][1] : processed_data_min_value
+                processed_data_max_value = (arr[i][1] > processed_data_max_value) ? arr[i][1] : processed_data_max_value
+              }
+              // else {
+              //   processed_data[i].combine([timestamp, 0])
+              // }
+            })
+          }
+          // }
+
+          /**
             * 'munin_historical tabular' order
             * "timestamp": 0,
             * "max": 3966 ,
@@ -451,226 +453,226 @@ export default {
             * "sum": 23664
             **/
 
-            // debug('MINUTE %o', minute)
+          // debug('MINUTE %o', minute)
 
-            if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0 && (!key_config.graph || key_config.graph !== 'no')) {
-              if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
-                this.chart.options.labels.push(label + '(median)')
-              }
-
-              let index = this.chart.options.labels.indexOf(label + '(median)')
-              let last
-
-              Array.each(processed_data, function (row, i) {
-                let timestamp = row[0]
-                let added_minute = false
-
-                Array.each(minute[key], function (minute_row) {
-                  let minute_row_timestamp = minute_row[0]
-                  // debug('TIMESTAMPs %s %s', new Date(roundSeconds(minute_row_timestamp)), new Date(roundSeconds(timestamp)))
-
-                  if (roundSeconds(minute_row_timestamp) === roundSeconds(timestamp) - MINUTE) {
-                    processed_data[i][index] = minute_row[3] // median
-                    added_minute = true
-                  }
-
-                  last = minute_row[3]
-                })
-
-                if (added_minute === false) { processed_data[i][index] = last }
-              })
+          if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0 && (!key_config.graph || key_config.graph !== 'no')) {
+            if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
+              this.chart.options.labels.push(label + '(median)')
             }
 
-            periodical_index++
-          }.bind(this))
+            let index = this.chart.options.labels.indexOf(label + '(median)')
+            let last
 
-          if (this.view.minute === false) {
-            Object.each(periodical, function (arr, key) {
-              let key_config = this.config[key]
+            Array.each(processed_data, function (row, i) {
+              let timestamp = row[0]
+              let added_minute = false
 
-              if (!key_config) {
-                Object.each(this.config, function (conf, conf_key) {
-                  if (conf_key.replace('_', '').replace('.', '') === key) {
-                    key_config = conf
-                  }
-                })
-              }
+              Array.each(minute[key], function (minute_row) {
+                let minute_row_timestamp = minute_row[0]
+                // debug('TIMESTAMPs %s %s', new Date(roundSeconds(minute_row_timestamp)), new Date(roundSeconds(timestamp)))
 
-              if (key_config.type && (key_config.type === 'DERIVE')) {
-                let label = (key_config && key_config.label) ? key_config.label : key
-
-                let index = this.chart.options.labels.indexOf(label)
-
-                if (index > -1) {
-                  let prev = 0
-                  // Array.each(processed_data, function (row, i) {
-                  for (let i = 0; i < processed_data.length; i++) {
-                    let row = processed_data[i]
-
-                    if (i === processed_data.length - 1) {
-                      processed_data[i][index] = 0
-                    } else {
-                      /**
-                      * ( (row[0] - processed_data[i + 1][0]) / 1000 )
-                      * timestamp of row - timestamp of next row (decreasing timestamps) / 1000 = seconds between rows
-                      **/
-                      processed_data[i][index] = (row[index] - processed_data[i + 1][index]) / ((row[0] - processed_data[i + 1][0]) / 1000)
-                    }
-
-                  // })
-                  }
+                if (roundSeconds(minute_row_timestamp) === roundSeconds(timestamp) - MINUTE) {
+                  processed_data[i][index] = minute_row[3] // median
+                  added_minute = true
                 }
 
-                // let median_index = this.chart.options.labels.indexOf(label + '(median)')
-                //
-                // if (median_index > -1) {
-                //   let prev = 0
-                //   // Array.each(processed_data, function (row, i) {
-                //   for (let i = 0; i < processed_data.length; i++) {
-                //     let row = processed_data[i]
-                //
-                //     if (i === processed_data.length - 1) {
-                //       processed_data[i][median_index] = 0
-                //     } else {
-                //       processed_data[i][median_index] = row[median_index] - processed_data[i + 1][median_index]
-                //     }
-                //
-                //   // })
-                //   }
-                // }
-              }
-            }.bind(this))
+                last = minute_row[3]
+              })
+
+              if (added_minute === false) { processed_data[i][index] = last }
+            })
           }
-          /**
+
+          periodical_index++
+        }.bind(this))
+
+        // if (this.view.minute === false) {
+        //   Object.each(periodical, function (arr, key) {
+        //     let key_config = this.config[key]
+        //
+        //     if (!key_config) {
+        //       Object.each(this.config, function (conf, conf_key) {
+        //         if (conf_key.replace('_', '').replace('.', '') === key) {
+        //           key_config = conf
+        //         }
+        //       })
+        //     }
+        //
+        //     if (key_config.type && (key_config.type === 'DERIVE')) {
+        //       let label = (key_config && key_config.label) ? key_config.label : key
+        //
+        //       let index = this.chart.options.labels.indexOf(label)
+        //
+        //       if (index > -1) {
+        //         let prev = 0
+        //         // Array.each(processed_data, function (row, i) {
+        //         for (let i = 0; i < processed_data.length; i++) {
+        //           let row = processed_data[i]
+        //
+        //           if (i === processed_data.length - 1) {
+        //             processed_data[i][index] = 0
+        //           } else {
+        //             /**
+        //               * ( (row[0] - processed_data[i + 1][0]) / 1000 )
+        //               * timestamp of row - timestamp of next row (decreasing timestamps) / 1000 = seconds between rows
+        //               **/
+        //             processed_data[i][index] = (row[index] - processed_data[i + 1][index]) / ((row[0] - processed_data[i + 1][0]) / 1000)
+        //           }
+        //
+        //           // })
+        //         }
+        //       }
+        //
+        //       // let median_index = this.chart.options.labels.indexOf(label + '(median)')
+        //       //
+        //       // if (median_index > -1) {
+        //       //   let prev = 0
+        //       //   // Array.each(processed_data, function (row, i) {
+        //       //   for (let i = 0; i < processed_data.length; i++) {
+        //       //     let row = processed_data[i]
+        //       //
+        //       //     if (i === processed_data.length - 1) {
+        //       //       processed_data[i][median_index] = 0
+        //       //     } else {
+        //       //       processed_data[i][median_index] = row[median_index] - processed_data[i + 1][median_index]
+        //       //     }
+        //       //
+        //       //   // })
+        //       //   }
+        //       // }
+        //     }
+        //   }.bind(this))
+        // }
+        /**
           * now that we now if there is a negative key, find it and make values negative
           **/
-          if (negative_key) {
-            // index = 0
-            // Object.each(periodical, function (arr, key) {
-            // if (negative_key === key) {
-            let key_config = this.config[negative_key]
+        // if (negative_key) {
+        //   // index = 0
+        //   // Object.each(periodical, function (arr, key) {
+        //   // if (negative_key === key) {
+        //   let key_config = this.config[negative_key]
+        //
+        //   if (!key_config) {
+        //     Object.each(this.config, function (conf, conf_key) {
+        //       if (conf_key.replace('_', '').replace('.', '') === negative_key) {
+        //         key_config = conf
+        //       }
+        //     })
+        //   }
+        //
+        //   if (key_config.max && this.chart.options.valueRange) { // && this.$options.__config_set === false
+        //     this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
+        //   }
+        //
+        //   let label = (key_config && key_config.label) ? key_config.label : negative_key
+        //
+        //   let index = this.chart.options.labels.indexOf(label)
+        //
+        //   if (index > -1) {
+        //     Array.each(processed_data, function (row, i) {
+        //       processed_data[i][index] = row[index] * -1
+        //     })
+        //   }
+        //
+        //   let median_index = this.chart.options.labels.indexOf(label + '(median)')
+        //
+        //   if (median_index > -1) {
+        //     Array.each(processed_data, function (row, i) {
+        //       processed_data[i][median_index] = row[median_index] * -1
+        //     })
+        //   }
+        //   // }
+        //   // }.bind(this))
+        //
+        //   if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
+        //     this.$set(this.chart.options, 'fillGraph', true)
+        //     this.$set(this.chart.options, 'fillAlpha', 0.5)
+        //     this.$set(this.chart.options, 'strokeWidth', 1)
+        //   }
+        // }
 
-            if (!key_config) {
-              Object.each(this.config, function (conf, conf_key) {
-                if (conf_key.replace('_', '').replace('.', '') === negative_key) {
-                  key_config = conf
-                }
-              })
-            }
-
-            if (key_config.max && this.chart.options.valueRange) { // && this.$options.__config_set === false
-              this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
-            }
-
-            let label = (key_config && key_config.label) ? key_config.label : negative_key
-
-            let index = this.chart.options.labels.indexOf(label)
-
-            if (index > -1) {
-              Array.each(processed_data, function (row, i) {
-                processed_data[i][index] = row[index] * -1
-              })
-            }
-
-            let median_index = this.chart.options.labels.indexOf(label + '(median)')
-
-            if (median_index > -1) {
-              Array.each(processed_data, function (row, i) {
-                processed_data[i][median_index] = row[median_index] * -1
-              })
-            }
-            // }
-            // }.bind(this))
-
-            if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
-              this.$set(this.chart.options, 'fillGraph', true)
-              this.$set(this.chart.options, 'fillAlpha', 0.5)
-              this.$set(this.chart.options, 'strokeWidth', 1)
-            }
-          }
-
-          /**
+        /**
           * process cdefs
           **/
-          if (this.view.minute === false) {
-            let cdef_data = function (cdef, value) {
-              let num = cdef.split(',')[1]
-              let op = cdef.split(',')[2]
-              // debug('cdef VALUE OP NUM %s %s %s', value, op, num)
-              switch (op) {
-                case '/': return value / num
-                case '*': return value * num
-                default: return value
-              }
-            }
+        // if (this.view.minute === false) {
+        //   let cdef_data = function (cdef, value) {
+        //     let num = cdef.split(',')[1]
+        //     let op = cdef.split(',')[2]
+        //     // debug('cdef VALUE OP NUM %s %s %s', value, op, num)
+        //     switch (op) {
+        //       case '/': return value / num
+        //       case '*': return value * num
+        //       default: return value
+        //     }
+        //   }
+        //
+        //   Array.each(cdefs, function (cdef) {
+        //     if (cdef.split(',').length === 3) {
+        //       let cdef_key = cdef.split(',')[0]
+        //
+        //       let key_config = this.config[cdef_key]
+        //       let label = (key_config && key_config.label) ? key_config.label : negative_key
+        //
+        //       let index = this.chart.options.labels.indexOf(label)
+        //
+        //       if (index > -1) {
+        //         Array.each(processed_data, function (row, i) {
+        //           processed_data[i][index] = cdef_data(cdef, row[index])
+        //           // debug('cdef data %d %d', processed_data[i][index], row[index])
+        //         })
+        //       }
+        //
+        //       // let median_index = this.chart.options.labels.indexOf(label + '(median)')
+        //       //
+        //       // if (median_index > -1) {
+        //       //   Array.each(processed_data, function (row, i) {
+        //       //     processed_data[i][median_index] = cdef_data(cdef, row[median_index])
+        //       //   })
+        //       // }
+        //     }
+        //   }.bind(this))
+        // }
 
-            Array.each(cdefs, function (cdef) {
-              if (cdef.split(',').length === 3) {
-                let cdef_key = cdef.split(',')[0]
-
-                let key_config = this.config[cdef_key]
-                let label = (key_config && key_config.label) ? key_config.label : negative_key
-
-                let index = this.chart.options.labels.indexOf(label)
-
-                if (index > -1) {
-                  Array.each(processed_data, function (row, i) {
-                    processed_data[i][index] = cdef_data(cdef, row[index])
-                    // debug('cdef data %d %d', processed_data[i][index], row[index])
-                  })
-                }
-
-                // let median_index = this.chart.options.labels.indexOf(label + '(median)')
-                //
-                // if (median_index > -1) {
-                //   Array.each(processed_data, function (row, i) {
-                //     processed_data[i][median_index] = cdef_data(cdef, row[median_index])
-                //   })
-                // }
-              }
-            }.bind(this))
-          }
-
-          if (this.chart.options.labels.length > 10 && this.$options.__config_set === false) {
-            let extra_rows = this.chart.options.labels.length - 10
-            let height = 154 + (25 * extra_rows)
-            this.chart.style = 'width:100%; height:' + height + 'px;'
-          }
-
-          debug('processed_data_min_value %s', this.id, processed_data_min_value, processed_data_max_value)
-
-          if (this.chart.options.valueRange === null && this.chart.options.logscale === 'y' && this.$options.__config_set === false) {
-            this.$set(this.chart.options, 'valueRange', [processed_data_min_value, processed_data_max_value])
-          }
-
-          if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
-            this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [processed_data_min_value] : 0)
-          }
-
-          // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
-          //   debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
-          // }
-
-          // debug('processed_data REFS %s %o', this.id, this.$refs)
-
-          // this.processed_data = processed_data
-
-          debug('__process_data %s %o', this.id, this.chart.options)
-          this.$nextTick(function () {
-            // debug('__process_data %s %o', this.id, processed_data)
-            if (processed_data.length > 1) {
-              this.$refs[this.id].update_stat_data([processed_data])
-              this.$refs[this.id].visibilityChanged(true)
-            }
-          }.bind(this))
-
-          this.$options.__config_set = true
-          this.show = true
-          // this.no_buffer = false
-        } else {
-          debug('No data for %s %o', this.id, val)
+        if (this.chart.options.labels.length > 10 && this.$options.__config_set === false) {
+          let extra_rows = this.chart.options.labels.length - 10
+          let height = 154 + (25 * extra_rows)
+          this.chart.style = 'width:100%; height:' + height + 'px;'
         }
+
+        debug('processed_data_min_value %s', this.id, processed_data_min_value, processed_data_max_value)
+
+        if (this.chart.options.valueRange === null && this.chart.options.logscale === 'y' && this.$options.__config_set === false) {
+          this.$set(this.chart.options, 'valueRange', [processed_data_min_value, processed_data_max_value])
+        }
+
+        if (this.chart.options.valueRange && !this.chart.options.valueRange[0] && this.$options.__config_set === false) {
+          this.$set(this.chart.options.valueRange, 0, (this.chart.options.logscale === 'y') ? [processed_data_min_value] : 0)
+        }
+
+        // if (this.id === 'munin.diskstats.diskstats.latency.vol0_home') {
+        //   debug('munin.diskstats.diskstats.latency.vol0_home %o %o %o %o', this.id, val, this.config, this.chart.options)
+        // }
+
+        // debug('processed_data REFS %s %o', this.id, this.$refs)
+
+        // this.processed_data = processed_data
+
+        debug('__process_data %s %o', this.id, this.chart.options)
+        this.$nextTick(function () {
+          // debug('__process_data %s %o', this.id, processed_data)
+          if (processed_data.length > 1) {
+            this.$refs[this.id].update_stat_data([processed_data])
+            this.$refs[this.id].visibilityChanged(true)
+          }
+        }.bind(this))
+
+        this.$options.__config_set = true
+        this.show = true
+        // this.no_buffer = false
+      } else {
+        debug('No data for %s %o', this.id, val)
       }
+      // }
     }
   //
   //   /**
@@ -714,10 +716,12 @@ export default {
   },
   computed: {
     title: function () {
-      return (this.config.graph && this.config.graph.title) ? this.config.graph.title : this.id
+      // return (this.config.graph && this.config.graph.title) ? this.config.graph.title :
+      return this.id
     },
     info: function () {
-      return (this.config.graph && this.config.graph.info) ? this.config.graph.info : ''
+      // return (this.config.graph && this.config.graph.info) ? this.config.graph.info :
+      return ''
     }
   },
   mounted: function () {

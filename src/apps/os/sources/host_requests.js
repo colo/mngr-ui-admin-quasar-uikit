@@ -330,7 +330,7 @@ const host_once_register = {
               'register': 'changes',
               'format': 'tabular',
               'index': false,
-              'opts': { includeTypes: true, squash: 1 },
+              'opts': { includeTypes: true, squash: 0.5 },
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/

@@ -131,7 +131,7 @@ const routes = [
           {
             path: 'hosts/:host',
             name: 'os_host',
-            component: () => import(/* webpackChunkName: os.host" */ '@apps/os/components/host.vue'),
+            component: () => import(/* webpackChunkName: "os.host" */ '@apps/os/components/host.vue'),
             meta: {
               breadcrumb: { label: 'OS Host', icon: 'widgets', app: 'os' }
             }
