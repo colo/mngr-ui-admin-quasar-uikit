@@ -6,7 +6,7 @@ export default {
   freezed: false,
 
   __unwatcher: undefined,
-  visible: true,
+  visible: false,
 
   props: {
     EventBus: {

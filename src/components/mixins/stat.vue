@@ -592,9 +592,12 @@ export default {
       debug('__set_stat_data', this.id, data, this.$options.stat_data, this.$options.__buffer_data.length, this.$options.__range_init)
 
       if (this.$options.__range_init === true) {
-        this.$options.stat_data.sort(function (a, b) {
-          return (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0)
-        })
+        // if you are not using buffer, you are managing your data, you are in charge of sorting
+        if (this.no_buffer === false) {
+          this.$options.stat_data.sort(function (a, b) {
+            return (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0)
+          })
+        }
 
         this.stat_lastupdate = Date.now()
 

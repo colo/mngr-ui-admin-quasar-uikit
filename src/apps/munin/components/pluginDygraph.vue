@@ -660,7 +660,7 @@ export default {
             // debug('__process_data %s %o', this.id, processed_data)
             if (processed_data.length > 1) {
               this.$refs[this.id].update_stat_data([processed_data])
-              this.$refs[this.id].visibilityChanged(true)
+              // this.$refs[this.id].visibilityChanged(true)
             }
           }.bind(this))
 

@@ -69,8 +69,6 @@ export default {
     //   }
     // },
     __update_data: function (data) {
-      debug('__update_data %s %o %o', this.id, data, this.chart_init)
-
       if (data) {
         let inmediate = false
         if (this.chart_init === false) {
@@ -81,17 +79,23 @@ export default {
 
         let current = []
         Array.each(data, function (row) {
-          // fix for incorrect values like "" (empty)
-          if (Array.isArray(row.value)) {
-            Array.each(row.value, function (value, index) {
-              if (!value || isNaN(value)) { row.value[index] = 0 } // or should be undefined?
-            })
+          // if you are not using buffer, you are managing your data, you are in charge of fixing values
+          if (this.no_buffer === false) {
+            // fix for incorrect values like "" (empty)
+            if (Array.isArray(row.value)) {
+              Array.each(row.value, function (value, index) {
+                value = (value) ? value * 1 : 0 // int cast
+                row.value[index] = value
+                // if (!value || isNaN(value)) { row.value[index] = 0 } // or should be undefined?
+              })
+            }
           }
 
           current.push(row.value)
-        })
+        }.bind(this))
 
         // debug('__create_watcher->generic_data_watcher',this.id, current, inmediate)
+        debug('__update_data %s %o %o', this.id, data, this.chart_init, this.no_buffer, inmediate)
 
         this.update_chart_stat(this.id, current, inmediate)
       }

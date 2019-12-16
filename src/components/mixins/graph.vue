@@ -2,7 +2,18 @@
 
   <component
     v-if="chart_init === true"
-    v-observe-visibility="{ callback: visibilityChanged, throttle: 50 }"
+    v-observe-visibility="(chart_init === true) ? {
+      callback: visibilityChanged,
+      /* intersection: {
+        root: 0,
+        rootMargin: 0,
+        threshold: 0,
+      }, */
+      throttle: 100,
+      throttleOptions: {
+        leading: 'visible',
+      },
+    } : false"
     :is="wrapper.type+'-wrapper'"
     :id="id"
     :ref="id"
@@ -90,6 +101,7 @@ export default {
   __skiped: 0,
   __data_unwatcher: undefined,
   __chart_init: false,
+
   visible: true,
   // data: function () {
   //   return []
@@ -232,26 +244,29 @@ export default {
       // if(this.$options.focus == true && this.$options.visible == true && data.length > 0){
       // ////console.log('update_chart_stat visibility', this.id, data)
 
-      if (data.length === 1) {
-        this.$options.tabular.data.shift()
-        this.$options.tabular.data.push(data[0])
-      } else if (data.length > 0) {
-        // let splice = data.length
-        let length = data.length
-        let splice = this.stat.length || this.$options.tabular.data.length
+      // if you are not using buffer, you are managing your data, you are in charge splicing/sorting
+      if (this.no_buffer === false) {
+        if (data.length === 1) {
+          this.$options.tabular.data.shift()
+          this.$options.tabular.data.push(data[0])
+        } else if (data.length > 0) {
+          // let splice = data.length
+          let length = data.length
+          let splice = this.stat.length || this.$options.tabular.data.length
+          this.$options.tabular.data = data
+
+          this.$options.tabular.data.splice(
+            (splice * -1) + 1,
+            length - splice
+          )
+
+          debug('update_chart_stat %s %d %d %d %o', this.id, this.stat.length, splice, length, this.$options.tabular.data)
+        }
+
+        this.$options.tabular.data.sort(function (a, b) { return (a[0] > b[0]) ? 1 : ((b[0] > a[0]) ? -1 : 0) })
+      } else {
         this.$options.tabular.data = data
-
-        this.$options.tabular.data.splice(
-          (splice * -1) + 1,
-          length - splice
-        )
-
-        debug('update_chart_stat %s %d %d %d %o', this.id, this.stat.length, splice, length, this.$options.tabular.data)
       }
-
-      this.$options.tabular.data.sort(function (a, b) { return (a[0] > b[0]) ? 1 : ((b[0] > a[0]) ? -1 : 0) })
-
-      // console.log('graph update_chart_stat skip',this.chart.skip, this.chart.interval)
 
       if (
         this.chart.skip &&
@@ -303,7 +318,7 @@ export default {
         */
 
       // if(this.$options.visible === true){
-      debug('always_update', this.id, this.always_update)
+      // debug('always_update', this.id, this.always_update)
 
       if (
         this.always_update === true ||
@@ -319,6 +334,15 @@ export default {
           )
 
       ) {
+        debug('updating %s - always %o - inmediate %o - focus %o - visible %o - interval %o',
+          this.id,
+          this.always_update,
+          inmediate,
+          this.$options.focus,
+          this.$options.visible,
+          this.chart.interval
+        )
+
         if (this.$refs[name] && typeof this.$refs[name].update === 'function' && this.$options.tabular.data.length > 0) {
           if (inmediate === true) {
             this.$refs[name].update(this.$options.tabular.data)
@@ -350,21 +374,22 @@ export default {
     * UI related
     **/
     visibilityChanged (isVisible, entry) {
-    //   // this.$options.visible = isVisible
-    //   if(
-    //     isVisible == false
-    //     && (this.$options.visible == undefined || this.$options.visible == true)
-    //   ){
-    //     this.reset()
-    //   }
-    //   // else if (
-    //   //   isVisible == true
-    //   //   && this.available_charts[id]
-    //   //   && (this.visibility[id] == undefined || this.visibility[id] == false)
-    //   // ){
-    //   //   this.$set(this.visibility, id, true)
-    //   //   this.add_chart(this.available_charts[id], id)
-    //   // }
+      debug('visibilityChanged', this.id, isVisible, entry)
+      //   // this.$options.visible = isVisible
+      //   if(
+      //     isVisible == false
+      //     && (this.$options.visible == undefined || this.$options.visible == true)
+      //   ){
+      //     this.reset()
+      //   }
+      //   // else if (
+      //   //   isVisible == true
+      //   //   && this.available_charts[id]
+      //   //   && (this.visibility[id] == undefined || this.visibility[id] == false)
+      //   // ){
+      //   //   this.$set(this.visibility, id, true)
+      //   //   this.add_chart(this.available_charts[id], id)
+      //   // }
 
       /**
       * update with current data is visibility changed from "unvisible" to visible

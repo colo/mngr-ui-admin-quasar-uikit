@@ -41,7 +41,7 @@
         :EventBus="eventbus"
         :stat="{
           data: [],
-          length: 600,
+          length: 360,
         }"
         :chart="chart"
         :reactive="false"
@@ -96,7 +96,7 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 import JSPipeline from 'js-pipeline'
 import Pipeline from '@apps/os/pipelines/index'
 
-const MAX_FEED_DATA = 10
+// const MAX_FEED_DATA = 10
 
 const roundMilliseconds = function (timestamp) {
   let d = new Date(timestamp)
@@ -262,7 +262,7 @@ export default {
 
         Object.each(this.$options.plugin_data.periodical, function (periodical, key) {
           // length = periodical.length
-          this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(0, 601)
+          this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(0, 360)
           // this.$options.plugin_data.periodical[key].splice(
           //   (splice * -1) + 1,
           //   length - splice
@@ -278,7 +278,7 @@ export default {
 
         Object.each(this.$options.plugin_data.minute, function (minute, key) {
           // length = minute.length
-          this.$options.plugin_data.minute[key] = this.$options.plugin_data.minute[key].slice(0, 11)
+          this.$options.plugin_data.minute[key] = this.$options.plugin_data.minute[key].slice(0, 7)
           // this.$options.plugin_data.minute[key].splice(
           //   (splice * -1) + 1,
           //   length - splice
@@ -662,7 +662,7 @@ export default {
           // debug('__process_data %s %o', this.id, processed_data)
           if (processed_data.length > 1) {
             this.$refs[this.id].update_stat_data([processed_data])
-            this.$refs[this.id].visibilityChanged(true)
+            // this.$refs[this.id].visibilityChanged(true)
           }
         }.bind(this))
 

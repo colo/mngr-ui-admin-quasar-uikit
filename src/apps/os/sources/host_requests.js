@@ -200,7 +200,7 @@ const host_once_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (6 * MINUTE)) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'os',
@@ -256,7 +256,7 @@ const host_once_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
             query: {
               'from': 'os_historical',
               // 'register': 'changes',
@@ -330,7 +330,7 @@ const host_once_register = {
               'register': 'changes',
               'format': 'tabular',
               'index': false,
-              'opts': { includeTypes: true, squash: 0.5 },
+              'opts': { includeTypes: true, squash: 1 },
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/
