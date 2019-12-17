@@ -199,7 +199,7 @@ export default {
       // let options = JSON.parse(JSON.stringify(this.chart.options))
       // let data = JSON.parse(JSON.stringify(this.data))
 
-      this.$refs[this.id].visibilityChanged(false)
+      // this.$refs[this.id].visibilityChanged(false)
       // this.no_buffer = true
       this.$options.__config_set = false
 

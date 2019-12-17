@@ -15,8 +15,8 @@
   </template> -->
 
     <template v-for="(plugin, name) in plugins">
-      <a :id="name" :key="name+'.anchor'"/>
-      <os-plugin-dygraph :ref="name" :id="name+'.plugin'" :data="plugin" :key="name+'.plugin'"/>
+      <!-- <a :id="name" :key="name+'.anchor'"/> -->
+      <os-plugin-dygraph :ref="name" :id="name" :data="plugin" :key="name+'.plugin'"/>
     </template>
 </div>
 </template>
