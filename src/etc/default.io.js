@@ -1,8 +1,8 @@
 'use strict'
 
 export default {
-  scheme: 'http',
-  host: 'colo',
+  scheme: 'ws',
+  host: 'localhost',
   port: 8080,
-  io: { forceNew: false }
+  io: { forceNew: false, transports: ['websocket'] }
 }
