@@ -343,6 +343,14 @@ export default {
           this.chart.interval
         )
 
+        /**
+        * used to be in components/chart
+        * @todo : reimplement all logic that was defined about 'match' & 'watch' etc...
+        **/
+        if (this.chart.watch && this.chart.watch.transform) {
+          this.$options.tabular.data = this.chart.watch.transform(this.$options.tabular.data, this, this.chart)
+        }
+
         if (this.$refs[name] && typeof this.$refs[name].update === 'function' && this.$options.tabular.data.length > 0) {
           if (inmediate === true) {
             this.$refs[name].update(this.$options.tabular.data)

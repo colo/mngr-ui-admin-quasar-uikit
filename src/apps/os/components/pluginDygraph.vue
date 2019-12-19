@@ -30,6 +30,7 @@
       needed so component is recreated on key change, so a new Dygraph chart is created with new labels / columns
       -->
       <component
+        v-if="chart"
         :is="tabular === false ? 'chart' : 'chart-tabular'"
         :wrapper="{
           type: 'dygraph'
@@ -39,10 +40,7 @@
         :id="id"
         :key="view.minute"
         :EventBus="eventbus"
-        :stat="{
-          data: [],
-          length: 360,
-        }"
+        :stat="stat"
         :chart="chart"
         :reactive="false"
         :no_buffer="true"
@@ -72,6 +70,8 @@ import { EventBus } from '@libs/eventbus'
 import chartTabular from '@components/chart.tabular'
 
 import dygraph_line_chart from 'mngr-ui-admin-charts/defaults/dygraph.line'
+import dygraph_loadavg from 'mngr-ui-admin-charts/os/loadavg'
+import dygraph_memory from 'mngr-ui-admin-charts/os/memory'
 
 import Dygraph from 'dygraphs'
 
@@ -139,6 +139,8 @@ export default {
   components: { chartTabular },
 
   // pipelines: {},
+  dygraph_chart: undefined,
+
   props: {
     id: {
       type: String,
@@ -176,23 +178,61 @@ export default {
       show_minute: false,
 
       eventbus: EventBus,
-      chart: Object.merge(Object.clone(dygraph_line_chart), {
-        interval: 1,
-        options: {
-          digitsAfterDecimal: 16,
-          strokeWidth: 1.5,
-          pixelRatio: null,
-          strokeBorderWidth: 0.0,
-          gridLineWidth: 0.1
-          // axes: {
-          //   x: {
-          //     ticker: Dygraph.dateTicker
-          //   }
-          // }
-        }
-      })
+      chart: undefined,
+      stat: {
+        data: [],
+        length: 360
+      }
+      // Object.merge(Object.clone(this.$options.dygraph_chart), {
+      //   interval: 1,
+      //   options: {
+      //     digitsAfterDecimal: 16,
+      //     strokeWidth: 1.5,
+      //     pixelRatio: null,
+      //     strokeBorderWidth: 0.0,
+      //     gridLineWidth: 0.1
+      //     // axes: {
+      //     //   x: {
+      //     //     ticker: Dygraph.dateTicker
+      //     //   }
+      //     // }
+      //   }
+      // })
 
     }
+  },
+  created: function () {
+    debug('lifecycle created', this.id)
+    switch (this.id) {
+      case 'os.loadavg':
+        this.$options.dygraph_chart = dygraph_loadavg
+        break
+
+      case 'os.memory':
+        this.$options.dygraph_chart = dygraph_memory
+        break
+
+      default:
+        this.$options.dygraph_chart = dygraph_line_chart
+    }
+
+    this.$set(this.stat, 'length', this.stat.length / this.$options.dygraph_chart)
+
+    this.chart = Object.merge(Object.clone(this.$options.dygraph_chart), {
+      // interval: 1,
+      options: {
+        digitsAfterDecimal: 16,
+        strokeWidth: 1.5,
+        pixelRatio: null,
+        strokeBorderWidth: 0.0,
+        gridLineWidth: 0.1
+        // axes: {
+        //   x: {
+        //     ticker: Dygraph.dateTicker
+        //   }
+        // }
+      }
+    })
   },
   watch: {
     'view.minute': function (val) {
@@ -204,7 +244,7 @@ export default {
       // this.no_buffer = true
       this.$options.__config_set = false
 
-      this.chart = Object.merge(Object.clone(dygraph_line_chart), {
+      this.chart = Object.merge(Object.clone(this.$options.dygraph_chart), {
         interval: 1,
         options: {
           strokeWidth: 1.5,

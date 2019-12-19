@@ -73,7 +73,7 @@ export default {
         let inmediate = false
         if (this.chart_init === false) {
           // this.__process_stat(this.chart, this.id, val)
-          this.__process_chart(this.chart, this.id)
+          this.__process_chart(this.chart, this.id, data)
           inmediate = true
         }
 
