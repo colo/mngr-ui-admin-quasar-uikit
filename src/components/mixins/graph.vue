@@ -252,7 +252,7 @@ export default {
         } else if (data.length > 0) {
           // let splice = data.length
           let length = data.length
-          let splice = this.stat.length || this.$options.tabular.data.length
+          let splice = (this.stat.length || this.$options.tabular.data.length) * this.chart.interval
           this.$options.tabular.data = data
 
           this.$options.tabular.data.splice(

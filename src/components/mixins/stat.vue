@@ -589,7 +589,7 @@ export default {
       // }
 
       // if (this.$options.__buffer_data.length > 10) { this.$options.__range_init = true }
-      debug('__set_stat_data', this.id, data, this.$options.stat_data, this.$options.__buffer_data.length, this.$options.__range_init)
+      // debug('__set_stat_data', this.id, data, this.$options.stat_data, this.$options.__buffer_data.length, this.$options.__range_init)
 
       if (this.$options.__range_init === true) {
         // if you are not using buffer, you are managing your data, you are in charge of sorting
@@ -597,6 +597,18 @@ export default {
           this.$options.stat_data.sort(function (a, b) {
             return (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0)
           })
+
+          let length = this.$options.stat_data.length
+          let splice = this.stat.length * this.chart.interval
+          // || this.$options.stat_data.length
+          // this.$options.tabular.data = data
+
+          this.$options.stat_data.splice(
+            (splice * -1) + 1,
+            length - splice
+          )
+
+          debug('__set_stat_data', this.id, this.$options.stat_data.length, splice, length)
         }
 
         this.stat_lastupdate = Date.now()
