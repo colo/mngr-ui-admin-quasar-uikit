@@ -43,7 +43,7 @@
         :stat="stat"
         :chart="chart"
         :reactive="false"
-        :no_buffer="true"
+        :no_buffer="false"
       >
       <!-- data: [processed_data] -->
       <!-- stat -> length: 300, -->
@@ -72,6 +72,7 @@ import chartTabular from '@components/chart.tabular'
 import dygraph_line_chart from 'mngr-ui-admin-charts/defaults/dygraph.line'
 import dygraph_loadavg from 'mngr-ui-admin-charts/os/loadavg'
 import dygraph_memory from 'mngr-ui-admin-charts/os/memory'
+import dygraph_cpus from 'mngr-ui-admin-charts/os/cpus'
 
 import Dygraph from 'dygraphs'
 
@@ -161,6 +162,8 @@ export default {
   },
 
   __config_set: false,
+  __labels_set: false,
+
   plugin_data: undefined,
 
   data () {
@@ -203,7 +206,14 @@ export default {
   },
   created: function () {
     debug('lifecycle created', this.id)
-    switch (this.id) {
+    let id
+    if (/cpus/.test(this.id)) {
+      id = 'os.cpus'
+    } else {
+      id = this.id
+    }
+
+    switch (id) {
       case 'os.loadavg':
         this.$options.dygraph_chart = dygraph_loadavg
         break
@@ -212,27 +222,38 @@ export default {
         this.$options.dygraph_chart = dygraph_memory
         break
 
+      case 'os.cpus':
+        this.$options.dygraph_chart = dygraph_cpus
+        break
+
       default:
         this.$options.dygraph_chart = dygraph_line_chart
     }
 
-    this.$set(this.stat, 'length', this.stat.length / this.$options.dygraph_chart)
+    if (!this.$options.dygraph_chart.interval || isNaN(this.$options.dygraph_chart.interval)) { this.$options.dygraph_chart.interval = 1 }
 
-    this.chart = Object.merge(Object.clone(this.$options.dygraph_chart), {
-      // interval: 1,
-      options: {
-        digitsAfterDecimal: 16,
-        strokeWidth: 1.5,
-        pixelRatio: null,
-        strokeBorderWidth: 0.0,
-        gridLineWidth: 0.1
-        // axes: {
-        //   x: {
-        //     ticker: Dygraph.dateTicker
-        //   }
-        // }
-      }
-    })
+    this.$set(this.stat, 'length', this.stat.length / this.$options.dygraph_chart.interval)
+
+    if (this.$options.dygraph_chart.options && this.$options.dygraph_chart.options.labels && this.$options.dygraph_chart.options.labels.length > 1) {
+      this.$options.__labels_set = true
+    }
+
+    this.chart = Object.clone(this.$options.dygraph_chart)
+    // this.chart = Object.merge(Object.clone(this.$options.dygraph_chart), {
+    //   // interval: 1,
+    //   options: {
+    //     digitsAfterDecimal: 16,
+    //     strokeWidth: 1.5,
+    //     pixelRatio: null,
+    //     strokeBorderWidth: 0.0,
+    //     gridLineWidth: 0.1
+    //     // axes: {
+    //     //   x: {
+    //     //     ticker: Dygraph.dateTicker
+    //     //   }
+    //     // }
+    //   }
+    // })
   },
   watch: {
     'view.minute': function (val) {
@@ -349,7 +370,7 @@ export default {
 
         // debug('data watch show_minute %s %o', this.id, this.show_minute)
 
-        if (this.$options.__config_set === false) { this.$set(this.chart.options, 'labels', ['Time']) }
+        if (this.$options.__config_set === false && this.$options.__labels_set === false) { this.$set(this.chart.options, 'labels', ['Time']) }
         // this.$set(this.chart.options, 'sigFigs', 6)
 
         // if (this.view.minute === false && this.config.graph && this.config.graph.args && this.$options.__config_set === false) {
@@ -395,7 +416,7 @@ export default {
           // debug('LABEL ', this.id, label)
           // label = label.replace('  ', '')
           // if (this.$options.__config_set === false && (!key_config.graph || key_config.graph !== 'no'))
-          if (this.$options.__config_set === false) { this.chart.options.labels.push(label) }
+          if (this.$options.__config_set === false && this.$options.__labels_set === false) { this.chart.options.labels.push(label) }
 
           // debug('KEY %s %o', key, this.config)
 

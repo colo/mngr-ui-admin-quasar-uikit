@@ -25,7 +25,7 @@ const os_hosts_paths = {
         range: 'posix ' + (Date.now() - (15 * SECOND)) + '-' + Date.now() + '/*',
         path: 'all',
         query: {
-          'from': 'os',
+          'from': 'os_tabular',
           'index': 'host',
           'q': [
             // { 'config': 'graph' },
@@ -57,8 +57,8 @@ const os_hosts_paths = {
     let _hosts_paths = {}
     let _paths = []
 
-    if (data && data.os && data.os.length > 0) {
-      Array.each(data.os, function (host_group) {
+    if (data && data.os_tabular && data.os_tabular.length > 0) {
+      Array.each(data.os_tabular, function (host_group) {
         Array.each(host_group, function (plugin) {
           let host = plugin.metadata.host
           // debug('All callback', plugin)
