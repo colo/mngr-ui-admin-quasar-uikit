@@ -78,6 +78,9 @@ import dygraph_mounts_used from 'mngr-ui-admin-charts/os/mounts.used'
 import dygraph_mounts_blocks from 'mngr-ui-admin-charts/os/mounts.blocks.tabular'
 import dygraph_networkInterfaces_bytes from 'mngr-ui-admin-charts/os/networkInterfaces.bytes'
 import dygraph_networkInterfaces_packets from 'mngr-ui-admin-charts/os/networkInterfaces.packets'
+import dygraph_blockdevices_time from 'mngr-ui-admin-charts/os/blockdevices.time'
+import dygraph_blockdevices_sectors from 'mngr-ui-admin-charts/os/blockdevices.sectors'
+import dygraph_blockdevices_requests from 'mngr-ui-admin-charts/os/blockdevices.requests'
 
 import Dygraph from 'dygraphs'
 
@@ -215,8 +218,12 @@ export default {
     let id
     if (/cpus/.test(this.id)) {
       id = 'os.cpus'
-    } else if (/blockdevices/.test(this.id)) {
-      id = 'os.blockdevices'
+    } else if (/^os\.blockdevices\..*\.time/.test(this.id)) {
+      id = 'os.blockdevices.time'
+    } else if (/^os\.blockdevices\..*\.sectors/.test(this.id)) {
+      id = 'os.blockdevices.sectors'
+    } else if (/^os\.blockdevices\..*\.requests/.test(this.id)) {
+      id = 'os.blockdevices.requests'
     } else if (/^os\.mounts\..*\.blocks$/.test(this.id)) {
       id = 'os.mounts.blocks'
     } else if (/networkInterfaces.*\.bytes/.test(this.id)) {
@@ -240,8 +247,16 @@ export default {
         this.$options.dygraph_chart = dygraph_cpus
         break
 
-      case 'os.blockdevices':
-        this.$options.dygraph_chart = dygraph_derived
+      case 'os.blockdevices.time':
+        this.$options.dygraph_chart = dygraph_blockdevices_time
+        break
+
+      case 'os.blockdevices.sectors':
+        this.$options.dygraph_chart = dygraph_blockdevices_sectors
+        break
+
+      case 'os.blockdevices.requests':
+        this.$options.dygraph_chart = dygraph_blockdevices_requests
         break
 
       case 'os.networkInterfaces.bytes':
