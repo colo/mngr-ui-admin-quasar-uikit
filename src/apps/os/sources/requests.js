@@ -22,7 +22,7 @@ const os_hosts_paths = {
     ) {
       source = [{
         params: { id: _key },
-        range: 'posix ' + (Date.now() - (15 * SECOND)) + '-' + Date.now() + '/*',
+        range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
         path: 'all',
         query: {
           'from': 'os_tabular',
