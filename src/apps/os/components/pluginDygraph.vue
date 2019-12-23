@@ -443,7 +443,7 @@ export default {
         // debug('valueRange %o', this.id, this.chart.options.valueRange)
 
         let processed_data = []
-        let negative_key
+        let negative_key = []
         let cdefs = []
 
         /**
@@ -472,7 +472,7 @@ export default {
           // debug('KEY %s %o', key, this.config)
 
           // if (key_config && key_config.negative) { negative_key = key_config.negative.replace('_', '') }
-          if (key_config && key_config.negative) { negative_key = key_config.negative }
+          if (key_config && key_config.negative) { negative_key.push(key_config.negative) }
 
           // if (key_config.cdef) { cdefs.push(key_config.cdef) }
 
@@ -659,49 +659,52 @@ export default {
         /**
           * now that we now if there is a negative key, find it and make values negative
           **/
-        if (negative_key) {
-          // index = 0
-          // Object.each(periodical, function (arr, key) {
-          // if (negative_key === key) {
-          let key_config = this.config[negative_key]
+        if (negative_key.length > 0) {
+          Array.each(negative_key, function (negative_key) {
+            // index = 0
+            // Object.each(periodical, function (arr, key) {
+            // if (negative_key === key) {
 
-          if (!key_config) {
-            Object.each(this.config, function (conf, conf_key) {
-              if (conf_key.replace('_', '').replace('.', '') === negative_key) {
-                key_config = conf
-              }
-            })
-          }
+            let key_config = this.config[negative_key]
 
-          if (key_config && key_config.max && this.chart.options.valueRange) { // && this.$options.__config_set === false
-            this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
-          }
+            if (!key_config) {
+              Object.each(this.config, function (conf, conf_key) {
+                if (conf_key.replace('_', '').replace('.', '') === negative_key) {
+                  key_config = conf
+                }
+              })
+            }
 
-          let label = (key_config && key_config.label) ? key_config.label : negative_key
+            if (key_config && key_config.max && this.chart.options.valueRange) { // && this.$options.__config_set === false
+              this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
+            }
 
-          let index = this.chart.options.labels.indexOf(label)
+            let label = (key_config && key_config.label) ? key_config.label : negative_key
 
-          if (index > -1) {
-            Array.each(processed_data, function (row, i) {
-              processed_data[i][index] = row[index] * -1
-            })
-          }
+            let index = this.chart.options.labels.indexOf(label)
 
-          let median_index = this.chart.options.labels.indexOf(label + '(median)')
+            if (index > -1) {
+              Array.each(processed_data, function (row, i) {
+                processed_data[i][index] = row[index] * -1
+              })
+            }
 
-          if (median_index > -1) {
-            Array.each(processed_data, function (row, i) {
-              processed_data[i][median_index] = row[median_index] * -1
-            })
-          }
-          // }
-          // }.bind(this))
+            let median_index = this.chart.options.labels.indexOf(label + '(median)')
 
-          if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
-            this.$set(this.chart.options, 'fillGraph', true)
-            this.$set(this.chart.options, 'fillAlpha', 0.5)
-            this.$set(this.chart.options, 'strokeWidth', 1)
-          }
+            if (median_index > -1) {
+              Array.each(processed_data, function (row, i) {
+                processed_data[i][median_index] = row[median_index] * -1
+              })
+            }
+            // }
+            // }.bind(this))
+
+            if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
+              this.$set(this.chart.options, 'fillGraph', true)
+              this.$set(this.chart.options, 'fillAlpha', 0.5)
+              this.$set(this.chart.options, 'strokeWidth', 1)
+            }
+          }.bind(this))
         }
 
         /**
