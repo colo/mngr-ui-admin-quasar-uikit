@@ -71,6 +71,7 @@ import chartTabular from '@components/chart.tabular'
 
 import dygraph_line_chart from 'mngr-ui-admin-charts/defaults/dygraph.line'
 import dygraph_derived from 'mngr-ui-admin-charts/defaults/dygraph.derived.tabular'
+import dygraph_uptime from 'mngr-ui-admin-charts/os/uptime'
 import dygraph_loadavg from 'mngr-ui-admin-charts/os/loadavg'
 import dygraph_memory from 'mngr-ui-admin-charts/os/memory.tabular'
 import dygraph_cpus from 'mngr-ui-admin-charts/os/cpus.tabular'
@@ -237,6 +238,10 @@ export default {
     switch (id) {
       case 'os.loadavg':
         this.$options.dygraph_chart = dygraph_loadavg
+        break
+
+      case 'os.uptime':
+        this.$options.dygraph_chart = dygraph_uptime
         break
 
       case 'os.memory':
