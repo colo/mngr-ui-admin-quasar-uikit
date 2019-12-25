@@ -333,7 +333,7 @@ export default {
       * so we need to pick the only element (if there are more, is an error)
       */
 
-      if (Array.isArray(val)) { val = val[0] }
+      if (Array.isArray(val) && val.length > 1) { val = val[0] }
 
       // this.__stat_data_watcher(val)
       if (val && val.length > 0) {

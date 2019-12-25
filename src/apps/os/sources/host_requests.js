@@ -22,10 +22,11 @@ const generic_callback = function (data, metadata, key, vm) {
       Object.each(plugin, function (value, prop) {
         if (!plugins[name][prop]) plugins[name][prop] = []
         plugins[name][prop].combine(value)
+        // plugins[name][prop] = value
       })
     })
 
-    // debug('PERIODICAL HOST CALLBACK data %o', plugins)
+    debug('PERIODICAL HOST CALLBACK data PLUGINS %o', plugins)
 
     Object.each(plugins, function (plugin, name) {
       if (plugin && Object.getLength(plugin) > 0) {
@@ -346,7 +347,7 @@ const host_once_register = {
               'register': 'changes',
               // 'format': 'merged',
               'index': false,
-              'opts': { includeTypes: true, squash: 0.5 },
+              'opts': { includeTypes: true, squash: 0.9 },
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/

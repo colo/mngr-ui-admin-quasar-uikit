@@ -328,7 +328,7 @@ export default {
             (
               !this.chart.interval ||
               // (Date.now() - ((this.chart.interval * 1000) - 200) >= this.$options.tabular.lastupdate) ||
-              (Date.now() - (this.chart.interval * 1000) >= this.$options.tabular.lastupdate) ||
+              (Date.now() - (this.chart.interval * 999) >= this.$options.tabular.lastupdate) ||
               this.$options.tabular.lastupdate === 0
             )
           )

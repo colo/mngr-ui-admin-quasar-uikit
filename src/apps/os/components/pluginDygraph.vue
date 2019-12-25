@@ -781,7 +781,7 @@ export default {
         debug('__process_data %s %o', this.id, this.chart.options)
         this.$nextTick(function () {
           // debug('__process_data %s %o', this.id, processed_data)
-          if (processed_data.length > 1) {
+          if (processed_data.length > 0) {
             this.$refs[this.id].update_stat_data([processed_data])
             // this.$refs[this.id].visibilityChanged(true)
           }
