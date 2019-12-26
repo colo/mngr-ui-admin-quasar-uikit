@@ -21,7 +21,7 @@ export default {
   input: [
     {
       poll: {
-        // suspended: true,
+        suspended: true,
         id: 'input.os.host',
         conn: [
 

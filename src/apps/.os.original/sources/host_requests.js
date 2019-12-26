@@ -21,52 +21,64 @@ const generic_callback = function (data, metadata, key, vm) {
             if (!vm.$refs[name][0].$options.plugin_data) vm.$refs[name][0].$options.plugin_data = { periodical: undefined, minute: undefined }
 
             let _plugin = {}
-            if (
-              vm.$refs[name][0].$options.plugin_data &&
-              vm.$refs[name][0].$options.plugin_data.periodical &&
-                Object.getLength(vm.$refs[name][0].$options.plugin_data.periodical) > 0
-            ) {
-              _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.periodical))
+            // if (
+            //   vm.$refs[name][0].$options.plugin_data &&
+            //   vm.$refs[name][0].$options.plugin_data.periodical &&
+            //     Object.getLength(vm.$refs[name][0].$options.plugin_data.periodical) > 0
+            // ) {
+            //   _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.periodical))
+            //
+            //   Object.each(plugin, function (data, prop) {
+            //     if (_plugin[prop] && Array.isArray(_plugin[prop]) && _plugin[prop].length > 0) {
+            //       _plugin[prop].combine(data)
+            //
+            //       // sort by first column, timestamp
+            //       _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+            //
+            //       let filtered = []
+            //       Array.each(_plugin[prop], function (item, index) {
+            //         if (index === 0) { filtered.push(item) } else if (item[0] !== _plugin[prop][index - 1][0]) {
+            //           filtered.push(item)
+            //         }
+            //       })
+            //
+            //       // debug('PERIODICAL HOST CALLBACK %s %o', name, prop, filtered)
+            //
+            //       _plugin[prop] = filtered
+            //     } else {
+            //       debug('PERIODICAL HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
+            //       // _plugin[prop] = data
+            //       //
+            //       // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+            //     }
+            //   })
+            //
+            //   // debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
+            // } else {
+            //   _plugin = {}
 
-              Object.each(plugin, function (data, prop) {
-                if (_plugin[prop] && Array.isArray(_plugin[prop]) && _plugin[prop].length > 0) {
-                  _plugin[prop].combine(data)
+            // Object.each(plugin, function (data, prop) {
+            //   // sort by first column, timestamp
+            //
+            //   if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
+            //     _plugin[prop] = Array.clone(data)
+            //     _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+            //   }
+            // })
 
-                  // sort by first column, timestamp
-                  _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-
-                  let filtered = []
-                  Array.each(_plugin[prop], function (item, index) {
-                    if (index === 0) { filtered.push(item) } else if (item[0] !== _plugin[prop][index - 1][0]) {
-                      filtered.push(item)
-                    }
-                  })
-
-                  // debug('PERIODICAL HOST CALLBACK %s %o', name, prop, filtered)
-
-                  _plugin[prop] = filtered
-                } else {
-                  debug('PERIODICAL HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
-                  // _plugin[prop] = data
-                  //
-                  // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-                }
-              })
-
-              // debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
-            } else {
-              // _plugin = {}
-              Object.each(plugin, function (data, prop) {
-                // sort by first column, timestamp
-
+            Object.keys(plugin)
+              .sort()// sort keys alphabetically
+              .forEach(function (prop, i) {
+              // console.log(v, data[v]);
+                let data = plugin[prop]
                 if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
                   _plugin[prop] = Array.clone(data)
                   _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
                 }
               })
 
-              debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
-            }
+            // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
+            // }
 
             if (Object.getLength(_plugin) > 0) {
               debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
@@ -330,7 +342,7 @@ const host_once_register = {
               'register': 'changes',
               'format': 'tabular',
               'index': false,
-              'opts': { includeTypes: true, squash: 1 },
+              'opts': { includeTypes: true, squash: false },
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/

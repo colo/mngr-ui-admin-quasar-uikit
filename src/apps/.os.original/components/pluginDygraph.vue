@@ -43,7 +43,7 @@
         :stat="stat"
         :chart="chart"
         :reactive="false"
-        :no_buffer="true"
+        :no_buffer="false"
       >
       <!-- data: [processed_data] -->
       <!-- stat -> length: 300, -->
@@ -70,8 +70,18 @@ import { EventBus } from '@libs/eventbus'
 import chartTabular from '@components/chart.tabular'
 
 import dygraph_line_chart from 'mngr-ui-admin-charts/defaults/dygraph.line'
+import dygraph_derived from 'mngr-ui-admin-charts/defaults/dygraph.derived.tabular'
+import dygraph_uptime from 'mngr-ui-admin-charts/os/uptime'
 import dygraph_loadavg from 'mngr-ui-admin-charts/os/loadavg'
-import dygraph_memory from 'mngr-ui-admin-charts/os/memory'
+import dygraph_memory from 'mngr-ui-admin-charts/os/memory.tabular'
+import dygraph_cpus from 'mngr-ui-admin-charts/os/cpus.tabular'
+import dygraph_mounts_used from 'mngr-ui-admin-charts/os/mounts.used'
+import dygraph_mounts_blocks from 'mngr-ui-admin-charts/os/mounts.blocks.tabular'
+import dygraph_networkInterfaces_bytes from 'mngr-ui-admin-charts/os/networkInterfaces.bytes'
+import dygraph_networkInterfaces_packets from 'mngr-ui-admin-charts/os/networkInterfaces.packets'
+import dygraph_blockdevices_time from 'mngr-ui-admin-charts/os/blockdevices.time'
+import dygraph_blockdevices_sectors from 'mngr-ui-admin-charts/os/blockdevices.sectors'
+import dygraph_blockdevices_requests from 'mngr-ui-admin-charts/os/blockdevices.requests'
 
 import Dygraph from 'dygraphs'
 
@@ -153,11 +163,11 @@ export default {
     data: {
       type: Object,
       default: function () { return {} }
-    },
-    config: {
-      type: Object,
-      default: function () { return undefined }
     }
+    // config: {
+    //   type: Object,
+    //   default: function () { return undefined }
+    // }
   },
 
   __config_set: false,
@@ -181,6 +191,7 @@ export default {
 
       eventbus: EventBus,
       chart: undefined,
+      config: undefined,
       stat: {
         data: [],
         length: 360
@@ -205,13 +216,68 @@ export default {
   },
   created: function () {
     debug('lifecycle created', this.id)
-    switch (this.id) {
+    let id
+    if (/cpus/.test(this.id)) {
+      id = 'os.cpus'
+    } else if (/^os\.blockdevices\..*\.time/.test(this.id)) {
+      id = 'os.blockdevices.time'
+    } else if (/^os\.blockdevices\..*\.sectors/.test(this.id)) {
+      id = 'os.blockdevices.sectors'
+    } else if (/^os\.blockdevices\..*\.requests/.test(this.id)) {
+      id = 'os.blockdevices.requests'
+    } else if (/^os\.mounts\..*\.blocks$/.test(this.id)) {
+      id = 'os.mounts.blocks'
+    } else if (/networkInterfaces.*\.bytes/.test(this.id)) {
+      id = 'os.networkInterfaces.bytes'
+    } else if (/networkInterfaces.*\.packets/.test(this.id)) {
+      id = 'os.networkInterfaces.packets'
+    } else {
+      id = this.id
+    }
+
+    switch (id) {
       case 'os.loadavg':
         this.$options.dygraph_chart = dygraph_loadavg
         break
 
+      case 'os.uptime':
+        this.$options.dygraph_chart = dygraph_uptime
+        break
+
       case 'os.memory':
         this.$options.dygraph_chart = dygraph_memory
+        break
+
+      case 'os.cpus':
+        this.$options.dygraph_chart = dygraph_cpus
+        break
+
+      case 'os.blockdevices.time':
+        this.$options.dygraph_chart = dygraph_blockdevices_time
+        break
+
+      case 'os.blockdevices.sectors':
+        this.$options.dygraph_chart = dygraph_blockdevices_sectors
+        break
+
+      case 'os.blockdevices.requests':
+        this.$options.dygraph_chart = dygraph_blockdevices_requests
+        break
+
+      case 'os.networkInterfaces.bytes':
+        this.$options.dygraph_chart = dygraph_networkInterfaces_bytes
+        break
+
+      case 'os.networkInterfaces.packets':
+        this.$options.dygraph_chart = dygraph_networkInterfaces_packets
+        break
+
+      case 'os.mounts.used':
+        this.$options.dygraph_chart = dygraph_mounts_used
+        break
+
+      case 'os.mounts.blocks':
+        this.$options.dygraph_chart = dygraph_mounts_blocks
         break
 
       default:
@@ -227,6 +293,8 @@ export default {
     }
 
     this.chart = Object.clone(this.$options.dygraph_chart)
+    this.config = this.chart.config
+
     // this.chart = Object.merge(Object.clone(this.$options.dygraph_chart), {
     //   // interval: 1,
     //   options: {
@@ -380,7 +448,7 @@ export default {
         // debug('valueRange %o', this.id, this.chart.options.valueRange)
 
         let processed_data = []
-        let negative_key
+        let negative_key = []
         let cdefs = []
 
         /**
@@ -408,7 +476,8 @@ export default {
 
           // debug('KEY %s %o', key, this.config)
 
-          // if (key_config.negative) { negative_key = key_config.negative.replace('_', '') }
+          // if (key_config && key_config.negative) { negative_key = key_config.negative.replace('_', '') }
+          if (key_config && key_config.negative) { negative_key.push(key_config.negative) }
 
           // if (key_config.cdef) { cdefs.push(key_config.cdef) }
 
@@ -504,7 +573,7 @@ export default {
 
           // debug('MINUTE %o', minute)
 
-          if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0 && (!key_config.graph || key_config.graph !== 'no')) {
+          if (this.view.minute === true && minute && minute[key] && Array.isArray(minute[key]) && minute[key].length > 0 && (!key_config || !key_config.graph || key_config.graph !== 'no')) {
             if (!this.chart.options.labels.contains(label + '(median)') && this.$options.__config_set === false) {
               this.chart.options.labels.push(label + '(median)')
             }
@@ -595,50 +664,53 @@ export default {
         /**
           * now that we now if there is a negative key, find it and make values negative
           **/
-        // if (negative_key) {
-        //   // index = 0
-        //   // Object.each(periodical, function (arr, key) {
-        //   // if (negative_key === key) {
-        //   let key_config = this.config[negative_key]
-        //
-        //   if (!key_config) {
-        //     Object.each(this.config, function (conf, conf_key) {
-        //       if (conf_key.replace('_', '').replace('.', '') === negative_key) {
-        //         key_config = conf
-        //       }
-        //     })
-        //   }
-        //
-        //   if (key_config.max && this.chart.options.valueRange) { // && this.$options.__config_set === false
-        //     this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
-        //   }
-        //
-        //   let label = (key_config && key_config.label) ? key_config.label : negative_key
-        //
-        //   let index = this.chart.options.labels.indexOf(label)
-        //
-        //   if (index > -1) {
-        //     Array.each(processed_data, function (row, i) {
-        //       processed_data[i][index] = row[index] * -1
-        //     })
-        //   }
-        //
-        //   let median_index = this.chart.options.labels.indexOf(label + '(median)')
-        //
-        //   if (median_index > -1) {
-        //     Array.each(processed_data, function (row, i) {
-        //       processed_data[i][median_index] = row[median_index] * -1
-        //     })
-        //   }
-        //   // }
-        //   // }.bind(this))
-        //
-        //   if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
-        //     this.$set(this.chart.options, 'fillGraph', true)
-        //     this.$set(this.chart.options, 'fillAlpha', 0.5)
-        //     this.$set(this.chart.options, 'strokeWidth', 1)
-        //   }
-        // }
+        if (negative_key.length > 0) {
+          Array.each(negative_key, function (negative_key) {
+            // index = 0
+            // Object.each(periodical, function (arr, key) {
+            // if (negative_key === key) {
+
+            let key_config = this.config[negative_key]
+
+            if (!key_config) {
+              Object.each(this.config, function (conf, conf_key) {
+                if (conf_key.replace('_', '').replace('.', '') === negative_key) {
+                  key_config = conf
+                }
+              })
+            }
+
+            if (key_config && key_config.max && this.chart.options.valueRange) { // && this.$options.__config_set === false
+              this.$set(this.chart.options.valueRange, 0, (this.chart.options.valueRange && this.chart.options.valueRange[0] && this.chart.options.valueRange[0] < (key_config.max * -1)) ? this.chart.options.valueRange[0] : (key_config.max * -1))
+            }
+
+            let label = (key_config && key_config.label) ? key_config.label : negative_key
+
+            let index = this.chart.options.labels.indexOf(label)
+
+            if (index > -1) {
+              Array.each(processed_data, function (row, i) {
+                processed_data[i][index] = row[index] * -1
+              })
+            }
+
+            let median_index = this.chart.options.labels.indexOf(label + '(median)')
+
+            if (median_index > -1) {
+              Array.each(processed_data, function (row, i) {
+                processed_data[i][median_index] = row[median_index] * -1
+              })
+            }
+            // }
+            // }.bind(this))
+
+            if (!this.chart.options.fillGraph || this.chart.options.fillGraph === false) {
+              this.$set(this.chart.options, 'fillGraph', true)
+              this.$set(this.chart.options, 'fillAlpha', 0.5)
+              this.$set(this.chart.options, 'strokeWidth', 1)
+            }
+          }.bind(this))
+        }
 
         /**
           * process cdefs
@@ -709,7 +781,7 @@ export default {
         debug('__process_data %s %o', this.id, this.chart.options)
         this.$nextTick(function () {
           // debug('__process_data %s %o', this.id, processed_data)
-          if (processed_data.length > 1) {
+          if (processed_data.length > 0) {
             this.$refs[this.id].update_stat_data([processed_data])
             // this.$refs[this.id].visibilityChanged(true)
           }

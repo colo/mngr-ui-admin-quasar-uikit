@@ -72,14 +72,25 @@ const generic_callback = function (data, metadata, key, vm) {
             //   // debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
             // } else {
             // _plugin = {}
-            Object.each(plugin, function (data, prop) {
-              // sort by first column, timestamp
 
-              if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
-                _plugin[prop] = Array.clone(data)
-                _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-              }
-            })
+            Object.keys(plugin)
+              .sort()// sort keys alphabetically
+              .forEach(function (prop, i) {
+              // console.log(v, data[v]);
+                let data = plugin[prop]
+                if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
+                  _plugin[prop] = Array.clone(data)
+                  _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+                }
+              })
+            // Object.each(plugin, function (data, prop) {
+            //   // sort by first column, timestamp
+            //
+            //   if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
+            //     _plugin[prop] = Array.clone(data)
+            //     _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+            //   }
+            // })
 
             debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
             // }
