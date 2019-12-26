@@ -347,7 +347,7 @@ const host_once_register = {
               'register': 'changes',
               // 'format': 'merged',
               'index': false,
-              'opts': { includeTypes: true, squash: 0.9 },
+              'opts': { includeTypes: true, squash: false },
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/
