@@ -5,14 +5,30 @@ const SECOND = 1000
 const MINUTE = 60 * SECOND
 
 const generic_callback = function (data, metadata, key, vm) {
-  // debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
+  debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
 
-  if (/periodical/.test(key) && (data.os || Object.getLength(data) > 0)) {
+  if (/periodical/.test(key) && (data.os_tabular || Object.getLength(data) > 0)) {
     let _data
-    if (data.os) _data = data.os // comes from 'Range'
+    if (data.os_tabular) _data = data.os_tabular // comes from 'Range'
     else _data = data // comes from 'register'
 
-    Object.each(_data, function (plugin, name) {
+    let plugins = {}
+    Array.each(_data, function (value) {
+      let name = value.metadata.path
+      let plugin = value.data
+
+      if (!plugins[name]) plugins[name] = {}
+      // plugins[name].push(plugin)
+      Object.each(plugin, function (value, prop) {
+        if (!plugins[name][prop]) plugins[name][prop] = []
+        plugins[name][prop].combine(value)
+        // plugins[name][prop] = value
+      })
+    })
+
+    debug('PERIODICAL HOST CALLBACK data PLUGINS %o', plugins)
+
+    Object.each(plugins, function (plugin, name) {
       if (plugin && Object.getLength(plugin) > 0) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
 
@@ -55,16 +71,7 @@ const generic_callback = function (data, metadata, key, vm) {
             //
             //   // debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
             // } else {
-            //   _plugin = {}
-
-            // Object.each(plugin, function (data, prop) {
-            //   // sort by first column, timestamp
-            //
-            //   if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
-            //     _plugin[prop] = Array.clone(data)
-            //     _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-            //   }
-            // })
+            // _plugin = {}
 
             Object.keys(plugin)
               .sort()// sort keys alphabetically
@@ -76,8 +83,16 @@ const generic_callback = function (data, metadata, key, vm) {
                   _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
                 }
               })
+            // Object.each(plugin, function (data, prop) {
+            //   // sort by first column, timestamp
+            //
+            //   if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
+            //     _plugin[prop] = Array.clone(data)
+            //     _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+            //   }
+            // })
 
-            // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
+            debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
             // }
 
             if (Object.getLength(_plugin) > 0) {
@@ -88,14 +103,14 @@ const generic_callback = function (data, metadata, key, vm) {
         })
       }
     })
-  } else if (/minute/.test(key) && (data.os_historical || Object.getLength(data) > 0)) {
+  } else if (/minute/.test(key) && (data.os_tabular_historical || Object.getLength(data) > 0)) {
     let _data
-    if (data.os_historical) _data = data.os_historical // comes from 'Range'
+    if (data.os_tabular_historical) _data = data.os_tabular_historical // comes from 'Range'
     else _data = data // comes from 'register'
 
     debug('MINUTE HOST CALLBACK data %s %o', key, _data)
 
-    Object.each(data.os_historical, function (plugin, name) {
+    Object.each(data.os_tabular_historical, function (plugin, name) {
       if (plugin && Object.getLength(plugin) > 0) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
 
@@ -164,11 +179,11 @@ const generic_callback = function (data, metadata, key, vm) {
       }
     })
   }
-  // else if (key === 'config.once' && data.os) {
+  // else if (key === 'config.once' && data.os_tabular) {
   //   debug('PERIODICAL HOST CALLBACK CONFIG %o', data)
   //   let _plugins_config = {}
   //   let _plugins_config_sorted = []
-  //   Array.each(data.os, function (group_path) {
+  //   Array.each(data.os_tabular, function (group_path) {
   //     // debug('PERIODICAL HOST CALLBACK %o %o %s', group_path)
   //     let config = group_path[0].config // only one per path
   //     let category = (config && config.graph && config.graph.category) ? config.graph.category.toLowerCase() : 'uncategorized'
@@ -201,7 +216,7 @@ const host_once_component = {
     let key
 
     if (!_key) {
-      key = ['periodical.once', 'minute.once']// 'config.once',
+      key = ['periodical.once']// 'config.once', , 'minute.once'
     }
 
     if (
@@ -215,15 +230,16 @@ const host_once_component = {
             range: 'posix ' + (Date.now() - (6 * MINUTE)) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
-              'from': 'os',
+              'from': 'os_tabular',
               // 'register': 'changes',
-              'format': 'tabular',
+              // 'format': 'merged',
               'index': false,
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/
               'q': [
-                'data'
+                'data',
+                { 'metadata': ['path'] }
               ],
               'transformation': [
                 {
@@ -246,7 +262,7 @@ const host_once_component = {
         //     path: 'all',
         //     // range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
         //     query: {
-        //       'from': 'os',
+        //       'from': 'os_tabular',
         //       // 'index': false,
         //
         //       'q': [
@@ -272,7 +288,7 @@ const host_once_component = {
             query: {
               'from': 'os_historical',
               // 'register': 'changes',
-              'format': 'tabular',
+              // 'format': 'merged',
               'index': false,
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
@@ -321,7 +337,7 @@ const host_once_register = {
     let key
 
     if (!_key) {
-      key = ['periodical.register', 'minute.register']// , 'config.once'
+      key = ['periodical.register']// , 'config.once' , 'minute.register'
       // key = ['config.once']
     }
 
@@ -338,9 +354,9 @@ const host_once_register = {
             // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
-              'from': 'os',
+              'from': 'os_tabular',
               'register': 'changes',
-              'format': 'tabular',
+              // 'format': 'merged',
               'index': false,
               'opts': { includeTypes: true, squash: false },
               /**
@@ -354,9 +370,9 @@ const host_once_register = {
                 //   ]
                 // },
                 // 'metadata',
-                'id',
-                'data'
-                // { 'metadata': ['host'] }
+                // 'id',
+                'data',
+                { 'metadata': ['path'] }
               ],
               // 'transformation': [
               //   {
@@ -380,7 +396,7 @@ const host_once_register = {
             query: {
               'from': 'os_historical',
               'register': 'changes',
-              'format': 'tabular',
+              // 'format': 'merged',
               'index': false,
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
@@ -393,7 +409,7 @@ const host_once_register = {
                 //   ]
                 // },
                 // 'metadata',
-                'id',
+                // 'id',
                 'data'
                 // { 'metadata': ['host', 'type'] }
               ],
@@ -451,7 +467,7 @@ const host_once_register = {
 //             query: {
 //               'from': 'os',
 //               // 'register': 'changes',
-//               'format': 'tabular',
+//               'format': 'merged',
 //               'index': false,
 //               /**
 //               * right now needed to match OUTPUT 'id' with this query (need to @fix)
@@ -485,7 +501,7 @@ const host_once_register = {
 //             query: {
 //               'from': 'os_historical',
 //               // 'register': 'changes',
-//               'format': 'tabular',
+//               'format': 'merged',
 //               'index': false,
 //               /**
 //               * right now needed to match OUTPUT 'id' with this query (need to @fix)
