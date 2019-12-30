@@ -17,6 +17,7 @@ const generic_callback = function (data, metadata, key, vm) {
     // let _plugins_config_sorted = []
 
     Object.each(_data, function (plugin, name) {
+      name = name.toLowerCase()
       let category
       if (name !== undefined) {
         name = name.replace('os.', '')
@@ -29,7 +30,8 @@ const generic_callback = function (data, metadata, key, vm) {
       }
 
       if (plugin && Object.getLength(plugin) > 0) {
-        if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
+        // if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
+        if (!vm.plugins.contains(name)) vm.plugins.push(name)
 
         vm.$nextTick(function () {
           if (vm.$refs[name] && vm.$refs[name][0]) { // if data already exists
@@ -105,6 +107,7 @@ const generic_callback = function (data, metadata, key, vm) {
     })
 
     vm.plugins_categories.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
+    vm.plugins.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
 
     // if (_plugins_categories.length > 0 && _plugins_categories.length !== vm.plugins_categories.length) {
     //   vm.plugins_categories = _plugins_categories
@@ -118,7 +121,8 @@ const generic_callback = function (data, metadata, key, vm) {
 
     Object.each(data.os_historical, function (plugin, name) {
       if (plugin && Object.getLength(plugin) > 0) {
-        if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
+        // if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
+        if (!vm.plugins.contains(name)) vm.plugins.push(name)
 
         vm.$nextTick(function () {
           if (vm.$refs[name] && vm.$refs[name][0]) { // if data already exists

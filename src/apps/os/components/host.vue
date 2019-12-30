@@ -10,11 +10,13 @@
       <!-- <template v-for="(config, name) in plugins_config_per_category">
         <os-plugin-dygraph :ref="name" :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/>
       </template> -->
-      <template v-for="(plugin, name) in plugins">
+      <template v-for="(name) in plugins">
+
         <!-- {{category}}
         {{name}} -->
         <!-- <a :id="name" :key="name+'.anchor'"/> -->
-        <os-plugin-dygraph v-if="name.indexOf(category) > -1" :ref="name" :id="'os.'+name" :name="name" :data="plugin" :key="name+'.plugin'"/>
+        <os-plugin-dygraph v-if="name.indexOf(category) > -1" :ref="name" :id="'os.'+name" :name="name"  :key="name+'.plugin'"/>
+          <!-- :data="plugin" -->
       </template>
     </vk-card>
 
@@ -62,7 +64,7 @@ export default {
       store: false,
       pipeline_id: 'input.os.host',
 
-      plugins: {},
+      plugins: [],
       // plugins_config: {},
       plugins_categories: [],
 
