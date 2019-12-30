@@ -1,23 +1,29 @@
 <template>
   <div>
 
-  <!-- <template v-for="(plugins_config_per_category, category) in plugins_config">
+  <template v-for="(category) in plugins_categories">
     <a :id="category" :key="category+'.anchor'"/>
     <vk-card class="uk-background-secondary uk-light" :key="category">
       <vk-card-title>
         <h3 class="uk-light">{{category}}</h3>
       </vk-card-title>
-      <template v-for="(config, name) in plugins_config_per_category">
+      <!-- <template v-for="(config, name) in plugins_config_per_category">
         <os-plugin-dygraph :ref="name" :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/>
+      </template> -->
+      <template v-for="(plugin, name) in plugins">
+        <!-- {{category}}
+        {{name}} -->
+        <!-- <a :id="name" :key="name+'.anchor'"/> -->
+        <os-plugin-dygraph v-if="name.indexOf(category) > -1" :ref="name" :id="'os.'+name" :name="name" :data="plugin" :key="name+'.plugin'"/>
       </template>
     </vk-card>
 
-  </template> -->
+  </template>
 
-    <template v-for="(plugin, name) in plugins">
-      <!-- <a :id="name" :key="name+'.anchor'"/> -->
+    <!-- <template v-for="(plugin, name) in plugins">
+
       <os-plugin-dygraph :ref="name" :id="name" :data="plugin" :key="name+'.plugin'"/>
-    </template>
+    </template> -->
 </div>
 </template>
 
@@ -57,8 +63,8 @@ export default {
       pipeline_id: 'input.os.host',
 
       plugins: {},
-      plugins_config: {},
-      // plugins_categories: ,
+      // plugins_config: {},
+      plugins_categories: [],
 
       components: {
         range: {

@@ -65,6 +65,11 @@ const os_hosts_paths = {
           let path = (plugin.metadata.path) ? plugin.metadata.path.toLowerCase() : undefined
 
           if (!_hosts_paths[host]) _hosts_paths[host] = []
+
+          if (path !== undefined) {
+            path = path.replace('os.', '')
+            if (path.indexOf('.') > -1) { path = path.substring(0, path.indexOf('.')) }
+          }
           if (path !== undefined && !_hosts_paths[host].contains(path)) _hosts_paths[host].push(path)
 
           if (!_paths.contains(path)) _paths.push(path)

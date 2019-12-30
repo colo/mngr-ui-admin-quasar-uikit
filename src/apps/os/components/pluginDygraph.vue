@@ -156,6 +156,10 @@ export default {
       type: String,
       default: undefined
     },
+    name: {
+      type: String,
+      default: undefined
+    },
     tabular: {
       type: Boolean,
       default: true
@@ -838,7 +842,7 @@ export default {
   computed: {
     title: function () {
       // return (this.config.graph && this.config.graph.title) ? this.config.graph.title :
-      return this.id
+      return (this.name) ? this.name : this.id
     },
     info: function () {
       // return (this.config.graph && this.config.graph.info) ? this.config.graph.info :

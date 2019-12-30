@@ -12,7 +12,22 @@ const generic_callback = function (data, metadata, key, vm) {
     if (data.os) _data = data.os // comes from 'Range'
     else _data = data // comes from 'register'
 
+    // let _paths = []
+    // let _plugins_categories = []
+    // let _plugins_config_sorted = []
+
     Object.each(_data, function (plugin, name) {
+      let category
+      if (name !== undefined) {
+        name = name.replace('os.', '')
+        category = (name.indexOf('.') > -1) ? name.substring(0, name.indexOf('.')) : name
+        // if (!_paths.contains(path)) _paths.push(path)
+        // if (!_plugins_config[category]) _plugins_config[category] = {}
+        if (!vm.plugins_categories.contains(category)) vm.plugins_categories.push(category)
+
+        // _plugins_config[category][name] = config
+      }
+
       if (plugin && Object.getLength(plugin) > 0) {
         if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
 
@@ -88,6 +103,12 @@ const generic_callback = function (data, metadata, key, vm) {
         })
       }
     })
+
+    vm.plugins_categories.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
+
+    // if (_plugins_categories.length > 0 && _plugins_categories.length !== vm.plugins_categories.length) {
+    //   vm.plugins_categories = _plugins_categories
+    // }
   } else if (/minute/.test(key) && (data.os_historical || Object.getLength(data) > 0)) {
     let _data
     if (data.os_historical) _data = data.os_historical // comes from 'Range'
