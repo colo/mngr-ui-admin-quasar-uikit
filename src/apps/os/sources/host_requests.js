@@ -17,7 +17,7 @@ const generic_callback = function (data, metadata, key, vm) {
     // let _plugins_config_sorted = []
 
     Object.each(_data, function (plugin, name) {
-      name = name.toLowerCase()
+      // name = name.toLowerCase()
       let category
       if (name !== undefined) {
         name = name.replace('os.', '')

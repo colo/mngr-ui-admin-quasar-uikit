@@ -62,7 +62,7 @@ const os_hosts_paths = {
         Array.each(host_group, function (plugin) {
           let host = plugin.metadata.host
           // debug('All callback', plugin)
-          let path = (plugin.metadata.path) ? plugin.metadata.path.toLowerCase() : undefined
+          let path = (plugin.metadata.path) ? plugin.metadata.path : undefined
 
           if (!_hosts_paths[host]) _hosts_paths[host] = []
 
