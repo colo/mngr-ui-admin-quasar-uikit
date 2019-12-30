@@ -15,7 +15,7 @@
         <!-- {{host}}
         {{name}} -->
         <!-- <a :id="name" :key="name+'.anchor'"/> -->
-        <os-plugin-dygraph v-if="name.indexOf(host) > -1" :ref="name" :id="'os.'+name" :name="name"  :key="name+'.plugin'"/>
+        <os-plugin-dygraph v-if="name.indexOf(host) > -1" :ref="name" :id="name" :name="name"  :key="name+'.plugin'"/>
           <!-- :data="plugin" -->
       </template>
     </vk-card>

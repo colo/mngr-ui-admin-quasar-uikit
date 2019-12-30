@@ -223,13 +223,13 @@ export default {
     let id
     if (/cpus/.test(this.id)) {
       id = 'os.cpus'
-    } else if (/^os\.blockdevices\..*\.time/.test(this.id)) {
+    } else if (/os\.blockdevices\..*\.time/.test(this.id)) {
       id = 'os.blockdevices.time'
-    } else if (/^os\.blockdevices\..*\.sectors/.test(this.id)) {
+    } else if (/os\.blockdevices\..*\.sectors/.test(this.id)) {
       id = 'os.blockdevices.sectors'
-    } else if (/^os\.blockdevices\..*\.requests/.test(this.id)) {
+    } else if (/os\.blockdevices\..*\.requests/.test(this.id)) {
       id = 'os.blockdevices.requests'
-    } else if (/^os\.mounts\..*\.blocks$/.test(this.id)) {
+    } else if (/os\.mounts\..*\.blocks$/.test(this.id)) {
       id = 'os.mounts.blocks'
     } else if (/networkInterfaces.*\.bytes/.test(this.id)) {
       id = 'os.networkInterfaces.bytes'
@@ -238,6 +238,10 @@ export default {
     } else {
       id = this.id
     }
+
+    id = id.replace(/(.*\.)(os\..*)/, '$2') // remove anything pre 'os.'
+
+    debug('ID %s', id)
 
     switch (id) {
       case 'os.loadavg':
