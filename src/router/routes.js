@@ -135,6 +135,14 @@ const routes = [
             meta: {
               breadcrumb: { label: 'OS Host', icon: 'widgets', app: 'os' }
             }
+          },
+          {
+            path: 'categories/:category',
+            name: 'os_category',
+            component: () => import(/* webpackChunkName: "os.category" */ '@apps/os/components/category.vue'),
+            meta: {
+              breadcrumb: { label: 'OS Category', icon: 'widgets', app: 'os' }
+            }
           }
           // {
           //   path: 'profile',
