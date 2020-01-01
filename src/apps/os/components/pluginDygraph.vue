@@ -103,8 +103,8 @@ import Dygraph from 'dygraphs'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
-import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/os/pipelines/index'
+// import JSPipeline from 'js-pipeline'
+// import Pipeline from '@apps/os/pipelines/index'
 
 // const MAX_FEED_DATA = 10
 

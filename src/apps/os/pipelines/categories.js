@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pipelines:category')
+const debug = Debug('apps:os:pipelines:categories')
 
 let qs = require('qs')
 
@@ -21,14 +21,14 @@ export default {
   input: [
     {
       poll: {
-        suspended: true,
-        id: 'input.os.category',
+        // suspended: true,
+        id: 'input.os.categories',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.os.category',
+              id: 'input.os.categories',
               module: InputIO
 
             }
@@ -38,7 +38,7 @@ export default {
         connect_retry_count: -1,
         connect_retry_periodical: 1000,
         requests: {
-          periodical: 5000
+          periodical: 10000
         }
       }
     }
@@ -87,18 +87,11 @@ export default {
     }
   ],
   output: [
-    // function (payload) {
-    //   debug('OUTPUT', payload)
-    //
-    //   if (!payload.err) { EventBus.$emit('input.os.category.' + payload.metadata.input, payload) }
-    //
-    //   // if (!payload.err) { EventBus.$emit('log', payload) }
-    // }
     function (payload) {
-      if (!payload.err && /^input\.os.category\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.os.category[', '').slice(0, -1)
+      if (!payload.err && /^input\.os\.categories\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.os.categories[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.os.category.' + payload.metadata.input, payload)
+        EventBus.$emit('input.os.categories.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }

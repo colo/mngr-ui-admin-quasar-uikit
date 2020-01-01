@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('libs:pipelines:os:host')
+const debug = Debug('apps:os:pipelines:host')
 
 let qs = require('qs')
 

@@ -31,13 +31,13 @@
 
 <script>
 import * as Debug from 'debug'
-const debug = Debug('apps:os:components:host')
+const debug = Debug('apps:os:pages:host')
 
 //
 
 // let moment = require('moment')
 
-import OsPluginDygraph from './pluginDygraph'
+import OsPluginDygraph from '@apps/os/components/pluginDygraph'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 

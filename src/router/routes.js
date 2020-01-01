@@ -123,31 +123,49 @@ const routes = [
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "os" */ '@apps/os/index.vue'),
+        redirect: { name: 'os_hosts' },
         meta: {
           breadcrumb: { label: 'OS', icon: 'widgets', app: 'os' }
         },
 
         children: [
           {
-            path: 'hosts/:host',
-            name: 'os_host',
-            component: () => import(/* webpackChunkName: "os.host" */ '@apps/os/components/host.vue'),
+            path: 'hosts',
+            name: 'os_hosts',
+            component: () => import(/* webpackChunkName: "os.hosts" */ '@apps/os/pages/hosts.vue'),
             meta: {
-              breadcrumb: { label: 'OS Host', icon: 'widgets', app: 'os' }
-            }
+              breadcrumb: { label: 'OS Hosts', icon: 'widgets', app: 'os' }
+            },
+            children: [
+              {
+                path: ':host',
+                name: 'os_host',
+                component: () => import(/* webpackChunkName: "os.host" */ '@apps/os/pages/host.vue'),
+                meta: {
+                  breadcrumb: { label: 'OS Host', icon: 'widgets', app: 'os' }
+                }
+              }
+            ]
           },
           {
-            path: 'categories/:category',
-            name: 'os_category',
-            component: () => import(/* webpackChunkName: "os.category" */ '@apps/os/components/category.vue'),
+            path: 'categories',
+            name: 'os_categories',
+            component: () => import(/* webpackChunkName: "os.hosts" */ '@apps/os/pages/categories.vue'),
             meta: {
-              breadcrumb: { label: 'OS Category', icon: 'widgets', app: 'os' }
-            }
+              breadcrumb: { label: 'OS Categories', icon: 'widgets', app: 'os' }
+            },
+            children: [
+              {
+                path: ':category',
+                name: 'os_category',
+                component: () => import(/* webpackChunkName: "os.category" */ '@apps/os/pages/category.vue'),
+                meta: {
+                  breadcrumb: { label: 'OS Category', icon: 'widgets', app: 'os' }
+                }
+              }
+            ]
           }
-          // {
-          //   path: 'profile',
-          //   component: () => import('pages/user-profile')
-          // }
+
         ]
       }
     ]
