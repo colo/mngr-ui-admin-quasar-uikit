@@ -44,7 +44,7 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 import JSPipeline from 'js-pipeline'
 import Pipeline from '@apps/os/pipelines/category'
 
-import { requests, store } from '@apps/os/sources/category'
+import { requests, store } from '@apps/os/sources/category/index'
 
 // const MAX_FEED_DATA = 10
 
@@ -153,6 +153,11 @@ export default {
     'category': function () {
       return (this.$route && this.$route.params && this.$route.params.category) ? this.$route.params.category : undefined
     }
+  },
+  beforeRouteLeave (to, from, next) {
+    debug('lifecycle beforeRouteLeave')
+    this.destroy_pipelines()
+    next()
   }
   // computed: {
   //

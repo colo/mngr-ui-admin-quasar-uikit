@@ -122,7 +122,7 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 
 import OsHostCard from '@apps/os/components/hostCard.vue'
 
-import { requests, store } from '@apps/os/sources/hosts'
+import { requests, store } from '@apps/os/sources/hosts/index'
 
 export default {
   mixins: [DataSourcesMixin],

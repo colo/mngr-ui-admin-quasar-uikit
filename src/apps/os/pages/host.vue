@@ -44,7 +44,7 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 import JSPipeline from 'js-pipeline'
 import Pipeline from '@apps/os/pipelines/host'
 
-import { requests, store } from '../sources/host'
+import { requests, store } from '../sources/host/index'
 
 // const MAX_FEED_DATA = 10
 

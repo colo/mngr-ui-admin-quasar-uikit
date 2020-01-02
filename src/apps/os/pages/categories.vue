@@ -120,7 +120,7 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 
 import OsCategoryCard from '@apps/os/components/categoryCard.vue'
 
-import { requests, store } from '@apps/os/sources/categories'
+import { requests, store } from '@apps/os/sources/categories/index'
 
 export default {
   mixins: [DataSourcesMixin],
