@@ -93,6 +93,7 @@ const routes = [
       {
         path: 'munin',
         name: 'munin',
+        redirect: { name: 'munin_hosts' },
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -103,17 +104,42 @@ const routes = [
 
         children: [
           {
-            path: 'hosts/:host',
-            name: 'munin_host',
-            component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/components/host.vue'),
+            path: 'hosts',
+            name: 'munin_hosts',
+            component: () => import(/* webpackChunkName: "munin.hosts" */ '@apps/munin/pages/hosts.vue'),
             meta: {
-              breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
-            }
+              breadcrumb: { label: 'Munin Hosts', icon: 'widgets', app: 'munin' }
+            },
+            children: [
+              {
+                path: ':host',
+                name: 'munin_host',
+                component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/pages/host.vue'),
+                meta: {
+                  breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
+                }
+              }
+            ]
+          },
+          {
+            path: 'categories',
+            name: 'munin_categories',
+            component: () => import(/* webpackChunkName: "munin.categories" */ '@apps/munin/pages/categories.vue'),
+            meta: {
+              breadcrumb: { label: 'Munin Categories', icon: 'widgets', app: 'munin' }
+            },
+            children: [
+              {
+                path: ':category',
+                name: 'munin_category',
+                component: () => import(/* webpackChunkName: "munin.category" */ '@apps/munin/pages/category.vue'),
+                meta: {
+                  breadcrumb: { label: 'Munin Category', icon: 'widgets', app: 'munin' }
+                }
+              }
+            ]
           }
-          // {
-          //   path: 'profile',
-          //   component: () => import('pages/user-profile')
-          // }
+
         ]
       },
       {

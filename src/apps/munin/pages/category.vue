@@ -1,56 +1,51 @@
 <template>
   <div>
-  <!-- <template v-for="(plugin, name) in plugins">
 
-    <munin-plugin-dygraph :id="name" :data="plugin" :config="plugins_config[name]" :key="name"/>
-
-  </template> -->
-  <!-- <template v-for="(config, name) in plugins_config">
-
-    <munin-plugin-dygraph :id="name" :data="plugins[name]" :config="config" :key="name"/>
-
-  </template> -->
-
-  <template v-for="(plugins_config_per_category, category) in plugins_config">
-    <a :id="category" :key="category+'.anchor'"/>
-    <vk-card class="uk-background-secondary uk-light" :key="category">
+  <template v-for="(host) in plugins_hosts">
+    <a :id="host" :key="host+'.anchor'"/>
+    <vk-card class="uk-background-secondary uk-light" :key="host">
       <vk-card-title>
-        <h3 class="uk-light">{{category}}</h3>
+        <h3 class="uk-light">{{host}}</h3>
       </vk-card-title>
-      <template v-for="(config, name) in plugins_config_per_category">
-        <!-- {{name}}
-        {{config}}
-        {{plugins[name]}}
-        <br :key="category+'.'+name"/> -->
-        <munin-plugin-dygraph :ref="name" :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/>
+      <!-- <template v-for="(config, name) in plugins_config_per_host">
+        <os-plugin-dygraph :ref="name" :id="host+'.'+name" :data="plugins[name]" :config="config" :key="host+'.'+name+'.plugin'"/>
+      </template> -->
+      <template v-for="(name) in plugins">
+
+        {{host}}
+        {{name}}
+        <!-- <a :id="name" :key="name+'.anchor'"/> -->
+        <munin-plugin-dygraph v-if="name.indexOf(host) > -1" :ref="name" :id="name" :name="name"  :key="name+'.plugin'"/>
+          <!-- <munin-plugin-dygraph :ref="name" :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/> -->
+          <!-- :data="plugin" -->
       </template>
     </vk-card>
-    <!-- <h1 :name="category" :key="category"><a :id="category" />{{category}}</h1> -->
-    <!-- {{category}} -->
-    <!-- <br :key="category"/> -->
-    <!-- <template v-for="(config, name) in plugins_config">
-      <munin-plugin-dygraph :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name"/>
-    </template> -->
+
   </template>
+
+    <!-- <template v-for="(plugin, name) in plugins">
+
+      <os-plugin-dygraph :ref="name" :id="name" :data="plugin" :key="name+'.plugin'"/>
+    </template> -->
 </div>
 </template>
 
 <script>
 import * as Debug from 'debug'
-const debug = Debug('apps:munin:components:host')
+const debug = Debug('apps:munin:pages:category')
 
 //
 
 // let moment = require('moment')
 
-import muninPluginDygraph from './pluginDygraph'
+import muninPluginDygraph from '@apps/munin/components/pluginDygraph'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/munin/pipelines/host'
+import Pipeline from '@apps/munin/pipelines/category'
 
-import { requests, store } from '../sources/host'
+import { requests, store } from '@apps/munin/sources/category/index'
 
 // const MAX_FEED_DATA = 10
 
@@ -63,16 +58,16 @@ export default {
 
   data () {
     return {
-      id: 'munin.host',
+      id: 'munin.category',
       path: 'all',
 
-      // munin: [],
+      // os: [],
       store: false,
-      pipeline_id: 'input.munin.host',
+      pipeline_id: 'input.munin.category',
 
-      plugins: {},
-      plugins_config: {},
-      // plugins_categories: ,
+      plugins: [],
+      // plugins_config: {},
+      plugins_hosts: [],
 
       components: {
         range: {
@@ -106,22 +101,22 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.munin.host'] && this.$options.pipelines['input.munin.host'].get_input_by_id('input.munin')) {
+      if (this.$options.pipelines['input.munin.category'] && this.$options.pipelines['input.munin.category'].get_input_by_id('input.munin.category')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.munin.host'].get_input_by_id('input.munin').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.munin.host'].get_input_by_id('input.munin').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.munin.category'].get_input_by_id('input.munin.category').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.munin.category'].get_input_by_id('input.munin.category').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.munin.host'].get_input_by_id('input.munin').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.munin.host'].get_input_by_id('input.munin').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.munin.category'].get_input_by_id('input.munin.category').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.munin.category'].get_input_by_id('input.munin.category').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)
 
         let pipeline_id = template.input[0].poll.id
-        // let pipeline_id = 'input.munin.host'
+        // let pipeline_id = 'input.munin.category'
 
         template.input[0].poll.conn[0].requests = this.__components_sources_to_requests(this.components)
 
@@ -156,8 +151,8 @@ export default {
 
   },
   computed: {
-    'host': function () {
-      return (this.$route && this.$route.params && this.$route.params.host) ? this.$route.params.host : undefined
+    'category': function () {
+      return (this.$route && this.$route.params && this.$route.params.category) ? this.$route.params.category : undefined
     }
   }
   // computed: {
@@ -172,18 +167,18 @@ export default {
   // //   }
   // },
   // mounted: function () {
-  //   this.pipeline_id = 'input.munin.host'
+  //   this.pipeline_id = 'input.munin.category'
   // },
   // create: function () {
-  //   debug('created HOST %s %o %o', this.host, this.$options.range_component, this.$options.__pipelines_cfg)
+  //   debug('created HOST %s %o %o', this.category, this.$options.range_component, this.$options.__pipelines_cfg)
   //   // EventBus.$on(this.pipeline_id, this.__process_input_data)
   //
   //   // if (this.store) this.__register_store_module(this.id, sourceStore)
   //   // this.__bind_components_to_sources(this.components)
   //   // this.create_pipelines()
   //
-  //   // this.$options.range_component.source.requests.once[0].params.query.filter.metadata.host = this.host
-  //   // this.$options.feed_component.source.requests.periodical[0].params.query.filter.metadata.host = this.host
+  //   // this.$options.range_component.source.requests.once[0].params.query.filter.metadata.category = this.category
+  //   // this.$options.feed_component.source.requests.periodical[0].params.query.filter.metadata.category = this.category
   //   // this.$set(this.components, 'range', this.$options.range_component)
   //   // this.$set(this.components, 'feed', this.$options.feed_component)
   //   // this.components.range.source.requests.once.push(this.$options.range_component)

@@ -22,46 +22,58 @@
 
       <router-link to="/munin" v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
-        <vk-breadcrumb-item v-bind="(!host) ? {'disabled' : true} : ''" :href="href" @click="navigate">Munin</vk-breadcrumb-item>
+        <vk-breadcrumb-item :href="href" @click="navigate">Munin</vk-breadcrumb-item>
       </router-link>
 
-      <vk-breadcrumb-item v-if="host">{{host}}</vk-breadcrumb-item>
+      <router-link to="/munin/categories" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item v-bind="(!category) ? {'disabled' : true} : ''" :href="href" @click="navigate">Categories</vk-breadcrumb-item>
+      </router-link>
+
+      <vk-breadcrumb-item v-if="category">{{category}}</vk-breadcrumb-item>
 
     </vk-breadcrumb>
+    <router-link
+      to="/munin/hosts"
+      v-slot="{ href, route, navigate, isActive, isExactActive }"
+    >
+
+      <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Hosts</vk-button-link>
+    </router-link>
     </vk-card>
 
-    <template v-for="(host_categories, host_name) in hosts_categories">
-      <munin-host-card
-        :key="host_name"
-        v-if="!host || host_name === host"
-        :categories="host_categories"
-        :host="host_name"
+    <template v-for="(category_hosts, category_name) in categories_paths">
+      <os-category-card
+        :key="category_name"
+        v-if="!category || category_name === category"
+        :hosts="category_hosts"
+        :category="category_name"
       />
     </template>
 
     <router-view :key="$route.path"></router-view>
 
-    <template v-for="(host_categories, host_name) in hosts_categories">
-      <munin-host-card
-        :key="host_name+'.bottom'"
-        v-if="host_name === host"
-        :categories="host_categories"
-        :host="host_name"
+    <template v-for="(category_hosts, category_name) in categories_paths">
+      <os-category-card
+        :key="category_name+'.bottom'"
+        v-if="category_name === category"
+        :hosts="category_hosts"
+        :category="category_name"
       />
     </template>
 
-    <!-- <template v-for="(host_categories, host_name) in hosts_categories">
-      <munin-host-card
-        :key="host_name"
-        v-if="!host"
-        :categories="host_categories"
-        :host="host_name"
+    <!-- <template v-for="(category_hosts, category_name) in categories_paths">
+      <os-category-card
+        :key="category_name"
+        v-if="!category"
+        :categories="category_hosts"
+        :category="category_name"
       />
-      <q-page-sticky v-else position="top" :key="host_name+'.sticky'">
-        <munin-host-card
-          v-if="host_name === host"
-          :categories="host_categories"
-          :host="host_name"
+      <q-page-sticky v-else position="top" :key="category_name+'.sticky'">
+        <os-category-card
+          v-if="category_name === category"
+          :categories="category_hosts"
+          :category="category_name"
         />
       </q-page-sticky>
     </template> -->
@@ -69,22 +81,22 @@
     <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
       <q-btn fab icon="keyboard_arrow_up" color="accent" />
     </q-page-scroller>
-    <!-- v-if="!host || host_name === host" -->
+    <!-- v-if="!category || category_name === category" -->
 
      <!-- :key="$route.fullPath" -->
-    <!-- <vk-card class="uk-background-secondary uk-light" v-for="(categories, host) in hosts_categories" :key="host">
+    <!-- <vk-card class="uk-background-secondary uk-light" v-for="(categories, category) in categories_paths" :key="category">
 
       <vk-card-title>
-        <router-link :to="'/munin/hosts/'+host" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <router-link :to="'/munin/categories/'+category" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
-          <h3 class="uk-light"><a class="uk-link-heading" :href="href" @click="navigate">{{host}}</a></h3>
+          <h3 class="uk-light"><a class="uk-link-heading" :href="href" @click="navigate">{{category}}</a></h3>
         </router-link>
 
       </vk-card-title>
 
       <ul class="uk-subnav uk-subnav-divider" uk-margin>
-        <li v-for="category in categories" :key="host+'.'+category">
-          <router-link :to="'/munin/hosts/'+host+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <li v-for="category in categories" :key="category+'.'+category">
+          <router-link :to="'/munin/categories/'+category+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }"
           >
             <a :href="href" @click="navigate">{{category}}</a>
           </router-link>
@@ -99,23 +111,23 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:munin')
+const debug = Debug('apps:munin:pages:categories')
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/munin/pipelines/index'
+import Pipeline from '@apps/munin/pipelines/categories'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
-import MuninHostCard from './components/hostCard.vue'
+import OsCategoryCard from '@apps/munin/components/categoryCard.vue'
 
-import { requests, store } from './sources/index'
+import { requests, store } from '@apps/munin/sources/categories/index'
 
 export default {
   mixins: [DataSourcesMixin],
-  components: { MuninHostCard },
+  components: { OsCategoryCard },
   // extends: DataSourcesMixin,
 
-  name: 'Munin',
+  name: 'MuninCategories',
 
   // pipelines: {},
   // __pipelines_cfg: {},
@@ -125,16 +137,16 @@ export default {
     return {
       height: '0px',
 
-      // host: undefined,
-      hosts_categories: {},
-      categories: [],
+      // category: undefined,
+      categories_paths: {},
+      paths: [],
       /**
       * dataSources
       **/
       store: false,
-      pipeline_id: 'input.munin',
+      pipeline_id: 'input.munin.categories',
 
-      id: 'munin',
+      id: 'munin.categories',
       path: 'all',
 
       components: {
@@ -152,8 +164,8 @@ export default {
     }
   },
   computed: {
-    'host': function () {
-      return (this.$route && this.$route.params && this.$route.params.host) ? this.$route.params.host : undefined
+    'category': function () {
+      return (this.$route && this.$route.params && this.$route.params.category) ? this.$route.params.category : undefined
     }
   },
   methods: {
@@ -163,16 +175,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.munin'] && this.$options.pipelines['input.munin'].get_input_by_id('input.munin')) {
+      if (this.$options.pipelines['input.munin.categories'] && this.$options.pipelines['input.munin.categories'].get_input_by_id('input.munin.categories')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.munin.categories'].get_input_by_id('input.munin.categories').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.munin.categories'].get_input_by_id('input.munin.categories').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.munin.categories'].get_input_by_id('input.munin.categories').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.munin.categories'].get_input_by_id('input.munin.categories').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)

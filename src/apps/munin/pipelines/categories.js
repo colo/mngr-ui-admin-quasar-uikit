@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pipelines:categories')
+const debug = Debug('apps:munin:pipelines:categories')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         suspended: true,
-        id: 'input.os.categories',
+        id: 'input.munin.categories',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.os.categories',
+              id: 'input.munin.categories',
               module: InputIO
 
             }
@@ -88,10 +88,10 @@ export default {
   ],
   output: [
     function (payload) {
-      if (!payload.err && /^input\.os\.categories\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.os.categories[', '').slice(0, -1)
+      if (!payload.err && /^input\.munin\.categories\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.munin.categories[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.os.categories.' + payload.metadata.input, payload)
+        EventBus.$emit('input.munin.categories.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }

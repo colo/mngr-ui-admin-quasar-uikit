@@ -95,7 +95,7 @@ export default {
     //   // if (!payload.err) { EventBus.$emit('log', payload) }
     // }
     function (payload) {
-      if (!payload.err && /^input\.os.category\[.*\]$/.test(payload.id)) {
+      if (!payload.err && /^input\.os\.category\[.*\]$/.test(payload.id)) {
         payload.id = payload.id.replace('input.os.category[', '').slice(0, -1)
         debug('OUTPUT', payload)
         EventBus.$emit('input.os.category.' + payload.metadata.input, payload)

@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pipelines:categories')
+const debug = Debug('apps:munin:pipelines:category')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         suspended: true,
-        id: 'input.os.categories',
+        id: 'input.munin.category',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.os.categories',
+              id: 'input.munin.category',
               module: InputIO
 
             }
@@ -38,7 +38,7 @@ export default {
         connect_retry_count: -1,
         connect_retry_periodical: 1000,
         requests: {
-          periodical: 10000
+          periodical: 5000
         }
       }
     }
@@ -87,11 +87,18 @@ export default {
     }
   ],
   output: [
+    // function (payload) {
+    //   debug('OUTPUT', payload)
+    //
+    //   if (!payload.err) { EventBus.$emit('input.munin.category.' + payload.metadata.input, payload) }
+    //
+    //   // if (!payload.err) { EventBus.$emit('log', payload) }
+    // }
     function (payload) {
-      if (!payload.err && /^input\.os\.categories\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.os.categories[', '').slice(0, -1)
+      if (!payload.err && /^input\.munin\.category\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.munin.category[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.os.categories.' + payload.metadata.input, payload)
+        EventBus.$emit('input.munin.category.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }

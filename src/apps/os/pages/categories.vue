@@ -127,7 +127,7 @@ export default {
   components: { OsCategoryCard },
   // extends: DataSourcesMixin,
 
-  name: 'OS',
+  name: 'OSCategories',
 
   // pipelines: {},
   // __pipelines_cfg: {},

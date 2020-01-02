@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('libs:pipelines:munin:host')
+const debug = Debug('apps:munin:pipelines:host')
 
 let qs = require('qs')
 
@@ -21,7 +21,7 @@ export default {
   input: [
     {
       poll: {
-        // suspended: true,
+        suspended: true,
         id: 'input.munin.host',
         conn: [
 

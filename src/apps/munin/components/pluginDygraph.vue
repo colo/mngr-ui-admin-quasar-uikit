@@ -90,10 +90,10 @@ import Dygraph from 'dygraphs'
 // import Widget from '@skins/flatlogic/lightblue/components/Widget/Widget'
 // import StatsCard from '@apps/munin/components/creativetim/argon/StatsCard'
 
-import DataSourcesMixin from '@components/mixins/dataSources'
-
-import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/munin/pipelines/index'
+// import DataSourcesMixin from '@components/mixins/dataSources'
+//
+// import JSPipeline from 'js-pipeline'
+// import Pipeline from '@apps/munin/pipelines/index'
 
 const MAX_FEED_DATA = 10
 

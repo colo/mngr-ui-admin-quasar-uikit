@@ -22,12 +22,26 @@
 
       <router-link to="/munin" v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
-        <vk-breadcrumb-item v-bind="(!host) ? {'disabled' : true} : ''" :href="href" @click="navigate">Munin</vk-breadcrumb-item>
+        <vk-breadcrumb-item :href="href" @click="navigate">Munin</vk-breadcrumb-item>
+      </router-link>
+
+      <router-link to="/munin/hosts" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item v-bind="(!host) ? {'disabled' : true} : ''" :href="href" @click="navigate">Hosts</vk-breadcrumb-item>
       </router-link>
 
       <vk-breadcrumb-item v-if="host">{{host}}</vk-breadcrumb-item>
 
     </vk-breadcrumb>
+
+    <router-link
+      to="/munin/categories"
+      v-slot="{ href, route, navigate, isActive, isExactActive }"
+    >
+
+      <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Categories</vk-button-link>
+    </router-link>
+
     </vk-card>
 
     <template v-for="(host_categories, host_name) in hosts_categories">
@@ -102,13 +116,13 @@ import * as Debug from 'debug'
 const debug = Debug('apps:munin')
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/munin/pipelines/index'
+import Pipeline from '@apps/munin/pipelines/hosts'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
-import MuninHostCard from './components/hostCard.vue'
+import MuninHostCard from '@apps/munin/components/hostCard.vue'
 
-import { requests, store } from './sources/index'
+import { requests, store } from '@apps/munin/sources/hosts/index'
 
 export default {
   mixins: [DataSourcesMixin],
@@ -132,9 +146,9 @@ export default {
       * dataSources
       **/
       store: false,
-      pipeline_id: 'input.munin',
+      pipeline_id: 'input.munin.hosts',
 
-      id: 'munin',
+      id: 'munin.hosts',
       path: 'all',
 
       components: {
@@ -163,16 +177,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.munin'] && this.$options.pipelines['input.munin'].get_input_by_id('input.munin')) {
+      if (this.$options.pipelines['input.munin.hosts'] && this.$options.pipelines['input.munin.hosts'].get_input_by_id('input.munin.hosts')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.munin.hosts'].get_input_by_id('input.munin.hosts').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.munin.hosts'].get_input_by_id('input.munin.hosts').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.munin'].get_input_by_id('input.munin').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.munin.hosts'].get_input_by_id('input.munin.hosts').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.munin.hosts'].get_input_by_id('input.munin.hosts').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)
