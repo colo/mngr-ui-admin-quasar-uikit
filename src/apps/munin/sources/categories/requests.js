@@ -64,7 +64,7 @@ const munin_categories_paths = {
           let host = plugin.metadata.host
           // debug('All callback', plugin)
           // let path = (plugin.metadata.path) ? plugin.metadata.path : undefined
-          let category = (plugin.config && plugin.config.graph && plugin.config.graph.category) ? plugin.config.graph.category.toLowerCase() : 'undefined'
+          let category = (plugin.config && plugin.config.graph && plugin.config.graph.category) ? plugin.config.graph.category.toLowerCase() : 'uncategorized'
 
           if (!_categories_paths[category]) _categories_paths[category] = []
 

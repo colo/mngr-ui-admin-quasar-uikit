@@ -48,25 +48,94 @@ const generic_callback = function (data, metadata, key, vm) {
               if (!vm.$refs[name][0].$options.plugin_data) vm.$refs[name][0].$options.plugin_data = { periodical: undefined, minute: undefined }
 
               let _plugin = {}
+              if (
+                vm.$refs[name][0].$options.plugin_data &&
+                vm.$refs[name][0].$options.plugin_data.periodical &&
+                  Object.getLength(vm.$refs[name][0].$options.plugin_data.periodical) > 0
+              ) {
+                _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.periodical))
 
-              Object.keys(plugin)
-                .sort()// sort keys alphabetically
-                .forEach(function (prop, i) {
-                // console.log(v, data[v]);
-                  let data = plugin[prop]
+                Object.each(plugin, function (data, prop) {
+                  if (_plugin[prop] && Array.isArray(_plugin[prop]) && _plugin[prop].length > 0) {
+                    _plugin[prop].combine(data)
+
+                    // sort by first column, timestamp
+                    _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+
+                    // filter based on not repeated timestamp
+                    // let filtered = _plugin[prop].filter(function (item, index) {
+                    //   // debug('PERIODICAL HOST CALLBACK %s %o', name, item, index, _plugin[prop][index - 1])
+                    //   if (index === 0)
+                    //     return true
+                    //   else if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
+                    //     return true
+                    //   } else if (_plugin[prop][index - 1] && !_plugin[prop][index + 1]) {
+                    //     return item[0] !== _plugin[prop][index - 1][0]
+                    //   } else if (!_plugin[prop][index - 1] && _plugin[prop][index + 1]) {
+                    //     return item[0] !== _plugin[prop][index + 1][0]
+                    //   } else {
+                    //     return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
+                    //   }
+                    //   // return true
+                    // })
+                    let filtered = []
+                    Array.each(_plugin[prop], function (item, index) {
+                      if (index === 0) { filtered.push(item) } else if (item[0] !== _plugin[prop][index - 1][0]) {
+                        filtered.push(item)
+                      }
+                    })
+
+                    // debug('PERIODICAL HOST CALLBACK %s %o', name, prop, filtered)
+
+                    _plugin[prop] = filtered
+                  } else {
+                    debug('PERIODICAL HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
+                    // _plugin[prop] = data
+                    //
+                    // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+                  }
+                })
+
+                // debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
+              } else {
+                // _plugin = {}
+                Object.each(plugin, function (data, prop) {
+                  // sort by first column, timestamp
+
                   if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
                     _plugin[prop] = Array.clone(data)
                     _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
                   }
                 })
 
-              // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
-              // }
+                // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
+              }
 
               if (Object.getLength(_plugin) > 0) {
-                debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
+                debug('PERIODICAL HOST CALLBACK set plugin %s %o', name, _plugin)
                 vm.$refs[name][0].set_data({ periodical: _plugin })
               }
+
+              // let _plugin = {}
+              //
+              // Object.keys(plugin)
+              //   .sort()// sort keys alphabetically
+              //   .forEach(function (prop, i) {
+              //   // console.log(v, data[v]);
+              //     let data = plugin[prop]
+              //     if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
+              //       _plugin[prop] = Array.clone(data)
+              //       _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
+              //     }
+              //   })
+              //
+              // // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
+              // // }
+              //
+              // if (Object.getLength(_plugin) > 0) {
+              //   debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
+              //   vm.$refs[name][0].set_data({ periodical: _plugin })
+              // }
             }
           })
         }
@@ -244,90 +313,60 @@ const generic_callback = function (data, metadata, key, vm) {
         })
       }
     })
+  } else if (key === 'config.once' && data.munin) {
+    debug('PERIODICAL HOST CALLBACK CONFIG %o', data)
+    let _plugins_config = {}
+    let _plugins_config_sorted = []
+    Array.each(data.munin, function (plugin) {
+      // debug('PERIODICAL HOST CALLBACK %o %o %s', group_path)
+      let host = plugin.metadata.host
+      let config = plugin.config // only one per path
+      // let category = (config && config.graph && config.graph.category) ? config.graph.category.toLowerCase() : 'uncategorized'
+      let path = plugin.metadata.path
+      let name = plugin.metadata.host + '.' + plugin.metadata.path
+
+      if (!_plugins_config[host]) _plugins_config[host] = {}
+      if (!_plugins_config_sorted.contains(name)) _plugins_config_sorted.push(name)
+
+      _plugins_config[host][name] = config
+    })
+
+    // _plugins_config_sorted.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
+    // let plugins_config = {}
+    // for (let i = 0; i < _plugins_config_sorted.length; i++) {
+    //   let name = _plugins_config_sorted[i]
+    //   plugins_config[category] = _plugins_config[category]
+    // }
+
+    if (Object.getLength(_plugins_config) > 0) {
+      vm.plugins_config = _plugins_config
+    }
   }
-  // else if (key === 'config.once' && data.munin) {
-  //   debug('PERIODICAL HOST CALLBACK CONFIG %o', data)
-  //   let _plugins_config = {}
-  //   let _plugins_config_sorted = []
-  //   Array.each(data.munin, function (group_path) {
-  //     // debug('PERIODICAL HOST CALLBACK %o %o %s', group_path)
-  //     let config = group_path[0].config // only one per path
-  //     let category = (config && config.graph && config.graph.category) ? config.graph.category.toLowerCase() : 'uncategorized'
-  //     let path = group_path[0].metadata.path
-  //
-  //     if (!_plugins_config[category]) _plugins_config[category] = {}
-  //     if (!_plugins_config_sorted.contains(category)) _plugins_config_sorted.push(category)
-  //
-  //     _plugins_config[category][path] = config
-  //   })
-  //
-  //   _plugins_config_sorted.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
-  //   let plugins_config = {}
-  //   for (let i = 0; i < _plugins_config_sorted.length; i++) {
-  //     let category = _plugins_config_sorted[i]
-  //     plugins_config[category] = _plugins_config[category]
-  //   }
-  //
-  //   if (Object.getLength(plugins_config) > 0) {
-  //     vm.plugins_config = plugins_config
-  //   }
-  // }
 }
 
 const category_once_component = {
   params: function (_key, vm) {
     // debug('PERIODICAL category_range_component %o %o', _key, vm)
+    if (vm && vm.category) {
+      debug('PERIODICAL CATEGORY_once_register %o %s', _key, vm.category)
+    }
 
     let source
     let key
 
     if (!_key) {
-      key = ['periodical.once']// 'config.once', , 'minute.once'
+      key = ['periodical.once', 'config.once']// 'config.once', , 'minute.once'
     }
 
     if (
       _key
     ) {
       switch (_key) {
-        // case 'periodical.hosts.once':
-        //   source = [{
-        //     params: { id: _key },
-        //     path: 'all',
-        //     range: 'posix ' + (Date.now() - (6 * MINUTE)) + '-' + Date.now() + '/*',
-        //     // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
-        //     query: {
-        //       'from': 'munin',
-        //       // 'register': 'changes',
-        //       // 'format': 'tabular',
-        //       'index': false,
-        //       /**
-        //       * right now needed to match OUTPUT 'id' with this query (need to @fix)
-        //       **/
-        //       'q': [
-        //         // 'data',
-        //         { 'metadata': ['host'] }
-        //       ],
-        //       // 'transformation': [
-        //       //   {
-        //       //     'orderBy': { 'index': 'r.desc(timestamp)' }
-        //       //   }
-        //       // ],
-        //       // 'aggregation': 'distinct',
-        //       'filter': [
-        //         "r.row('config')('graph')('category').eq('" + vm.category + "')"
-        //         // "r.row('metadata')('path').lt('os." + vm.category + "\uFFFF')"
-        //         // { 'metadata': { 'host': vm.host } },
-        //         // "r.row('metadata')('path').ne('os.procs')"
-        //       ]
-        //
-        //     }
-        //   }]
-        //   break
         case 'periodical.once':
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (6 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin',
@@ -358,31 +397,34 @@ const category_once_component = {
 
           break
 
-        // case 'config.once':
-        //   source = [{
-        //     params: { id: _key },
-        //     range: 'posix ' + (Date.now() - 15 * SECOND) + '-' + Date.now() + '/*',
-        //     path: 'all',
-        //     // range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
-        //     query: {
-        //       'from': 'os',
-        //       // 'index': false,
-        //
-        //       'q': [
-        //         // 'id',
-        //         'config',
-        //         { 'metadata': ['path'] }
-        //       ],
-        //       // 'transformation': [
-        //       //   { 'orderBy': { 'index': 'r.desc(timestamp)' } }
-        //       //   // 'slice:0:1'
-        //       // ],
-        //       'aggregation': 'distinct',
-        //       'filter': [{ 'metadata': { 'category': vm.host } }]
-        //     }
-        //   }]
-        //
-        //   break
+        case 'config.once':
+          source = [{
+            params: { id: _key },
+            range: 'posix ' + (Date.now() - 15 * SECOND) + '-' + Date.now() + '/*',
+            path: 'all',
+            // range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
+            query: {
+              'from': 'munin',
+              'index': false,
+
+              'q': [
+                // 'id',
+                'config',
+                { 'metadata': ['host', 'path'] }
+              ],
+              // 'transformation': [
+              //   { 'orderBy': { 'index': 'r.desc(timestamp)' } }
+              //   // 'slice:0:1'
+              // ],
+              'aggregation': 'distinct',
+              'filter': [
+                "r.row('config')('graph')('category').eq('" + vm.category + "')"
+                // { 'metadata': { 'category': vm.host } }
+              ]
+            }
+          }]
+
+          break
         // case 'minute.once':
         //   source = [{
         //     params: { id: _key },
@@ -435,7 +477,9 @@ const category_once_component = {
 
 const category_once_register = {
   params: function (_key, vm) {
-    // debug('REGISTER category_once_register %o %o', _key, vm)
+    if (vm && vm.category) {
+      debug('REGISTER CATEGORY_once_register %o %s', _key, vm.category)
+    }
 
     let source
     let key
@@ -455,10 +499,9 @@ const category_once_register = {
           source = [{
             params: { id: _key },
             path: 'all',
-            // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
-            // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+
             query: {
-              'from': 'os',
+              'from': 'munin',
               'register': 'changes',
               'format': 'tabular',
               // 'group': 'host',
@@ -485,8 +528,7 @@ const category_once_register = {
               //   }
               // ],
               'filter': [
-                "r.row('metadata')('path').ge('os." + vm.category + "')",
-                "r.row('metadata')('path').lt('os." + vm.category + "\uFFFF')"
+                "r.row('config')('graph')('category').eq('" + vm.category + "')"
               ]
 
             }

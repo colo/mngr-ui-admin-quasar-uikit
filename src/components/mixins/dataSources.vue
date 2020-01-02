@@ -148,7 +148,7 @@ export default {
       }
     },
     __update_component_data: function (component, key, type, payload) {
-      debug('__update_component_data', component, key, type, Object.clone(payload))
+      // debug('__update_component_data', component, key, type, Object.clone(payload))
       let callback = this.__get_source_callback_from_key(component.source, key, type)
 
       debug('__update_component_data', callback)

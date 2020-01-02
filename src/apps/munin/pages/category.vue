@@ -3,7 +3,7 @@
 
   <template v-for="(host) in plugins_hosts">
     <a :id="host" :key="host+'.anchor'"/>
-    <vk-card class="uk-background-secondary uk-light" :key="host">
+    <vk-card class="uk-background-secondary uk-light" :key="host+'.'+category" v-if="plugins_config[host]">
       <vk-card-title>
         <h3 class="uk-light">{{host}}</h3>
       </vk-card-title>
@@ -12,10 +12,10 @@
       </template> -->
       <template v-for="(name) in plugins">
 
-        {{host}}
-        {{name}}
+        <!-- {{host}}
+        {{name}} -->
         <!-- <a :id="name" :key="name+'.anchor'"/> -->
-        <munin-plugin-dygraph v-if="name.indexOf(host) > -1" :ref="name" :id="name" :name="name"  :key="name+'.plugin'"/>
+        <munin-plugin-dygraph v-if="name.indexOf(host) > -1" :config="plugins_config[host][name]" :ref="name" :id="name" :name="name"  :key="name+'.plugin'"/>
           <!-- <munin-plugin-dygraph :ref="name" :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/> -->
           <!-- :data="plugin" -->
       </template>
@@ -66,7 +66,7 @@ export default {
       pipeline_id: 'input.munin.category',
 
       plugins: [],
-      // plugins_config: {},
+      plugins_config: {},
       plugins_hosts: [],
 
       components: {
@@ -152,8 +152,14 @@ export default {
   },
   computed: {
     'category': function () {
+      debug('CATEGORY %s', this.$route.params.category)
       return (this.$route && this.$route.params && this.$route.params.category) ? this.$route.params.category : undefined
     }
+  },
+  beforeRouteLeave (to, from, next) {
+    debug('lifecycle beforeRouteLeave')
+    this.destroy_pipelines()
+    next()
   }
   // computed: {
   //
