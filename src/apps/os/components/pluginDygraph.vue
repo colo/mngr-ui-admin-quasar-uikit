@@ -235,6 +235,8 @@ export default {
       id = 'os.networkInterfaces.bytes'
     } else if (/networkInterfaces.*\.packets/.test(this.id)) {
       id = 'os.networkInterfaces.packets'
+    } else if (/os\.rethinkdb/.test(this.id)) {
+      id = 'os.rethinkdb'
     } else {
       id = this.id
     }
@@ -286,6 +288,12 @@ export default {
 
       case 'os.mounts.blocks':
         this.$options.dygraph_chart = dygraph_mounts_blocks
+        break
+
+      case 'os.rethinkdb':
+        this.$options.dygraph_chart = dygraph_line_chart
+        this.$options.dygraph_chart.options.logscale = 'y'
+        this.$options.dygraph_chart.options.axes.y.logscale = true
         break
 
       default:
