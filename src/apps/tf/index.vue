@@ -1,5 +1,6 @@
 <template>
-  <q-page>
+  <div :id="'Written_v_Idle'"></div>
+  <!-- <q-page>
 
     <vk-card class="uk-background-secondary">
     <vk-breadcrumb>
@@ -14,9 +15,8 @@
 
     <vk-card class="uk-background-secondary">
 
-
     </vk-card>
-  </q-page>
+  </q-page> -->
 </template>
 
 <script>
@@ -37,6 +37,9 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 import { requests, store } from '@apps/tf/sources/index'
 // import moment from 'moment'
 
+import * as tf from '@tensorflow/tfjs'
+import * as tfvis from '@tensorflow/tfjs-vis'
+
 export default {
   mixins: [DataSourcesMixin],
 
@@ -49,10 +52,11 @@ export default {
   // __pipelines_cfg: {},
   // unwatch_store: undefined,
 
+  values: [],
+
   data () {
     return {
       height: '0px',
-
 
       /**
       * dataSources
@@ -62,6 +66,8 @@ export default {
 
       id: 'tf',
       path: 'all',
+
+      values: [],
 
       components: {
         'all': [
@@ -77,6 +83,73 @@ export default {
       }
     }
   },
+  watch: {
+    'values': {
+      deep: true,
+      handler: function (val) {
+        // debug('values %o', val)
+
+        // const values = val.map(d => ({
+        //   x: Math.round(d.written) * 1,
+        //   y: d.idle
+        // }))
+
+        const container = document.getElementById('Written_v_Idle')
+
+        // const data = { values: values }
+        // debug('values %o %o', data)
+
+        const apples = Array(14)
+          .fill(0)
+          .map(y => Math.random() * 100 + Math.random() * 50)
+          .map((y, x) => ({ x: x, y: y }))
+
+        const oranges = Array(14)
+          .fill(0)
+          .map(y => Math.random() * 100 + Math.random() * 150)
+          .map((y, x) => ({ x: x, y: y }))
+
+        const series = ['Apples', 'Oranges']
+
+        const data = { values: [apples, oranges], series }
+
+        // const container = document.getElementById("scatter-cont");
+        tfvis.render.scatterplot(container, data, {
+          xLabel: 'day',
+          yLabel: 'sales',
+          height: 450,
+          zoomToFit: true,
+          fontSize: 16
+        })
+
+        // tfvis.render.scatterplot(
+        //   container,
+        //   data,
+        //   {
+        //     xLabel: 'Written',
+        //     yLabel: 'Idle',
+        //     height: 300
+        //   }
+        // )
+      }
+    }
+  },
+  // mounted: function () {
+  //
+  // },
+  // updated: function () {
+  //   debug('updated %o', this.$options.values)
+  //   let values = this.$options.values
+  //   tfvis.render.scatterplot(
+  //     { name: 'Written v Idle' },
+  //     { values },
+  //     {
+  //       xLabel: 'Written',
+  //       yLabel: 'Idle',
+  //       height: 300
+  //     }
+  //   )
+  // },
   methods: {
     /**
     * @start pipelines
