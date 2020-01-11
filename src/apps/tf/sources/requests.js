@@ -4,6 +4,41 @@ const debug = Debug('apps:tf:sources:requests')
 const SECOND = 1000
 const MINUTE = 60 * SECOND
 
+let prev = []
+const transform = function (values, column) {
+  debug('transform %o', values, prev)
+  let transformed = JSON.parse(JSON.stringify(values))
+  if (prev.length === 0 || (transformed.length > 0 && transformed[0] !== null && prev[0] > values[0][0])) { // timestamp check
+    prev = transformed.shift()
+    // chart.prev = values[0]
+  }
+
+  // Array.each(values, function (row) {
+  for (let i = 0; i < transformed.length; i++) {
+    let row = transformed[i]
+    if (row && row !== null && row[0] > prev[0]) {
+      let prev_row = Array.clone(row)
+
+      // Array.each(row, function (col, index) {
+      for (let index = 0; index < row.length; index++) {
+        let col = row[index]
+        if (index > 0 && (column === undefined || index === column)) { // index == 0 == timestamp
+          row[index] = col - prev[index]
+          row[index] = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
+        }
+      }
+      // })
+
+      prev = prev_row
+    }
+  }
+  // })
+
+  debug('transform2', JSON.parse(JSON.stringify(transformed)))
+
+  return JSON.parse(JSON.stringify(transformed))
+}
+
 const host_once_component = {
   params: function (_key, vm) {
     // debug('PERIODICAL host_range_component %o %o', _key, vm)
@@ -26,7 +61,7 @@ const host_once_component = {
             range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
-              'from': 'os',
+              'from': 'os_historical',
               // 'register': 'changes',
               // 'format': 'tabular',
               'index': false,
@@ -44,7 +79,9 @@ const host_once_component = {
               ],
               'filter': [
                 { 'metadata': { 'host': 'elk' } },
-                "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
+                { 'metadata': { 'type': 'minute' } },
+                // "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
+                "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors'))"
               ]
 
             }
@@ -122,24 +159,40 @@ const host_once_component = {
     return { key, source }
   },
   callback: function (data, metadata, key, vm) {
-    // debug('CALLBACK data %s %o', key, data, metadata)
+    debug('CALLBACK data %s %o', key, data, metadata)
 
-    if (data && data.os && data.os.length > 0) {
+    if (data && data.os_historical && data.os_historical.length > 0) {
       let docs = {}
-      Array.each(data.os, function (row) {
+      Array.each(data.os_historical, function (row) {
         let ts = row.metadata.timestamp
         if (!docs[ts]) docs[ts] = { idle: undefined, written: undefined }
         if (row.metadata.path === 'os.cpus') {
-          docs[ts].idle = row.data.idle
+          docs[ts].idle = row.data.idle.median
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
-          docs[ts].written = row.data.per_sec
+        // } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
+
+          docs[ts].per_sec = Math.round(row.data.per_sec.median) * 1
+        } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
+          docs[ts].write_sectors = row.data.write_sectors.median
         }
       })
 
-      const cleaned = Object.values(docs).filter(doc => (doc.idle !== undefined && doc.written !== undefined))
+      let arr_docs = []
+      let tss = Object.keys(docs)
+      tss.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) }) // sort by timestamp
+      Array.each(tss, function (ts) {
+        ts *= 1
+        arr_docs.push([ts, docs[ts].write_sectors, docs[ts].idle])
+      })
 
-      debug('CALLBACK DOCS %o', cleaned)
-      if (cleaned.length > 0) { vm.values = cleaned }
+      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
+
+      arr_docs = transform(arr_docs)
+
+      // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
+
+      debug('CALLBACK DOCS %o', arr_docs)
+      if (arr_docs.length > 0) { vm.values = arr_docs }
     }
   }
 
