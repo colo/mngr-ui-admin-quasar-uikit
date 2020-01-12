@@ -3,6 +3,7 @@ const debug = Debug('apps:tf:sources:requests')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
+const HOUR = 60 * MINUTE
 
 let prev = []
 const transform = function (values, column) {
@@ -58,7 +59,7 @@ const host_once_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - HOUR) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'os_historical',
@@ -167,13 +168,11 @@ const host_once_component = {
         let ts = row.metadata.timestamp
         if (!docs[ts]) docs[ts] = { idle: undefined, written: undefined }
         if (row.metadata.path === 'os.cpus') {
-          docs[ts].idle = row.data.idle.median
+          docs[ts].idle = row.data.idle.min
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
-        // } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
-
-          docs[ts].per_sec = Math.round(row.data.per_sec.median) * 1
+          docs[ts].per_sec = Math.round(row.data.per_sec.mean) * 1
         } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
-          docs[ts].write_sectors = row.data.write_sectors.median
+          docs[ts].write_sectors = row.data.write_sectors.max
         }
       })
 
@@ -187,7 +186,7 @@ const host_once_component = {
 
       arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
 
-      arr_docs = transform(arr_docs)
+      // arr_docs = transform(arr_docs)
 
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
 

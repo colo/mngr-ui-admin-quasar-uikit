@@ -14,7 +14,7 @@ const debug = Debug("libs:input:io")
 // import store from 'src/store'
 
 // import DefaultConn from '@etc/default.io'
-import RootIO from '@etc/root.io'
+import RootIO from '@etc/tf.io'
 
 export default new Class({
   Extends: App,
@@ -346,7 +346,7 @@ export default new Class({
       // if(this.io.disconnected == false)
         // this.io.close()
     }.bind(this))
-    
+
     this.addEvent('onExit', function(){
       debug('onExit')
 
