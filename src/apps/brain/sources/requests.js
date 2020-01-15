@@ -23,7 +23,7 @@ const transform = function (values, column) {
       // Array.each(row, function (col, index) {
       for (let index = 0; index < row.length; index++) {
         let col = row[index]
-        if (index > 0 && (column === undefined || index === column)) { // index == 0 == timestamp
+        if (index > 0 && (column === undefined || index === column || column.contains(index))) { // index == 0 == timestamp
           row[index] = col - prev[index]
           row[index] = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
         }
@@ -82,7 +82,7 @@ const host_once_component = {
                 { 'metadata': { 'host': 'elk' } },
                 // { 'metadata': { 'type': 'minute' } },
                 // "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
-                "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors'))"
+                "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors')).or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
               ]
 
             }
@@ -186,7 +186,7 @@ const host_once_component = {
 
       arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
 
-      arr_docs = transform(arr_docs)
+      arr_docs = transform(arr_docs, [1, 2])
 
       arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
 
