@@ -82,6 +82,7 @@ import dygraph_networkInterfaces_packets from 'mngr-ui-admin-charts/os/networkIn
 import dygraph_blockdevices_time from 'mngr-ui-admin-charts/os/blockdevices.time'
 import dygraph_blockdevices_sectors from 'mngr-ui-admin-charts/os/blockdevices.sectors'
 import dygraph_blockdevices_requests from 'mngr-ui-admin-charts/os/blockdevices.requests'
+import dygraph_rethinkdb from 'mngr-ui-admin-charts/os/rethinkdb'
 
 import Dygraph from 'dygraphs'
 
@@ -235,6 +236,8 @@ export default {
       id = 'os.networkInterfaces.bytes'
     } else if (/networkInterfaces.*\.packets/.test(this.id)) {
       id = 'os.networkInterfaces.packets'
+    } else if (/os\.rethinkdb\.server\.clients/.test(this.id)) {
+      id = 'os.rethinkdb.server.clients'
     } else if (/os\.rethinkdb/.test(this.id)) {
       id = 'os.rethinkdb'
     } else {
@@ -290,10 +293,14 @@ export default {
         this.$options.dygraph_chart = dygraph_mounts_blocks
         break
 
-      case 'os.rethinkdb':
+      case 'os.rethinkdb.server.clients':
         this.$options.dygraph_chart = dygraph_line_chart
         this.$options.dygraph_chart.options.logscale = 'y'
         this.$options.dygraph_chart.options.axes.y.logscale = true
+        break
+
+      case 'os.rethinkdb':
+        this.$options.dygraph_chart = dygraph_rethinkdb
         break
 
       default:
