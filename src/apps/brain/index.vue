@@ -165,26 +165,41 @@ export default {
     'values': {
       deep: true,
       handler: function (data) {
-        data = JSON.parse(JSON.stringify(data))
-        let test = data.slice(0, data.length / 2)
-        let train = data.slice(data.length / 2, data.length)
+        // data = JSON.parse(JSON.stringify(data))
+        data = this.shuffle(JSON.parse(JSON.stringify(data)))
+        const SPLIT = data.length * 0.7 // 70%
+        // let test = this.shuffle(data.slice(0, data.length / 2))
+        // let train = this.shuffle(data.slice(data.length / 2, data.length))
+        const train = data.slice(0, SPLIT)
+        const test = data.slice(SPLIT + 1)
 
         debug('values %o', data)
 
-        const net = new brain.recurrent.RNNTimeStep({
-          // inputSize: 1,
-          hiddenLayers: [1, 1],
+        // const net = new brain.recurrent.LSTMTimeStep({
+        //   inputSize: 1,
+        //   hiddenLayers: [2],
+        //   // activation: 'sigmoid',
+        //   outputSize: 1
+        // })
+        const net = new brain.NeuralNetwork({
+          activation: 'sigmoid', // activation function
+          hiddenLayers: [4],
+          learningRate: 0.1, // global learning rate, useful when training using streams
           outputSize: 1
         })
 
-        let { minIn, maxIn, minOut, maxOut } = this.min_max(data)
+        let sectors = this.min_max(data, 0)
+        let queue = this.min_max(data, 1)
+        let idle = this.min_max(data, 2)
 
-        let trainData = data.map(d => {
-          return { input: { sectors: this.normalize(d[1], minIn, maxIn) }, output: { idle: this.normalize(d[2], minOut, maxOut) } }
+        debug('sectors queue idle ', sectors, queue, idle)
+
+        let trainData = train.map(d => {
+          return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
         })
         debug('trainData', trainData)
         // let testData = train.map(d => {
-        //   return d[1]
+        //   return d[0]
         // })
 
         net.train(trainData, {
@@ -192,56 +207,71 @@ export default {
           errorThresh: 0.001, // the acceptable error percentage from training data --> number between 0 and 1
           log: true, // true to use console.log, when a function is supplied it is used --> Either true or a function
           logPeriod: 100, // iterations between logging out --> number greater than 0
-          learningRate: 0.01 // scales with delta to effect training rate --> number between 0 and 1
+          learningRate: 0.5 // scales with delta to effect training rate --> number between 0 and 1
         })
 
-        let testing = this.min_max(test)
+        // let testing = this.min_max(test)
 
-        // let testData = test.map(d => {
-        //   return { input: { sectors: this.normalize(d[1], testing.minIn, testing.maxIn) }, output: { idle: this.normalize(d[2], testing.minOut, testing.maxOut) } }
-        // })
+        debug('testData', test)
+
+        let testData = test.map(d => {
+          // return this.normalize(d[0], testing.minIn, testing.maxIn)
+          return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [Math.round(this.normalize(d[2], idle.min, idle.max))] }
+        })
+
+        debug('testData', testData)
+
+        let accuracy = this.getAccuracy(net, testData)
+
+        debug('accuracy', accuracy)
+
         // let result = net.run(testData)
-        // //
+        // debug('run', result)
+
+        let forecast = [[120000, 120000]]
+        let forecastData = forecast.map(d => {
+          return [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)]
+          // return { input: [this.normalize(d, minIn, maxIn)], output: [0] }
+        })
+
+        forecastData.forEach((datapoint) => {
+          debug('RUN datapoint', datapoint)
+          let output = net.run(datapoint)
+          debug('RUN forecast', output, this.denormalize(output, idle.min, idle.max))
+        })
+
+        // let forecastResult = net.forecast(forecastData, 10)
         //
-        // debug('run', (result.idle * (testing.maxIn - testing.minIn)) + testing.minIn)
-        //
-        // let forecast = [1000, 5000, 10000]
-        // let forecastData = forecast.map(d => {
-        //   return { input: { sectors: this.normalize(d[1], testing.minIn, testing.maxIn) } }
-        // })
-        //
-        // let forecastResult = net.forecast(forecastData, 3)
-        //
-        // debug('forecastResult', (forecastResult.idle * (testing.maxIn - testing.minIn)) + testing.minIn)
+        // debug('forecastResult', forecastResult)
         // this.$nextTick(function () {
         //
         // })
 
-        let forecast = [1000, 5000, 100000]
-        let forecastData = forecast.map(d => {
-          return { input: { sectors: this.normalize(d, testing.minIn, testing.maxIn) } }
-        })
-
-        debug('forecastData', forecastData)
-
-        let result = net.run(forecast)
-
-        debug('run', (result.idle * (testing.maxIn - testing.minIn)) + testing.minIn)
-
-        result = net.forecast(forecast, 3)
-
-        debug('run', (result.idle * (testing.maxIn - testing.minIn)) + testing.minIn)
+        // let forecast = [50000, 100000, 5000000]
+        // let forecastData = forecast.map(d => {
+        //   return { input: { sectors: this.normalize(d, testing.minIn, testing.maxIn) } }
+        // })
         //
+        // debug('forecastData', forecastData)
+        //
+        // let result = net.run(forecastData)
+        //
+        // debug('run', (result.idle * (testing.maxIn - testing.minIn)) + testing.minIn)
+        //
+        // result = net.forecast(forecastData, 3)
+        //
+        // debug('run', (result.idle * (testing.maxIn - testing.minIn)) + testing.minIn)
+        // //
       }
     }
   },
-  mounted: function () {
-    if (document.readyState !== 'loading') {
-      this.run()
-    } else {
-      document.addEventListener('DOMContentLoaded', this.run)
-    }
-  },
+  // mounted: function () {
+  //   if (document.readyState !== 'loading') {
+  //     this.run()
+  //   } else {
+  //     document.addEventListener('DOMContentLoaded', this.run)
+  //   }
+  // },
 
   // updated: function () {
   //   debug('updated %o', this.$options.values)
@@ -257,6 +287,25 @@ export default {
   //   )
   // },
   methods: {
+    getAccuracy: function (net, testData) {
+      let hits = 0
+      testData.forEach((datapoint) => {
+        const output = net.run(datapoint.input)
+        const outputArray = [Math.round(output)]
+        debug('getAccuracy', datapoint.input, output, outputArray, datapoint.output)
+        if (outputArray[0] === datapoint.output[0]) {
+          hits += 1
+        }
+      })
+      return hits / testData.length
+    },
+    shuffle: function (a) {
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]]
+      }
+      return a
+    },
     run: function () {
       document.getElementById('network-settings').addEventListener('submit', function (e) {
         // Stop it from submitting
@@ -343,22 +392,23 @@ export default {
       // Click programmatically
       document.getElementById('submit').click()
     },
-    min_max: function (data) {
-      let minIn, maxIn, minOut, maxOut
+    min_max: function (data, column) {
+      let min, max
       Array.each(data, function (d) {
-        let inPut = d[1]
-        let outPut = d[2]
-        minIn = (minIn === undefined || minIn > inPut) ? inPut : minIn
-        maxIn = (maxIn === undefined || maxIn < inPut) ? inPut : maxIn
+        let col = d[column]
 
-        minOut = (minOut === undefined || minOut > outPut) ? outPut : minOut
-        maxOut = (maxIn === undefined || maxIn < outPut) ? outPut : maxOut
+        min = (min === undefined || min > col) ? col : min
+        max = (max === undefined || max < col) ? col : max
       })
 
-      return { minIn, maxIn, minOut, maxOut }
+      return { min, max }
     },
     normalize: function (value, min, max) {
       return (value - min) / (max - min)
+    },
+    denormalize: function (value, min, max) {
+      // return (value - min) / (max - min)
+      return (value + min) * (max - min)
     },
     convertToTensor: function (data) {
 
