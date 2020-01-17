@@ -189,15 +189,15 @@ export default {
         })
 
         let sectors = this.min_max(data, 0)
-        let idle = this.min_max(data, 1)
-        // let queue = this.min_max(data, 1)
-        // let idle = this.min_max(data, 2)
+        // let idle = this.min_max(data, 1)
+        let queue = this.min_max(data, 1)
+        let idle = this.min_max(data, 2)
 
         debug('sectors queue idle ', sectors, idle)
 
         let trainData = train.map(d => {
-          return { input: [this.normalize(d[0], sectors.min, sectors.max)], output: [this.normalize(d[1], idle.min, idle.max)] }
-          // return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
+          // return { input: [this.normalize(d[0], sectors.min, sectors.max)], output: [this.normalize(d[1], idle.min, idle.max)] }
+          return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
         })
         debug('trainData', trainData)
         // let testData = train.map(d => {
@@ -217,8 +217,8 @@ export default {
         debug('testData', test)
 
         let testData = test.map(d => {
-          return { input: [this.normalize(d[0], sectors.min, sectors.max)], output: [Math.round(this.normalize(d[1], idle.min, idle.max))] }
-          // return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [Math.round(this.normalize(d[2], idle.min, idle.max))] }
+          // return { input: [this.normalize(d[0], sectors.min, sectors.max)], output: [Math.round(this.normalize(d[1], idle.min, idle.max))] }
+          return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [Math.round(this.normalize(d[2], idle.min, idle.max))] }
         })
 
         debug('testData', testData)
@@ -230,11 +230,11 @@ export default {
         // let result = net.run(testData)
         // debug('run', result)
 
-        // let forecast = [[120000, 20000]]
-        let forecast = [[2000]]
+        let forecast = [[637000, 1100]]
+        // let forecast = [[70]]
         let forecastData = forecast.map(d => {
-          return [this.normalize(d[0], sectors.min, sectors.max)]
-          // return [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)]
+          // return [this.normalize(d[0], sectors.min, sectors.max)]
+          return [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)]
         })
 
         forecastData.forEach((datapoint) => {

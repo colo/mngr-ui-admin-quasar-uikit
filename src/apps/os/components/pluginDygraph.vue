@@ -198,7 +198,7 @@ export default {
       config: undefined,
       stat: {
         data: [],
-        length: 360
+        length: 600
       }
       // Object.merge(Object.clone(this.$options.dygraph_chart), {
       //   interval: 1,
@@ -395,7 +395,7 @@ export default {
 
         Object.each(this.$options.plugin_data.periodical, function (periodical, key) {
           // length = periodical.length
-          this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(0, 360)
+          this.$options.plugin_data.periodical[key] = this.$options.plugin_data.periodical[key].slice(0, 600)
           // this.$options.plugin_data.periodical[key].splice(
           //   (splice * -1) + 1,
           //   length - splice

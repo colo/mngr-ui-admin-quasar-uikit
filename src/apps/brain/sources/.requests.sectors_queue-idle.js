@@ -83,10 +83,10 @@ const host_once_component = {
               'filter': [
                 { 'metadata': { 'host': 'elk' } },
                 // { 'metadata': { 'type': 'minute' } },
-                "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
-                // "this.r.row('metadata')('path').eq('os.cpus')" +
-                // ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.time'))" +
-                // ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors'))"
+                // "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
+                "this.r.row('metadata')('path').eq('os.cpus')" +
+                ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.time'))" +
+                ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors'))"
               ]
 
             }
@@ -187,53 +187,62 @@ const host_once_component = {
       tss.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) }) // sort by timestamp
       Array.each(tss, function (ts) {
         ts *= 1
-        arr_docs.push([ts, docs[ts].per_sec, docs[ts].idle])
-        // arr_docs.push([ts, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle])
+        // arr_docs.push([ts, docs[ts].per_sec, docs[ts].idle])
+        arr_docs.push([ts, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle])
       })
 
-      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
-      // arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined))
+      // arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
+      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined))
 
-      arr_docs = transform(arr_docs, [2])
-      // arr_docs = transform(arr_docs, [1, 2, 3])
+      // arr_docs = transform(arr_docs, [2])
+      arr_docs = transform(arr_docs, [1, 2, 3])
 
-      arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
-      // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0 && doc[3] > 0))
+      // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
+      arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0 && doc[3] > 0))
 
       const LENGTH = 2
       let final_docs = []
-      let current_row = [[], []]
-      // let current_row = [[], [], []]
-      // let current_row = [0, 0]
+      // let current_row = [[], []]
+      let current_row = [[], [], []]
       // let current_row = [0, 0, 0]
-      // for (let i = 0; i < arr_docs.length; i++) {
-      //   let row = arr_docs[i]
-      //   // debug('CALLBACK ROW %o', current_row, i, i % LENGTH)
-      //   if (i === 0 || (i % LENGTH !== 0)) {
-      //     current_row[0].push(row[1])
-      //     current_row[1].push(row[2])
-      //     // current_row[2].push(row[3])
-      //   } else {
-      //     current_row[0] = ss.median(current_row[0])
-      //     current_row[1] = ss.median(current_row[1])
-      //     // current_row[2] = ss.median(current_row[2])
-      //     final_docs.push(Array.clone(current_row))
-      //
-      //     current_row = [[], []]
-      //     // current_row = [[], [], []]
-      //     current_row[0].push(row[1])
-      //     current_row[1].push(row[2])
-      //     // current_row[2].push(row[3])
-      //   }
-      // }
       for (let i = 0; i < arr_docs.length; i++) {
         let row = arr_docs[i]
-        debug('CALLBACK ROW %o', current_row, i)
-        current_row[0] = row[1]
-        current_row[1] = row[2]
-        // current_row[2] = row[3]
-        final_docs.push(Array.clone(current_row))
+        // debug('CALLBACK ROW %o', current_row, i, i % LENGTH)
+        if (i === 0 || (i % LENGTH !== 0)) {
+          current_row[0].push(row[1])
+          current_row[1].push(row[2])
+          current_row[2].push(row[3])
+          // current_row[2] += row[3]
+          // current_row[0] += row[1]
+          // current_row[1] += row[2]
+          // // current_row[2] += row[3]
+        } else {
+          current_row[0] = ss.median(current_row[0])
+          current_row[1] = ss.median(current_row[1])
+          current_row[2] = ss.median(current_row[2])
+          // current_row[0] = current_row[0] / LENGTH
+          // current_row[1] = current_row[1] / LENGTH
+          // current_row[2] = current_row[2] / LENGTH
+          final_docs.push(Array.clone(current_row))
+
+          // current_row = [[], []]
+          current_row = [[], [], []]
+          current_row[0].push(row[1])
+          current_row[1].push(row[2])
+          current_row[2].push(row[3])
+          // current_row[0] = row[1]
+          // current_row[1] = row[2]
+          // // current_row[2] = row[3]
+        }
       }
+      // for (let i = 0; i < arr_docs.length; i++) {
+      //   let row = arr_docs[i]
+      //   debug('CALLBACK ROW %o', current_row, i)
+      //   current_row[0] = row[1]
+      //   current_row[1] = row[2]
+      //   current_row[2] = row[3]
+      //   final_docs.push(Array.clone(current_row))
+      // }
       debug('CALLBACK DOCS %o', final_docs)
       if (arr_docs.length > 0) { vm.values = final_docs }
     }
