@@ -181,14 +181,12 @@ export default {
         //   // activation: 'sigmoid',
         //   outputSize: 1
         // })
-        const netOptions = {
+        const net = new brain.NeuralNetwork({
           activation: 'sigmoid', // activation function
           hiddenLayers: [4],
           learningRate: 0.1, // global learning rate, useful when training using streams
           outputSize: 3
-        }
-        // const net = new brain.NeuralNetwork(netOptions)
-        const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
+        })
 
         let docs = this.min_max(data, 0)
         let sectors = this.min_max(data, 1)
@@ -213,19 +211,17 @@ export default {
         //   return d[0]
         // })
 
-        const trainOptions = {
+        net.train(trainData, {
           iterations: 2000, // the maximum times to iterate the training data --> number greater than 0
           errorThresh: 0.001, // the acceptable error percentage from training data --> number between 0 and 1
           log: true, // true to use console.log, when a function is supplied it is used --> Either true or a function
           logPeriod: 100, // iterations between logging out --> number greater than 0
           learningRate: 0.5 // scales with delta to effect training rate --> number between 0 and 1
-        }
-        // net.train(trainData, trainOptions)
-        const stats = crossValidate.train(trainData, trainOptions)
-        debug('crossValidate', crossValidate.toJSON())
+        })
+
         // let testing = this.min_max(test)
 
-        debug('test', test)
+        debug('testData', test)
 
         let testData = test.map(d => {
           return {
@@ -239,7 +235,6 @@ export default {
         })
 
         debug('testData', testData)
-        const net = crossValidate.toNeuralNetwork()
 
         let accuracy = this.getAccuracy(net, testData)
 
@@ -249,7 +244,7 @@ export default {
         // debug('run', result)
 
         // let forecast = [[120000, 20000]]
-        let forecast = [[2000]]
+        let forecast = [[1700]]
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], docs.min, docs.max)]
         })
