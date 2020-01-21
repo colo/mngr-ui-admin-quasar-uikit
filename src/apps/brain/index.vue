@@ -184,7 +184,7 @@ export default {
         const netOptions = {
           activation: 'sigmoid', // activation function
           hiddenLayers: [4],
-          learningRate: 0.1, // global learning rate, useful when training using streams
+          // learningRate: 0.1, // global learning rate, useful when training using streams
           outputSize: 3
         }
         // const net = new brain.NeuralNetwork(netOptions)
@@ -218,7 +218,7 @@ export default {
           errorThresh: 0.001, // the acceptable error percentage from training data --> number between 0 and 1
           log: true, // true to use console.log, when a function is supplied it is used --> Either true or a function
           logPeriod: 100, // iterations between logging out --> number greater than 0
-          learningRate: 0.5 // scales with delta to effect training rate --> number between 0 and 1
+          learningRate: 0.6 // scales with delta to effect training rate --> number between 0 and 1
         }
         // net.train(trainData, trainOptions)
         const stats = crossValidate.train(trainData, trainOptions)
@@ -312,7 +312,7 @@ export default {
       testData.forEach((datapoint) => {
         const output = net.run(datapoint.input)
         // const outputArray = [Math.round(output)]
-        debug('getAccuracy', datapoint.input, output, datapoint.output)
+        // debug('getAccuracy', datapoint.input, output, datapoint.output)
         if (Math.round(output[0]) === Math.round(datapoint.output[0]) && Math.round(output[1]) === Math.round(datapoint.output[1]) && Math.round(output[2]) === Math.round(datapoint.output[2])) {
           hits += 1
         }

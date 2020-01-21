@@ -137,43 +137,47 @@ const host_once_component = {
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
       arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0 && doc[3] > 0 && doc[4] > 0))
 
-      const LENGTH = 2
+      // const LENGTH = 2
       let final_docs = []
-      // let current_row = [[], []]
-      let current_row = [[], [], [], []]
-      // let current_row = [0, 0]
-      // let current_row = [0, 0, 0]
-      for (let i = 0; i < arr_docs.length; i++) {
-        let row = arr_docs[i]
-        // debug('CALLBACK ROW %o', current_row, i, i % LENGTH)
-        if (i === 0 || (i % LENGTH !== 0)) {
-          current_row[0].push(row[1])
-          current_row[1].push(row[2])
-          current_row[2].push(row[3])
-          current_row[3].push(row[4])
-        } else {
-          current_row[0] = ss.median(current_row[0])
-          current_row[1] = ss.median(current_row[1])
-          current_row[2] = ss.median(current_row[2])
-          current_row[3] = ss.median(current_row[3])
-          final_docs.push(Array.clone(current_row))
-
-          // current_row = [[], []]
-          current_row = [[], [], [], []]
-          current_row[0].push(row[1])
-          current_row[1].push(row[2])
-          current_row[2].push(row[3])
-          current_row[3].push(row[4])
-        }
-      }
+      // // let current_row = [[], []]
+      // let current_row = [[], [], [], []]
+      let current_row = []
+      // // let current_row = [0, 0]
+      // // let current_row = [0, 0, 0]
       // for (let i = 0; i < arr_docs.length; i++) {
       //   let row = arr_docs[i]
-      //   debug('CALLBACK ROW %o', current_row, i)
-      //   current_row[0] = row[1]
-      //   current_row[1] = row[2]
-      //   // current_row[2] = row[3]
-      //   final_docs.push(Array.clone(current_row))
+      //   // debug('CALLBACK ROW %o', current_row, i, i % LENGTH)
+      //   if (i === 0 || (i % LENGTH !== 0)) {
+      //     current_row[0].push(row[1])
+      //     current_row[1].push(row[2])
+      //     current_row[2].push(row[3])
+      //     current_row[3].push(row[4])
+      //   } else {
+      //     current_row[0] = ss.median(current_row[0])
+      //     current_row[1] = ss.median(current_row[1])
+      //     current_row[2] = ss.median(current_row[2])
+      //     current_row[3] = ss.median(current_row[3])
+      //     final_docs.push(Array.clone(current_row))
+      //
+      //     // current_row = [[], []]
+      //     current_row = [[], [], [], []]
+      //     current_row[0].push(row[1])
+      //     current_row[1].push(row[2])
+      //     current_row[2].push(row[3])
+      //     current_row[3].push(row[4])
+      //   }
       // }
+      for (let i = 0; i < arr_docs.length; i++) {
+        let row = JSON.parse(JSON.stringify(arr_docs[i]))
+        // debug('CALLBACK ROW %o', current_row, i)
+        current_row[0] = row[1]
+        current_row[1] = row[2]
+        current_row[2] = row[3]
+        current_row[3] = row[4]
+
+        final_docs.push(Array.clone(current_row))
+        current_row = []
+      }
       debug('CALLBACK DOCS %o', final_docs)
       if (arr_docs.length > 0) { vm.values = final_docs }
     }
