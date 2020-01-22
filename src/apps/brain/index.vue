@@ -182,28 +182,33 @@ export default {
         //   outputSize: 1
         // })
         const netOptions = {
+          // inputSize: 2,
           activation: 'sigmoid', // activation function
           hiddenLayers: [4],
-          // learningRate: 0.1, // global learning rate, useful when training using streams
+          // learningRate: 0.01, // global learning rate, useful when training using streams
           outputSize: 3
         }
         // const net = new brain.NeuralNetwork(netOptions)
         const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
 
-        let docs = this.min_max(data, 0)
-        let sectors = this.min_max(data, 1)
-        let queue = this.min_max(data, 2)
-        let idle = this.min_max(data, 3)
+        let read = this.min_max(data, 0)
+        let written = this.min_max(data, 1)
+        let sectors = this.min_max(data, 2)
+        let queue = this.min_max(data, 3)
+        let idle = this.min_max(data, 4)
 
-        debug('sectors queue idle ', docs, sectors, queue, idle)
+        debug('sectors queue idle ', read, written, sectors, queue, idle)
 
         let trainData = train.map(d => {
           return {
-            input: [this.normalize(d[0], docs.min, docs.max)],
+            input: [
+              this.normalize(d[0], read.min, read.max),
+              this.normalize(d[1], written.min, written.max)
+            ],
             output: [
-              this.normalize(d[1], sectors.min, sectors.max),
-              this.normalize(d[2], queue.min, queue.max),
-              this.normalize(d[3], idle.min, idle.max)
+              this.normalize(d[2], sectors.min, sectors.max),
+              this.normalize(d[3], queue.min, queue.max),
+              this.normalize(d[4], idle.min, idle.max)
             ]
           }
           // return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
@@ -217,9 +222,11 @@ export default {
           iterations: 2000, // the maximum times to iterate the training data --> number greater than 0
           errorThresh: 0.001, // the acceptable error percentage from training data --> number between 0 and 1
           log: true, // true to use console.log, when a function is supplied it is used --> Either true or a function
-          logPeriod: 100, // iterations between logging out --> number greater than 0
-          learningRate: 0.6 // scales with delta to effect training rate --> number between 0 and 1
+          logPeriod: 100 // iterations between logging out --> number greater than 0
+          // learningRate: 0.6 // scales with delta to effect training rate --> number between 0 and 1
+          // learningRate: 0.01
         }
+
         // net.train(trainData, trainOptions)
         const stats = crossValidate.train(trainData, trainOptions)
         debug('crossValidate', crossValidate.toJSON())
@@ -229,11 +236,14 @@ export default {
 
         let testData = test.map(d => {
           return {
-            input: [this.normalize(d[0], docs.min, docs.max)],
+            input: [
+              this.normalize(d[0], read.min, read.max),
+              this.normalize(d[1], written.min, written.max)
+            ],
             output: [
-              this.normalize(d[1], sectors.min, sectors.max),
-              this.normalize(d[2], queue.min, queue.max),
-              this.normalize(d[3], idle.min, idle.max)
+              this.normalize(d[2], sectors.min, sectors.max),
+              this.normalize(d[3], queue.min, queue.max),
+              this.normalize(d[4], idle.min, idle.max)
             ]
           }
         })
@@ -249,9 +259,9 @@ export default {
         // debug('run', result)
 
         // let forecast = [[120000, 20000]]
-        let forecast = [[2000]]
+        let forecast = [[0, 2000], [140000, 0], [150000, 2100]] // normal delete - this read - this read + normal delete
         let forecastData = forecast.map(d => {
-          return [this.normalize(d[0], docs.min, docs.max)]
+          return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
         })
 
         forecastData.forEach((datapoint) => {
