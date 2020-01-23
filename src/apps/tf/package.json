@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ml5": "^0.4.3"
+    "ml5": "^0.4.3",
+    "simple-statistics": "^7.0.7"
   }
 }

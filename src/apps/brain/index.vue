@@ -167,7 +167,7 @@ export default {
       handler: function (data) {
         // data = JSON.parse(JSON.stringify(data))
         data = this.shuffle(JSON.parse(JSON.stringify(data)))
-        const SPLIT = data.length * 0.7 // 70%
+        const SPLIT = data.length * 0.8 // 70%
         // let test = this.shuffle(data.slice(0, data.length / 2))
         // let train = this.shuffle(data.slice(data.length / 2, data.length))
         const train = data.slice(0, SPLIT)
@@ -181,14 +181,15 @@ export default {
         //   // activation: 'sigmoid',
         //   outputSize: 1
         // })
-        const netOptions = {
+        let netOptions = {
           // inputSize: 2,
           activation: 'sigmoid', // activation function
           hiddenLayers: [4],
           // learningRate: 0.01, // global learning rate, useful when training using streams
           outputSize: 3
         }
-        // const net = new brain.NeuralNetwork(netOptions)
+        // netOptions = {}
+        // const net = new brain.recurrent.GRU(netOptions)
         const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
 
         let read = this.min_max(data, 0)

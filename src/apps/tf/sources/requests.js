@@ -1,7 +1,7 @@
 import * as Debug from 'debug'
 import * as ss from 'simple-statistics'
 
-const debug = Debug('apps:brain:sources:requests')
+const debug = Debug('apps:ml5:sources:requests')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND

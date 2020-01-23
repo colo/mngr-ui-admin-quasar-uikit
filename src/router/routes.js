@@ -194,32 +194,32 @@ const routes = [
 
         ]
       },
-      // {
-      //   path: '/tf',
-      //   name: 'tf',
-      //   // route level code-splitting
-      //   // this generates a separate chunk (about.[hash].js) for this route
-      //   // which is lazy-loaded when the route is visited.
-      //   component: () => import(/* webpackChunkName: "tf" */ '@apps/tf/index.vue'),
-      //   meta: {
-      //     breadcrumb: { label: 'TensorFlow', icon: 'widgets', app: 'tf' }
-      //   }
-      //
-      //   // children: [
-      //   //   {
-      //   //     path: ':host',
-      //   //     name: 'Host',
-      //   //     component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/host.vue'),
-      //   //     meta: {
-      //   //       breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
-      //   //     }
-      //   //   }
-      //   //   // {
-      //   //   //   path: 'profile',
-      //   //   //   component: () => import('pages/user-profile')
-      //   //   // }
-      //   // ]
-      // },
+      {
+        path: '/tf',
+        name: 'tf',
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "tf" */ '@apps/tf/index.vue'),
+        meta: {
+          breadcrumb: { label: 'TensorFlow', icon: 'widgets', app: 'tf' }
+        }
+
+        // children: [
+        //   {
+        //     path: ':host',
+        //     name: 'Host',
+        //     component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/host.vue'),
+        //     meta: {
+        //       breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
+        //     }
+        //   }
+        //   // {
+        //   //   path: 'profile',
+        //   //   component: () => import('pages/user-profile')
+        //   // }
+        // ]
+      },
       {
         path: '/brain',
         name: 'brain',
