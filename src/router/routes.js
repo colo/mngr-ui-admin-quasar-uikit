@@ -194,15 +194,41 @@ const routes = [
 
         ]
       },
+      // {
+      //   path: '/tf',
+      //   name: 'tf',
+      //   // route level code-splitting
+      //   // this generates a separate chunk (about.[hash].js) for this route
+      //   // which is lazy-loaded when the route is visited.
+      //   component: () => import(/* webpackChunkName: "tf" */ '@apps/tf/index.vue'),
+      //   meta: {
+      //     breadcrumb: { label: 'TensorFlow', icon: 'widgets', app: 'tf' }
+      //   }
+      //
+      //   // children: [
+      //   //   {
+      //   //     path: ':host',
+      //   //     name: 'Host',
+      //   //     component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/host.vue'),
+      //   //     meta: {
+      //   //       breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
+      //   //     }
+      //   //   }
+      //   //   // {
+      //   //   //   path: 'profile',
+      //   //   //   component: () => import('pages/user-profile')
+      //   //   // }
+      //   // ]
+      // },
       {
-        path: '/tf',
-        name: 'tf',
+        path: '/brain',
+        name: 'brain',
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "tf" */ '@apps/tf/index.vue'),
+        component: () => import(/* webpackChunkName: "brain" */ '@apps/brain/index.vue'),
         meta: {
-          breadcrumb: { label: 'TensorFlow', icon: 'widgets', app: 'tf' }
+          breadcrumb: { label: 'Barin', icon: 'widgets', app: 'brain' }
         }
 
         // children: [
@@ -221,14 +247,14 @@ const routes = [
         // ]
       },
       {
-        path: '/brain',
-        name: 'brain',
+        path: '/neataptic',
+        name: 'neataptic',
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "brain" */ '@apps/brain/index.vue'),
+        component: () => import(/* webpackChunkName: "brain" */ '@apps/neataptic/index.vue'),
         meta: {
-          breadcrumb: { label: 'Barin', icon: 'widgets', app: 'brain' }
+          breadcrumb: { label: 'neataptic', icon: 'widgets', app: 'neataptic' }
         }
 
         // children: [

@@ -38,7 +38,7 @@ import { requests, store } from '@apps/tf/sources/index'
 // import moment from 'moment'
 
 import * as tf from '@tensorflow/tfjs'
-import * as tfvis from '@tensorflow/tfjs-vis'
+// import * as tfvis from '@tensorflow/tfjs-vis'
 
 export default {
   mixins: [DataSourcesMixin],
@@ -56,6 +56,7 @@ export default {
 
   model: undefined,
   tfData: undefined,
+  tfTestData: undefined,
   tensorData: undefined,
 
   data () {
@@ -91,7 +92,15 @@ export default {
     'values': {
       deep: true,
       handler: function (data) {
-        this.$options.tfData = JSON.parse(JSON.stringify(data))
+        // data = this.shuffle(JSON.parse(JSON.stringify(data)))
+        data = JSON.parse(JSON.stringify(data))
+        const SPLIT = data.length * 0.8 // 70%
+        // let test = this.shuffle(data.slice(0, data.length / 2))
+        // let train = this.shuffle(data.slice(data.length / 2, data.length))
+        this.$options.tfData = data.slice(0, SPLIT)
+        this.$options.tfTestData = data.slice(SPLIT + 1)
+
+        // this.$options.tfData = JSON.parse(JSON.stringify(data))
         debug('values %o', this.$options.tfData)
 
         this.$nextTick(function () {
@@ -154,7 +163,7 @@ export default {
       const model = tf.sequential()
 
       // Add a single hidden layer
-      model.add(tf.layers.dense({ inputShape: [1], units: 1, useBias: true }))
+      model.add(tf.layers.dense({ inputShape: [2], units: 1, useBias: true }))
 
       // Add an output layer
       model.add(tf.layers.dense({ units: 1, useBias: true }))
@@ -182,11 +191,11 @@ export default {
 
         // Step 2. Convert data to Tensor
 
-        const inputs = data.map(d => d[1])
-        const labels = data.map(d => d[2])
+        const inputs = data.map(d => [d[0], d[1]])
+        const labels = data.map(d => [d[4]]) // d[2], d[3],
         debug('tidy', inputs, labels)
 
-        const inputTensor = tf.tensor2d(inputs, [inputs.length, 1], 'int32')
+        const inputTensor = tf.tensor2d(inputs, [inputs.length, 2], 'int32')
         const labelTensor = tf.tensor2d(labels, [labels.length, 1], 'int32')
 
         // Step 3. Normalize the data to the range 0 - 1 using min-max scaling
@@ -213,9 +222,10 @@ export default {
       let self = this
       // Prepare the model for training.
       model.compile({
-        optimizer: tf.train.adam(),
-        loss: tf.losses.meanSquaredError,
-        metrics: ['mse']
+        optimizer: 'sgd',
+        // optimizer: tf.train.adam(),
+        loss: tf.losses.meanSquaredError
+        // metrics: ['mse']
       })
       // model.compile({ optimizer: tf.train.sgd(0.001), loss: 'meanSquaredError' })
 
@@ -237,20 +247,24 @@ export default {
           },
           onTrainEnd: (logs) => {
             debug('onTrainEnd', logs)
-            self.testModel(self.$options.model, self.$options.tfData, self.$options.tensorData)
+            // self.testModel(self.$options.model, self.$options.tfTestData, self.$options.tensorData)
+
+            self.testModel(self.$options.model, [[0, 2000], [140000, 0], [150000, 2100]], self.$options.tensorData)
           }
         }
       })
     },
     testModel: function (model, inputData, normalizationData) {
+      tf.util.shuffle(inputData)
+
       const { inputMax, inputMin, labelMin, labelMax } = normalizationData
 
       // Generate predictions for a uniform range of numbers between 0 and 1;
       // We un-normalize the data by doing the inverse of the min-max scaling
       // that we did earlier.
       const [xs, preds] = tf.tidy(() => {
-        const xs = tf.linspace(0, 1, 100)
-        const preds = model.predict(xs.reshape([100, 1]))
+        const xs = tf.linspace(0, 1, 200)
+        const preds = model.predict(xs.reshape([100, 2]))
 
         const unNormXs = xs
           .mul(inputMax.sub(inputMin))
@@ -264,6 +278,8 @@ export default {
         return [unNormXs.dataSync(), unNormPreds.dataSync()]
       })
 
+      debug('predictedPoints %o', preds)
+
       const predictedPoints = Array.from(xs).map((val, i) => {
         return { x: val, y: preds[i] }
       })
@@ -271,7 +287,7 @@ export default {
       debug('inputData %o', inputData)
 
       const originalPoints = inputData.map(d => ({
-        x: d[1], y: d[2]
+        x: [d[0], d[1]], y: [d[2], d[3], d[4]]
       }))
 
       debug('predictedPoints %o', predictedPoints)

@@ -1,5 +1,5 @@
 {
-  "name": "tf",
+  "name": "neataptic-test",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tensorflow/tfjs": "^1.5.1",
+    "neataptic": "^1.4.7",
     "simple-statistics": "^7.0.7"
   }
 }

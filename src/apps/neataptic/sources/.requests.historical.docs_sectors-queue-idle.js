@@ -1,7 +1,7 @@
 import * as Debug from 'debug'
 import * as ss from 'simple-statistics'
 
-const debug = Debug('apps:tf:sources:requests')
+const debug = Debug('apps:brain:sources:requests')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -64,7 +64,7 @@ const host_once_component = {
             range: 'posix ' + (Date.now() - HOUR) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
-              'from': 'os',
+              'from': 'os_historical',
               // 'register': 'changes',
               // 'format': 'tabular',
               'index': false,
@@ -82,13 +82,12 @@ const host_once_component = {
               ],
               'filter': [
                 { 'metadata': { 'host': 'elk' } },
-                // { 'metadata': { 'type': 'minute' } },
+                { 'metadata': { 'type': 'minute' } },
                 // "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
                 "this.r.row('metadata')('path').eq('os.cpus')" +
                 ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.time'))" +
                 ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors'))" +
-                ".or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))" +
-                ".or(this.r.row('metadata')('path').eq('os.rethinkdb.server.read_docs'))"
+                ".or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
               ]
 
             }
@@ -104,23 +103,23 @@ const host_once_component = {
   callback: function (data, metadata, key, vm) {
     debug('CALLBACK data %s %o', key, data, metadata)
 
-    if (data && data.os && data.os.length > 0) {
+    if (data && data.os_historical && data.os_historical.length > 0) {
       let docs = {}
-      Array.each(data.os, function (row) {
+      Array.each(data.os_historical, function (row) {
         let ts = row.metadata.timestamp
-        if (!docs[ts]) docs[ts] = { idle: undefined, written: undefined }
+        if (!docs[ts]) docs[ts] = { idle: undefined, per_sec: undefined, sectors: undefined, time_in_queue: undefined }
         if (row.metadata.path === 'os.cpus') {
-          docs[ts].idle = row.data.idle
-        } else if (row.metadata.path === 'os.rethinkdb.server.read_docs') {
-          docs[ts].read = Math.round(row.data.per_sec) * 1
+          docs[ts].idle = row.data.idle.median
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
-          docs[ts].written = Math.round(row.data.per_sec) * 1
+          docs[ts].per_sec = Math.round(row.data.per_sec.median) * 1
         } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
-          docs[ts].sectors = row.data.write_sectors + row.data.read_sectors
+          docs[ts].sectors = row.data.write_sectors.median + row.data.read_sectors.median
         } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
-          docs[ts].time_in_queue = row.data.time_in_queue
+          docs[ts].time_in_queue = row.data.time_in_queue.median
         }
       })
+
+      debug('CALLBACK DOCS %o', docs)
 
       let arr_docs = []
       let tss = Object.keys(docs)
@@ -128,24 +127,24 @@ const host_once_component = {
       Array.each(tss, function (ts) {
         ts *= 1
         // arr_docs.push([ts, docs[ts].per_sec, docs[ts].idle])
-        arr_docs.push([ts, docs[ts].read, docs[ts].written, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle])
+        arr_docs.push([ts, docs[ts].per_sec, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle])
       })
 
       // arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
-      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined && doc[4] !== undefined && doc[5] !== undefined))
+      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined && doc[4] !== undefined))
 
-      arr_docs = transform(arr_docs, [3, 4, 5])
+      // arr_docs = transform(arr_docs, [2, 3, 4])
       // arr_docs = transform(arr_docs, [1, 2, 3])
 
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
-      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[3] >= 0 && doc[4] >= 0 && doc[5] >= 0))
+      arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0 && doc[3] > 0 && doc[4] > 0))
+
+      debug('CALLBACK DOCS %o', arr_docs)
 
       // const LENGTH = 2
       let final_docs = []
-      let current_row = []
-      // // // let current_row = [[], []]
-      // let current_row = [[], [], [], [], []]
-      //
+      // // let current_row = [[], []]
+      let current_row = [[], [], [], []]
       // // let current_row = [0, 0]
       // // let current_row = [0, 0, 0]
       // for (let i = 0; i < arr_docs.length; i++) {
@@ -156,36 +155,29 @@ const host_once_component = {
       //     current_row[1].push(row[2])
       //     current_row[2].push(row[3])
       //     current_row[3].push(row[4])
-      //     current_row[4].push(row[5])
       //   } else {
       //     current_row[0] = ss.median(current_row[0])
       //     current_row[1] = ss.median(current_row[1])
       //     current_row[2] = ss.median(current_row[2])
       //     current_row[3] = ss.median(current_row[3])
-      //     current_row[4] = ss.median(current_row[4])
-      //
       //     final_docs.push(Array.clone(current_row))
       //
       //     // current_row = [[], []]
-      //     current_row = [[], [], [], [], []]
+      //     current_row = [[], [], [], []]
       //     current_row[0].push(row[1])
       //     current_row[1].push(row[2])
       //     current_row[2].push(row[3])
       //     current_row[3].push(row[4])
-      //     current_row[4].push(row[5])
       //   }
       // }
       for (let i = 0; i < arr_docs.length; i++) {
-        let row = JSON.parse(JSON.stringify(arr_docs[i]))
-        // debug('CALLBACK ROW %o', current_row, i)
+        let row = arr_docs[i]
+        debug('CALLBACK ROW %o', current_row, i)
         current_row[0] = row[1]
         current_row[1] = row[2]
         current_row[2] = row[3]
         current_row[3] = row[4]
-        current_row[4] = row[5]
-
         final_docs.push(Array.clone(current_row))
-        current_row = []
       }
       debug('CALLBACK DOCS %o', final_docs)
       if (arr_docs.length > 0) { vm.values = final_docs }

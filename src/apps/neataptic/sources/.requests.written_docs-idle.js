@@ -1,7 +1,7 @@
 import * as Debug from 'debug'
 import * as ss from 'simple-statistics'
 
-const debug = Debug('apps:tf:sources:requests')
+const debug = Debug('apps:brain:sources:requests')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -83,17 +83,79 @@ const host_once_component = {
               'filter': [
                 { 'metadata': { 'host': 'elk' } },
                 // { 'metadata': { 'type': 'minute' } },
-                // "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
-                "this.r.row('metadata')('path').eq('os.cpus')" +
-                ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.time'))" +
-                ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors'))" +
-                ".or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))" +
-                ".or(this.r.row('metadata')('path').eq('os.rethinkdb.server.read_docs'))"
+                "this.r.row('metadata')('path').eq('os.cpus').or(this.r.row('metadata')('path').eq('os.rethinkdb.server.written_docs'))"
+                // "this.r.row('metadata')('path').eq('os.cpus')" +
+                // ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.time'))" +
+                // ".or(this.r.row('metadata')('path').eq('os.blockdevices.vda3.sectors'))"
               ]
 
             }
           }]
           break
+
+        // case 'config.once':
+        //   source = [{
+        //     params: { id: _key },
+        //     range: 'posix ' + (Date.now() - 15 * SECOND) + '-' + Date.now() + '/*',
+        //     path: 'all',
+        //     // range: 'posix ' + (Date.now() - (5 * MINUTE)) + '-' + Date.now() + '/*',
+        //     query: {
+        //       'from': 'os',
+        //       // 'index': false,
+        //
+        //       'q': [
+        //         // 'id',
+        //         'config',
+        //         { 'metadata': ['path'] }
+        //       ],
+        //       // 'transformation': [
+        //       //   { 'orderBy': { 'index': 'r.desc(timestamp)' } }
+        //       //   // 'slice:0:1'
+        //       // ],
+        //       'aggregation': 'distinct',
+        //       'filter': [{ 'metadata': { 'host': vm.host } }]
+        //     }
+        //   }]
+        //
+        //   break
+        // case 'minute.once':
+        //   source = [{
+        //     params: { id: _key },
+        //     path: 'all',
+        //     range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
+        //     query: {
+        //       'from': 'os_historical',
+        //       // 'register': 'changes',
+        //       'format': 'tabular',
+        //       'index': false,
+        //       /**
+        //       * right now needed to match OUTPUT 'id' with this query (need to @fix)
+        //       **/
+        //       'q': [
+        //         // {
+        //         //   'metadata': [
+        //         //     'timestamp',
+        //         //     'path'
+        //         //   ]
+        //         // },
+        //         // 'metadata',
+        //         'data'
+        //       ],
+        //       'transformation': [
+        //         {
+        //           'orderBy': { 'index': 'r.desc(timestamp)' }
+        //         }
+        //       ],
+        //       'filter': [
+        //         { 'metadata': { 'host': vm.host } },
+        //         { 'metadata': { 'type': 'minute' } },
+        //         "r.row('metadata')('path').ne('os.procs')"
+        //       ]
+        //
+        //     }
+        //   }]
+        //
+        //   break
       }
     }
 
@@ -111,10 +173,8 @@ const host_once_component = {
         if (!docs[ts]) docs[ts] = { idle: undefined, written: undefined }
         if (row.metadata.path === 'os.cpus') {
           docs[ts].idle = row.data.idle
-        } else if (row.metadata.path === 'os.rethinkdb.server.read_docs') {
-          docs[ts].read = Math.round(row.data.per_sec) * 1
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
-          docs[ts].written = Math.round(row.data.per_sec) * 1
+          docs[ts].per_sec = Math.round(row.data.per_sec) * 1
         } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
           docs[ts].sectors = row.data.write_sectors + row.data.read_sectors
         } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
@@ -127,65 +187,52 @@ const host_once_component = {
       tss.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) }) // sort by timestamp
       Array.each(tss, function (ts) {
         ts *= 1
-        // arr_docs.push([ts, docs[ts].per_sec, docs[ts].idle])
-        arr_docs.push([ts, docs[ts].read, docs[ts].written, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle])
+        arr_docs.push([ts, docs[ts].per_sec, docs[ts].idle])
+        // arr_docs.push([ts, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle])
       })
 
-      // arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
-      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined && doc[4] !== undefined && doc[5] !== undefined))
+      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
+      // arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined))
 
-      arr_docs = transform(arr_docs, [3, 4, 5])
+      arr_docs = transform(arr_docs, [2])
       // arr_docs = transform(arr_docs, [1, 2, 3])
 
-      // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
-      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[3] >= 0 && doc[4] >= 0 && doc[5] >= 0))
+      arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
+      // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0 && doc[3] > 0))
 
-      // const LENGTH = 2
+      const LENGTH = 2
       let final_docs = []
-      let current_row = []
-      // // // let current_row = [[], []]
-      // let current_row = [[], [], [], [], []]
-      //
-      // // let current_row = [0, 0]
-      // // let current_row = [0, 0, 0]
+      let current_row = [[], []]
+      // let current_row = [[], [], []]
+      // let current_row = [0, 0]
+      // let current_row = [0, 0, 0]
       // for (let i = 0; i < arr_docs.length; i++) {
       //   let row = arr_docs[i]
       //   // debug('CALLBACK ROW %o', current_row, i, i % LENGTH)
       //   if (i === 0 || (i % LENGTH !== 0)) {
       //     current_row[0].push(row[1])
       //     current_row[1].push(row[2])
-      //     current_row[2].push(row[3])
-      //     current_row[3].push(row[4])
-      //     current_row[4].push(row[5])
+      //     // current_row[2].push(row[3])
       //   } else {
       //     current_row[0] = ss.median(current_row[0])
       //     current_row[1] = ss.median(current_row[1])
-      //     current_row[2] = ss.median(current_row[2])
-      //     current_row[3] = ss.median(current_row[3])
-      //     current_row[4] = ss.median(current_row[4])
-      //
+      //     // current_row[2] = ss.median(current_row[2])
       //     final_docs.push(Array.clone(current_row))
       //
-      //     // current_row = [[], []]
-      //     current_row = [[], [], [], [], []]
+      //     current_row = [[], []]
+      //     // current_row = [[], [], []]
       //     current_row[0].push(row[1])
       //     current_row[1].push(row[2])
-      //     current_row[2].push(row[3])
-      //     current_row[3].push(row[4])
-      //     current_row[4].push(row[5])
+      //     // current_row[2].push(row[3])
       //   }
       // }
       for (let i = 0; i < arr_docs.length; i++) {
-        let row = JSON.parse(JSON.stringify(arr_docs[i]))
-        // debug('CALLBACK ROW %o', current_row, i)
+        let row = arr_docs[i]
+        debug('CALLBACK ROW %o', current_row, i)
         current_row[0] = row[1]
         current_row[1] = row[2]
-        current_row[2] = row[3]
-        current_row[3] = row[4]
-        current_row[4] = row[5]
-
+        // current_row[2] = row[3]
         final_docs.push(Array.clone(current_row))
-        current_row = []
       }
       debug('CALLBACK DOCS %o', final_docs)
       if (arr_docs.length > 0) { vm.values = final_docs }
