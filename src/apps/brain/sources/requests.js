@@ -11,10 +11,10 @@ let prev = []
 const transform = function (values, column) {
   debug('transform %o', values, prev)
   let transformed = JSON.parse(JSON.stringify(values))
-  if (prev.length === 0 || (transformed.length > 0 && transformed[0] !== null && prev[0] > values[0][0])) { // timestamp check
-    prev = transformed.shift()
-    // chart.prev = values[0]
-  }
+  // if (prev.length === 0 || (transformed.length > 0 && transformed[0] !== null && prev[0] > values[0][0])) { // timestamp check
+  prev = transformed.shift()
+  // chart.prev = values[0]
+  // }
 
   // Array.each(values, function (row) {
   for (let i = 0; i < transformed.length; i++) {
@@ -26,8 +26,13 @@ const transform = function (values, column) {
       for (let index = 0; index < row.length; index++) {
         let col = row[index]
         if (index > 0 && (column === undefined || index === column || column.contains(index))) { // index == 0 == timestamp
-          row[index] = col - prev[index]
-          row[index] = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
+          // row[index] = col - prev[index]
+          let __val = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
+
+          row[index] = (index === 5 && __val > 40000) ? __val / 2 : __val
+          // if (index === 5 && (col - prev[index]) > 39000) {
+          //   debug('transformation', row[0], prev[0], (row[0] - prev[0]), col, prev[index], (col - prev[index]) / ((row[0] - prev[0]) / 1000), col - prev[index])
+          // }
         }
       }
       // })

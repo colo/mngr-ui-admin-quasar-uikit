@@ -145,13 +145,18 @@ export default {
         let network = new neataptic.architect.LSTM(2, 5, 3)
 
         network.train(trainData, {
-          // cost: neataptic.methods.cost.CROSS_ENTROPY,
-          cost: neataptic.methods.cost.BINARY,
+          // cost: neataptic.methods.cost.MSE, // default - bad
+          cost: neataptic.methods.cost.CROSS_ENTROPY,
+          // cost: neataptic.methods.cost.BINARY,
+          // cost: neataptic.methods.cost.MAE, // bad
+          // cost: neataptic.methods.cost.MAPE, // bad
+          // cost: neataptic.methods.cost.MSLE, //bad
+          // cost: neataptic.methods.cost.HINGE, //bad
           log: 100,
           iterations: 2000,
           error: 0.001,
           clear: true,
-          rate: 0.5,
+          // rate: 0.5,
           crossValidate:
             {
               testSize: 0.4,
@@ -163,7 +168,7 @@ export default {
         //
         // debug('accuracy', accuracy)
 
-        let forecast = [[0, 2400], [3700, 0], [3700, 2400], [180000, 0]] // normal delete - this read - this read + normal delete
+        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
         })
