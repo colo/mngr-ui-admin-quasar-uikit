@@ -167,7 +167,7 @@ export default {
       handler: function (data) {
         // data = JSON.parse(JSON.stringify(data))
         data = this.shuffle(JSON.parse(JSON.stringify(data)))
-        const SPLIT = data.length * 0.8 // 70%
+        const SPLIT = data.length * 0.7 // 70%
         // let test = this.shuffle(data.slice(0, data.length / 2))
         // let train = this.shuffle(data.slice(data.length / 2, data.length))
         const train = data.slice(0, SPLIT)
@@ -181,35 +181,27 @@ export default {
         //   // activation: 'sigmoid',
         //   outputSize: 1
         // })
-        let netOptions = {
-          // inputSize: 2,
+        const net = new brain.NeuralNetwork({
           activation: 'sigmoid', // activation function
-          hiddenLayers: [5],
-          // learningRate: 0.01, // global learning rate, useful when training using streams
+          hiddenLayers: [4],
+          learningRate: 0.1, // global learning rate, useful when training using streams
           outputSize: 3
-        }
-        // netOptions = {}
-        // const net = new brain.recurrent.GRU(netOptions)
-        const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
+        })
 
-        let read = this.min_max(data, 0)
-        let written = this.min_max(data, 1)
-        let sectors = this.min_max(data, 2)
-        let queue = this.min_max(data, 3)
-        let idle = this.min_max(data, 4)
+        let docs = this.min_max(data, 0)
+        let sectors = this.min_max(data, 1)
+        let queue = this.min_max(data, 2)
+        let idle = this.min_max(data, 3)
 
-        debug('sectors queue idle ', read, written, sectors, queue, idle)
+        debug('sectors queue idle ', docs, sectors, queue, idle)
 
         let trainData = train.map(d => {
           return {
-            input: [
-              this.normalize(d[0], read.min, read.max),
-              this.normalize(d[1], written.min, written.max)
-            ],
+            input: [this.normalize(d[0], docs.min, docs.max)],
             output: [
-              this.normalize(d[2], sectors.min, sectors.max),
-              this.normalize(d[3], queue.min, queue.max),
-              this.normalize(d[4], idle.min, idle.max)
+              this.normalize(d[1], sectors.min, sectors.max),
+              this.normalize(d[2], queue.min, queue.max),
+              this.normalize(d[3], idle.min, idle.max)
             ]
           }
           // return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
@@ -219,38 +211,30 @@ export default {
         //   return d[0]
         // })
 
-        const trainOptions = {
+        net.train(trainData, {
           iterations: 2000, // the maximum times to iterate the training data --> number greater than 0
           errorThresh: 0.001, // the acceptable error percentage from training data --> number between 0 and 1
           log: true, // true to use console.log, when a function is supplied it is used --> Either true or a function
-          logPeriod: 100 // iterations between logging out --> number greater than 0
-          // learningRate: 0.6 // scales with delta to effect training rate --> number between 0 and 1
-          // learningRate: 0.01
-        }
+          logPeriod: 100, // iterations between logging out --> number greater than 0
+          learningRate: 0.5 // scales with delta to effect training rate --> number between 0 and 1
+        })
 
-        // net.train(trainData, trainOptions)
-        const stats = crossValidate.train(trainData, trainOptions)
-        debug('crossValidate', crossValidate.toJSON())
         // let testing = this.min_max(test)
 
-        debug('test', test)
+        debug('testData', test)
 
         let testData = test.map(d => {
           return {
-            input: [
-              this.normalize(d[0], read.min, read.max),
-              this.normalize(d[1], written.min, written.max)
-            ],
+            input: [this.normalize(d[0], docs.min, docs.max)],
             output: [
-              this.normalize(d[2], sectors.min, sectors.max),
-              this.normalize(d[3], queue.min, queue.max),
-              this.normalize(d[4], idle.min, idle.max)
+              this.normalize(d[1], sectors.min, sectors.max),
+              this.normalize(d[2], queue.min, queue.max),
+              this.normalize(d[3], idle.min, idle.max)
             ]
           }
         })
 
         debug('testData', testData)
-        const net = crossValidate.toNeuralNetwork()
 
         let accuracy = this.getAccuracy(net, testData)
 
@@ -260,9 +244,9 @@ export default {
         // debug('run', result)
 
         // let forecast = [[120000, 20000]]
-        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
+        let forecast = [[1700]]
         let forecastData = forecast.map(d => {
-          return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
+          return [this.normalize(d[0], docs.min, docs.max)]
         })
 
         forecastData.forEach((datapoint) => {
@@ -323,7 +307,7 @@ export default {
       testData.forEach((datapoint) => {
         const output = net.run(datapoint.input)
         // const outputArray = [Math.round(output)]
-        // debug('getAccuracy', datapoint.input, output, datapoint.output)
+        debug('getAccuracy', datapoint.input, output, datapoint.output)
         if (Math.round(output[0]) === Math.round(datapoint.output[0]) && Math.round(output[1]) === Math.round(datapoint.output[1]) && Math.round(output[2]) === Math.round(datapoint.output[2])) {
           hits += 1
         }

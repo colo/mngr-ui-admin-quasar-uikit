@@ -252,9 +252,35 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "brain" */ '@apps/neataptic/index.vue'),
+        component: () => import(/* webpackChunkName: "neataptic" */ '@apps/neataptic/index.vue'),
         meta: {
           breadcrumb: { label: 'neataptic', icon: 'widgets', app: 'neataptic' }
+        }
+
+        // children: [
+        //   {
+        //     path: ':host',
+        //     name: 'Host',
+        //     component: () => import(/* webpackChunkName: "munin.host" */ '@apps/munin/host.vue'),
+        //     meta: {
+        //       breadcrumb: { label: 'Munin Host', icon: 'widgets', app: 'munin' }
+        //     }
+        //   }
+        //   // {
+        //   //   path: 'profile',
+        //   //   component: () => import('pages/user-profile')
+        //   // }
+        // ]
+      },
+      {
+        path: '/carrot',
+        name: 'carrot',
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "carrot" */ '@apps/carrot/index.vue'),
+        meta: {
+          breadcrumb: { label: 'carrot', icon: 'widgets', app: 'carrot' }
         }
 
         // children: [

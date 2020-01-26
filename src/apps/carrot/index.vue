@@ -26,7 +26,7 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:brain')
+const debug = Debug('apps:carrot')
 
 import JSPipeline from 'js-pipeline'
 
@@ -36,11 +36,13 @@ import DataSourcesMixin from '@components/mixins/dataSources'
 
 // import OsHostCard from '@apps/brain/components/hostCard.vue'
 
-import { requests, store } from '@apps/neataptic/sources/index'
+import { requests, store } from '@apps/carrot/sources/index'
 // import moment from 'moment'
 
-import neataptic from 'neataptic'
-// import { Network, methods } from 'neataptic'
+// import carrot from 'carrot'
+import carrot from '@liquid-carrot/carrot'
+// const carrot = require('@liquidcarrot/carrot')
+// import { Network, methods } from 'carrot'
 
 export default {
   mixins: [DataSourcesMixin],
@@ -142,17 +144,17 @@ export default {
 
         debug('testData', testData)
 
-        let network = new neataptic.architect.LSTM(2, 5, 3)
-        // let network = new neataptic.architect.NARX(2, [2, 3], 3, 200, 200)
+        let network = new carrot.architect.LSTM(2, 5, 3)
+        // let network = new carrot.architect.NARX(2, 5, 3, 3, 3)
 
         network.train(trainData, {
-          // cost: neataptic.methods.cost.MSE, // default - bad
-          cost: neataptic.methods.cost.CROSS_ENTROPY,
-          // cost: neataptic.methods.cost.BINARY,
-          // cost: neataptic.methods.cost.MAE, // bad
-          // cost: neataptic.methods.cost.MAPE, // bad
-          // cost: neataptic.methods.cost.MSLE, //bad
-          // cost: neataptic.methods.cost.HINGE, //bad
+          // cost: carrot.methods.cost.MSE, // default - bad
+          cost: carrot.methods.cost.CROSS_ENTROPY,
+          // cost: carrot.methods.cost.BINARY,
+          // cost: carrot.methods.cost.MAE, // bad
+          // cost: carrot.methods.cost.MAPE, // bad
+          // cost: carrot.methods.cost.MSLE, //bad
+          // cost: carrot.methods.cost.HINGE, //bad
           log: 100,
           iterations: 2000,
           error: 0.001,
@@ -167,9 +169,10 @@ export default {
 
         // let accuracy = this.getAccuracy(network, testData)
         //
-        // debug('accuracy', network.toJSON(), network.fromJSON(network.toJSON()))
+        debug('accuracy', network.toJSON(), carrot.Network.fromJSON(network.toJSON()))
 
-        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
+        const imported = carrot.Network.fromJSON(network.toJSON())
+        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [200000, 64]] // normal delete - this read - this read + normal delete
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
         })
@@ -184,6 +187,17 @@ export default {
             this.denormalize(output[2], idle.min, idle.max)
           )
         })
+
+        // forecastData.forEach((datapoint) => {
+        //   debug('RUN datapoint', datapoint)
+        //   let output = imported.activate([datapoint[0], datapoint[1]])
+        //   debug('RUN forecast %o - sectors %d - queue %d - idle %d',
+        //     output,
+        //     this.denormalize(output[0], sectors.min, sectors.max),
+        //     this.denormalize(output[1], queue.min, queue.max),
+        //     this.denormalize(output[2], idle.min, idle.max)
+        //   )
+        // })
 
         // testData.forEach(row => {
         //   let input = row.input
