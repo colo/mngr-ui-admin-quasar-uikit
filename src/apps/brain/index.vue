@@ -1,6 +1,6 @@
 <template>
   <div class="flex-container">
-    <div class="form-wrapper">
+    <!-- <div class="form-wrapper">
       <form id="network-settings" action="" method="POST">
         <div class="input-wrapper">
           <div class="input-label">Network type</div>
@@ -72,25 +72,9 @@
         </div>
       </form>
     </div>
-    <div id="result"></div>
+    <div id="result"></div> -->
   </div>
-  <!-- <q-page>
 
-    <vk-card class="uk-background-secondary">
-    <vk-breadcrumb>
-      <router-link to="/" v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-        <vk-breadcrumb-item :href="href" @click="navigate">Home</vk-breadcrumb-item>
-      </router-link>
-
-      <vk-breadcrumb-item disabled>Tf</vk-breadcrumb-item>
-    </vk-breadcrumb>
-    </vk-card>
-
-    <vk-card class="uk-background-secondary">
-
-    </vk-card>
-  </q-page> -->
 </template>
 
 <script>
@@ -184,9 +168,9 @@ export default {
         let netOptions = {
           // inputSize: 2,
           activation: 'sigmoid', // activation function
-          hiddenLayers: [5],
+          hiddenLayers: [4],
           // learningRate: 0.01, // global learning rate, useful when training using streams
-          outputSize: 3
+          outputSize: 2
         }
         // netOptions = {}
         // const net = new brain.recurrent.GRU(netOptions)
@@ -197,8 +181,9 @@ export default {
         let sectors = this.min_max(data, 2)
         let queue = this.min_max(data, 3)
         let idle = this.min_max(data, 4)
+        let usage = this.min_max(data, 5)
 
-        debug('sectors queue idle ', read, written, sectors, queue, idle)
+        debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
 
         let trainData = train.map(d => {
           return {
@@ -207,9 +192,10 @@ export default {
               this.normalize(d[1], written.min, written.max)
             ],
             output: [
-              this.normalize(d[2], sectors.min, sectors.max),
-              this.normalize(d[3], queue.min, queue.max),
-              this.normalize(d[4], idle.min, idle.max)
+              // this.normalize(d[2], sectors.min, sectors.max),
+              // this.normalize(d[3], queue.min, queue.max),
+              this.normalize(d[4], idle.min, idle.max),
+              this.normalize(d[5], usage.min, usage.max)
             ]
           }
           // return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
@@ -242,9 +228,10 @@ export default {
               this.normalize(d[1], written.min, written.max)
             ],
             output: [
-              this.normalize(d[2], sectors.min, sectors.max),
-              this.normalize(d[3], queue.min, queue.max),
-              this.normalize(d[4], idle.min, idle.max)
+              // this.normalize(d[2], sectors.min, sectors.max),
+              // this.normalize(d[3], queue.min, queue.max),
+              this.normalize(d[4], idle.min, idle.max),
+              this.normalize(d[5], usage.min, usage.max)
             ]
           }
         })
@@ -268,7 +255,8 @@ export default {
         forecastData.forEach((datapoint) => {
           debug('RUN datapoint', datapoint)
           let output = net.run(datapoint)
-          debug('RUN forecast %o - sectors %d - queue %d - idle %d', output, this.denormalize(output[0], sectors.min, sectors.max), this.denormalize(output[1], queue.min, queue.max), this.denormalize(output[2], idle.min, idle.max))
+          // debug('RUN forecast %o - sectors %d - queue %d - idle %d', output, this.denormalize(output[0], sectors.min, sectors.max), this.denormalize(output[1], queue.min, queue.max), this.denormalize(output[2], idle.min, idle.max))
+          debug('RUN forecast %o - idle %d - usage %d', output, this.denormalize(output[0], idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
         })
 
         // let forecastResult = net.forecast(forecastData, 10)
@@ -324,7 +312,8 @@ export default {
         const output = net.run(datapoint.input)
         // const outputArray = [Math.round(output)]
         // debug('getAccuracy', datapoint.input, output, datapoint.output)
-        if (Math.round(output[0]) === Math.round(datapoint.output[0]) && Math.round(output[1]) === Math.round(datapoint.output[1]) && Math.round(output[2]) === Math.round(datapoint.output[2])) {
+        // if (Math.round(output[0]) === Math.round(datapoint.output[0]) && Math.round(output[1]) === Math.round(datapoint.output[1]) && Math.round(output[2]) === Math.round(datapoint.output[2])) {
+        if (Math.round(output[0]) === Math.round(datapoint.output[0]) && Math.round(output[1]) === Math.round(datapoint.output[1])) {
           hits += 1
         }
         // output.forEach((outpoint, index) => {

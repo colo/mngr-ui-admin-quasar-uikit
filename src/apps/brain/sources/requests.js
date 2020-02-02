@@ -114,8 +114,18 @@ const host_once_component = {
       Array.each(data.os, function (row) {
         let ts = row.metadata.timestamp
         if (!docs[ts]) docs[ts] = { idle: undefined, written: undefined }
+        // if (row.metadata.path === 'os.cpus') {
+        //   docs[ts].idle = row.data.idle
+        // }
         if (row.metadata.path === 'os.cpus') {
-          docs[ts].idle = row.data.idle
+          Object.each(row.data, function (val, key) {
+            if (key === 'idle') {
+              docs[ts].idle = val
+            } else {
+              if (!docs[ts].usage) docs[ts].usage = 0
+              docs[ts].usage += val
+            }
+          })
         } else if (row.metadata.path === 'os.rethinkdb.server.read_docs') {
           docs[ts].read = Math.round(row.data.per_sec) * 1
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
@@ -133,17 +143,17 @@ const host_once_component = {
       Array.each(tss, function (ts) {
         ts *= 1
         // arr_docs.push([ts, docs[ts].per_sec, docs[ts].idle])
-        arr_docs.push([ts, docs[ts].read, docs[ts].written, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle])
+        arr_docs.push([ts, docs[ts].read, docs[ts].written, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle, docs[ts].usage])
       })
 
       // arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
-      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined && doc[4] !== undefined && doc[5] !== undefined))
+      arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined && doc[4] !== undefined && doc[5] !== undefined && doc[6] !== undefined))
 
-      arr_docs = transform(arr_docs, [3, 4, 5])
+      arr_docs = transform(arr_docs, [3, 4, 5, 6])
       // arr_docs = transform(arr_docs, [1, 2, 3])
 
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
-      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[3] >= 0 && doc[4] >= 0 && doc[5] >= 0))
+      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[3] >= 0 && doc[4] >= 0 && doc[5] >= 0 && doc[6] >= 0))
 
       // const LENGTH = 2
       let final_docs = []
@@ -188,6 +198,7 @@ const host_once_component = {
         current_row[2] = row[3]
         current_row[3] = row[4]
         current_row[4] = row[5]
+        current_row[5] = row[6]
 
         final_docs.push(Array.clone(current_row))
         current_row = []
