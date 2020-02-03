@@ -247,7 +247,7 @@ export default {
         // debug('run', result)
 
         // let forecast = [[120000, 20000]]
-        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
+        let forecast = [[0, 2000], [4100, 0], [3500, 2000], [190000, 100]] // normal delete - this read - this read + normal delete
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
         })
