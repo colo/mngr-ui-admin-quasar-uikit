@@ -260,6 +260,8 @@ export default {
           debug('RUN forecast %o - idle %d - usage %d', output, this.denormalize(output[0], idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
         })
 
+        debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
+
         // let forecastResult = net.forecast(forecastData, 10)
         //
         // debug('forecastResult', forecastResult)
