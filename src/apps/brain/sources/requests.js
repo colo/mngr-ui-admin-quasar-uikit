@@ -25,6 +25,10 @@ const transform = function (values, column) {
       // Array.each(row, function (col, index) {
       for (let index = 0; index < row.length; index++) {
         let col = row[index]
+        if (index === 2) {
+          debug('written', col)
+        }
+
         if (index > 0 && (column === undefined || index === column || column.contains(index))) { // index == 0 == timestamp
           // row[index] = col - prev[index]
           let __val = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
@@ -127,9 +131,9 @@ const host_once_component = {
             }
           })
         } else if (row.metadata.path === 'os.rethinkdb.server.read_docs') {
-          docs[ts].read = Math.round(row.data.per_sec) * 1
+          docs[ts].read = row.data.per_sec * 1
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
-          docs[ts].written = Math.round(row.data.per_sec) * 1
+          docs[ts].written = row.data.per_sec * 1
         } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
           docs[ts].sectors = row.data.write_sectors + row.data.read_sectors
         } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
@@ -153,59 +157,66 @@ const host_once_component = {
       // arr_docs = transform(arr_docs, [1, 2, 3])
 
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
-      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[3] >= 0 && doc[4] >= 0 && doc[5] >= 0 && doc[6] >= 0))
+      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[5] >= 0 && doc[6] >= 0))
 
-      const LENGTH = 5
-      let final_docs = []
-      // // let current_row = [[], []]
-      let current_row = [[], [], [], [], [], []]
-      // let current_row = [0, 0]
-      // let current_row = [0, 0, 0]
-      for (let i = 0; i < arr_docs.length; i++) {
-        let row = arr_docs[i]
-        // debug('CALLBACK ROW %o', current_row, i, i % LENGTH)
-        if (i === 0 || (i % LENGTH !== 0)) {
-          current_row[0].push(row[1])
-          current_row[1].push(row[2])
-          current_row[2].push(row[3])
-          current_row[3].push(row[4])
-          current_row[4].push(row[5])
-          current_row[5].push(row[6])
-        } else {
-          current_row[0] = ss.max(current_row[0])
-          current_row[1] = ss.max(current_row[1])
-          current_row[2] = ss.max(current_row[2])
-          current_row[3] = ss.max(current_row[3])
-          current_row[4] = ss.min(current_row[4])// idle decrease, so we need min
-          current_row[5] = ss.max(current_row[5])
-
-          final_docs.push(Array.clone(current_row))
-
-          // current_row = [[], []]
-          current_row = [[], [], [], [], [], []]
-          current_row[0].push(row[1])
-          current_row[1].push(row[2])
-          current_row[2].push(row[3])
-          current_row[3].push(row[4])
-          current_row[4].push(row[5])
-          current_row[5].push(row[6])
-        }
-      }
+      // const LENGTH = 2
       // let final_docs = []
-      // let current_row = []
+      // // // let current_row = [[], []]
+      // let current_row = [[], [], [], [], [], []]
+      // // let current_row = [0, 0]
+      // // let current_row = [0, 0, 0]
       // for (let i = 0; i < arr_docs.length; i++) {
-      //   let row = JSON.parse(JSON.stringify(arr_docs[i]))
-      //   // debug('CALLBACK ROW %o', current_row, i)
-      //   current_row[0] = row[1]
-      //   current_row[1] = row[2]
-      //   current_row[2] = row[3]
-      //   current_row[3] = row[4]
-      //   current_row[4] = row[5]
-      //   current_row[5] = row[6]
+      //   let row = arr_docs[i]
+      //   // debug('CALLBACK ROW %o', current_row, i, i % LENGTH)
+      //   if (i === 0 || (i % LENGTH !== 0)) {
+      //     current_row[0].push(row[1])
+      //     current_row[1].push(row[2])
+      //     current_row[2].push(row[3])
+      //     current_row[3].push(row[4])
+      //     current_row[4].push(row[5])
+      //     current_row[5].push(row[6])
+      //   } else {
+      //     current_row[0].push(row[1])
+      //     current_row[1].push(row[2])
+      //     current_row[2].push(row[3])
+      //     current_row[3].push(row[4])
+      //     current_row[4].push(row[5])
+      //     current_row[5].push(row[6])
       //
-      //   final_docs.push(Array.clone(current_row))
-      //   current_row = []
+      //     current_row[0] = ss.max(current_row[0])
+      //     current_row[1] = ss.max(current_row[1])
+      //     current_row[2] = ss.max(current_row[2])
+      //     current_row[3] = ss.max(current_row[3])
+      //     current_row[4] = ss.min(current_row[4])// idle decrease, so we need min
+      //     current_row[5] = ss.max(current_row[5])
+      //
+      //     final_docs.push(Array.clone(current_row))
+      //
+      //     // current_row = [[], []]
+      //     current_row = [[], [], [], [], [], []]
+      //     current_row[0].push(row[1])
+      //     current_row[1].push(row[2])
+      //     current_row[2].push(row[3])
+      //     current_row[3].push(row[4])
+      //     current_row[4].push(row[5])
+      //     current_row[5].push(row[6])
+      //   }
       // }
+      let final_docs = []
+      let current_row = []
+      for (let i = 0; i < arr_docs.length; i++) {
+        let row = JSON.parse(JSON.stringify(arr_docs[i]))
+        // debug('CALLBACK ROW %o', current_row, i)
+        current_row[0] = row[1]
+        current_row[1] = row[2]
+        current_row[2] = row[3]
+        current_row[3] = row[4]
+        current_row[4] = row[5]
+        current_row[5] = row[6]
+
+        final_docs.push(Array.clone(current_row))
+        current_row = []
+      }
       debug('CALLBACK DOCS %o', final_docs)
       if (arr_docs.length > 0) { vm.values = final_docs }
     }
