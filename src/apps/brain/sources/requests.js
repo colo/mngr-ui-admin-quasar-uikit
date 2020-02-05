@@ -34,8 +34,8 @@ const transform = function (values, column) {
           // row[index] = col - prev[index]
           let __val = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
 
-          row[index] = ((index === 5 || index === 6) && __val > 20000) ? __val / 2 : __val
-          row[index] = ((index === 5 || index === 6) && row[index] > 20000) ? -1 : row[index]
+          row[index] = ((index === 5 || index === 6) && __val > 40000) ? __val / 2 : __val
+          row[index] = ((index === 5 || index === 6) && row[index] > 40000) ? -1 : row[index]
           // if (index === 6) {
           //   debug('usage %s %s %d %d', new Date(prev[0]), new Date(row[0]), __val, row[index])
           // }
@@ -144,10 +144,10 @@ const host_once_component = {
         } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
           docs[ts].sectors = row.data.write_sectors + row.data.read_sectors
         } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
-          docs[ts].time_in_queue = row.data.time_in_queue
-
-          if (!docs[ts].usage) docs[ts].usage = 0
-          docs[ts].usage += row.data.time_in_queue + row.data.write_ticks + row.data.read_ticks
+          // docs[ts].time_in_queue = row.data.time_in_queue
+          docs[ts].time_in_queue = row.data.time_in_queue + row.data.write_ticks + row.data.read_ticks
+          // if (!docs[ts].usage) docs[ts].usage = 0
+          // docs[ts].usage += row.data.time_in_queue + row.data.write_ticks + row.data.read_ticks
         }
       })
 
@@ -167,7 +167,7 @@ const host_once_component = {
       // arr_docs = transform(arr_docs, [1, 2, 3])
 
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
-      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[5] >= 0 && doc[6] >= 0))
+      arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[4] && doc[5] >= 0 && doc[6] >= 0))
 
       const LENGTH = 60
       let final_docs = []
@@ -183,7 +183,7 @@ const host_once_component = {
           current_row[1].push(row[2])
           current_row[2].push(row[3])
           current_row[3].push(row[4])
-          current_row[4].push(row[5])
+          current_row[4].push(row[4] + row[5])
           current_row[5].push(row[6])
         } else {
           current_row[0].push(row[1])
@@ -208,7 +208,7 @@ const host_once_component = {
           current_row[1].push(row[2])
           current_row[2].push(row[3])
           current_row[3].push(row[4])
-          current_row[4].push(row[5])
+          current_row[4].push(row[4] + row[5])
           current_row[5].push(row[6])
         }
       }
