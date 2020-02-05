@@ -174,8 +174,8 @@ export default {
         }
         // netOptions = {}
         // const net = new brain.recurrent.GRU(netOptions)
-        const net = new brain.NeuralNetwork(netOptions)
-        // const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
+        // const net = new brain.NeuralNetwork(netOptions)
+        const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
 
         let read = this.min_max(data, 0)
         let written = this.min_max(data, 1)
@@ -215,9 +215,9 @@ export default {
           // learningRate: 0.01
         }
 
-        net.train(trainData, trainOptions)
-        // const stats = crossValidate.train(trainData, trainOptions)
-        // debug('crossValidate', crossValidate.toJSON())
+        // net.train(trainData, trainOptions)
+        const stats = crossValidate.train(trainData, trainOptions)
+        debug('crossValidate', crossValidate.toJSON())
         // let testing = this.min_max(test)
 
         debug('test', test)
@@ -238,7 +238,7 @@ export default {
         })
 
         debug('testData', testData)
-        // const net = crossValidate.toNeuralNetwork()
+        const net = crossValidate.toNeuralNetwork()
 
         let accuracy = this.getAccuracy(net, testData)
 
@@ -248,7 +248,11 @@ export default {
         // debug('run', result)
 
         // let forecast = [[120000, 20000]]
-        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [150000, 100]] // normal delete - this read - this read + normal delete
+
+        // let forecast = [[0, 2000], [4100, 0], [4100, 2000], [150000, 100]] // normal delete - this read - this read + normal delete
+
+        let forecast = [[0, 200], [800, 0], [800, 200], [48000, 60]] // normal delete - this read - this read + normal delete
+
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
         })

@@ -34,10 +34,10 @@ const transform = function (values, column) {
           // row[index] = col - prev[index]
           let __val = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
 
-          row[index] = ((index === 5 || index === 6) && __val > 40000) ? __val / 2 : __val
-
+          row[index] = ((index === 5 || index === 6) && __val > 20000) ? __val / 2 : __val
+          row[index] = ((index === 5 || index === 6) && row[index] > 20000) ? -1 : row[index]
           // if (index === 6) {
-          //   debug('usage', prev[0], row[0], __val, row[index])
+          //   debug('usage %s %s %d %d', new Date(prev[0]), new Date(row[0]), __val, row[index])
           // }
           // if (index === 5 && (col - prev[index]) > 39000) {
           //   debug('transformation', row[0], prev[0], (row[0] - prev[0]), col, prev[index], (col - prev[index]) / ((row[0] - prev[0]) / 1000), col - prev[index])
@@ -75,7 +75,7 @@ const host_once_component = {
           source = [{
             params: { id: _key },
             path: 'all',
-            range: 'posix ' + (Date.now() - HOUR) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (2 * HOUR)) + '-' + Date.now() + '/*',
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'os',
@@ -140,7 +140,7 @@ const host_once_component = {
           docs[ts].read = Math.round(row.data.per_sec) * 1
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
           docs[ts].written = Math.round(row.data.per_sec) * 1
-          debug('written %s %o', new Date(ts), row.data)
+          // debug('written %s %o', new Date(ts), row.data)
         } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
           docs[ts].sectors = row.data.write_sectors + row.data.read_sectors
         } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
@@ -169,7 +169,7 @@ const host_once_component = {
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
       arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[5] >= 0 && doc[6] >= 0))
 
-      const LENGTH = 3
+      const LENGTH = 60
       let final_docs = []
       // // let current_row = [[], []]
       let current_row = [[], [], [], [], [], []]
