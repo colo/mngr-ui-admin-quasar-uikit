@@ -248,7 +248,7 @@ export default {
         // debug('run', result)
 
         // let forecast = [[120000, 20000]]
-        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [114000, 100]] // normal delete - this read - this read + normal delete
+        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [150000, 100]] // normal delete - this read - this read + normal delete
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
         })
@@ -257,7 +257,7 @@ export default {
           debug('RUN datapoint', datapoint)
           let output = net.run(datapoint)
           // debug('RUN forecast %o - sectors %d - queue %d - idle %d', output, this.denormalize(output[0], sectors.min, sectors.max), this.denormalize(output[1], queue.min, queue.max), this.denormalize(output[2], idle.min, idle.max))
-          debug('RUN forecast %o - idle %d - usage %d', output, this.denormalize(output[0], idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
+          debug('RUN forecast - read %d - written %d - %o - idle %d - usage %d', this.denormalize(datapoint[0], read.min, read.max), this.denormalize(datapoint[1], written.min, written.max), output, this.denormalize(output[0], idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
         })
 
         debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)

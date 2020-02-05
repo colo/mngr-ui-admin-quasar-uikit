@@ -7,8 +7,9 @@ const SECOND = 1000
 const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
 
-let prev = []
 const transform = function (values, column) {
+  let prev = []
+
   debug('transform %o', values, prev)
   let transformed = JSON.parse(JSON.stringify(values))
   // if (prev.length === 0 || (transformed.length > 0 && transformed[0] !== null && prev[0] > values[0][0])) { // timestamp check
@@ -33,11 +34,11 @@ const transform = function (values, column) {
           // row[index] = col - prev[index]
           let __val = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
 
-          row[index] = ((index === 5 || index === 6) && __val > 20000) ? __val / 2 : __val
+          row[index] = ((index === 5 || index === 6) && __val > 40000) ? __val / 2 : __val
 
-          if (index === 6) {
-            debug('usage', prev[0], row[0], __val, row[index])
-          }
+          // if (index === 6) {
+          //   debug('usage', prev[0], row[0], __val, row[index])
+          // }
           // if (index === 5 && (col - prev[index]) > 39000) {
           //   debug('transformation', row[0], prev[0], (row[0] - prev[0]), col, prev[index], (col - prev[index]) / ((row[0] - prev[0]) / 1000), col - prev[index])
           // }
@@ -90,7 +91,7 @@ const host_once_component = {
               ],
               'transformation': [
                 {
-                  'orderBy': { 'index': 'r.desc(timestamp)' }
+                  'orderBy': { 'index': 'r.asc(timestamp)' }
                 }
               ],
               'filter': [
@@ -119,9 +120,10 @@ const host_once_component = {
 
     if (data && data.os && data.os.length > 0) {
       let docs = {}
-      Array.each(data.os, function (row) {
+      Array.each(data.os, function (_row) {
+        let row = Object.clone(_row)
         let ts = row.metadata.timestamp
-        if (!docs[ts]) docs[ts] = { idle: undefined, written: undefined }
+        if (!docs[ts]) docs[ts] = { }
         // if (row.metadata.path === 'os.cpus') {
         //   docs[ts].idle = row.data.idle
         // }
@@ -138,7 +140,7 @@ const host_once_component = {
           docs[ts].read = Math.round(row.data.per_sec) * 1
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
           docs[ts].written = Math.round(row.data.per_sec) * 1
-          debug('written', docs[ts].written)
+          debug('written %s %o', new Date(ts), row.data)
         } else if (row.metadata.path === 'os.blockdevices.vda3.sectors') {
           docs[ts].sectors = row.data.write_sectors + row.data.read_sectors
         } else if (row.metadata.path === 'os.blockdevices.vda3.time') {
@@ -167,7 +169,7 @@ const host_once_component = {
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
       arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[5] >= 0 && doc[6] >= 0))
 
-      const LENGTH = 2
+      const LENGTH = 3
       let final_docs = []
       // // let current_row = [[], []]
       let current_row = [[], [], [], [], [], []]
