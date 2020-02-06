@@ -34,8 +34,8 @@ const transform = function (values, column) {
           // row[index] = col - prev[index]
           let __val = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
 
-          row[index] = ((index === 5 || index === 6) && __val > (row[7] * 10000)) ? __val / 2 : __val
-          // row[index] = ((index === 5 || index === 6) && row[index] > (row[7] * 10000)) ? -1 : row[index]
+          row[index] = ((index === 5 || index === 6) && __val > (row[6] * 10000)) ? __val / 2 : __val
+          row[index] = ((index === 5 || index === 6) && row[index] > (row[6] * 10000)) ? -1 : row[index]
           // if (index === 6) {
           //   debug('usage %s %s %d %d', new Date(prev[0]), new Date(row[0]), __val, row[index])
           // }
@@ -45,10 +45,10 @@ const transform = function (values, column) {
         }
       }
 
-      if (row[5] + row[6] > row[7] * 10000) {
-        row[5] = -1
-        row[6] = -1
-      }
+      // if (row[5] + row[6] > row[7] * 10000) {
+      //   row[5] = -1
+      //   row[6] = -1
+      // }
 
       // })
 
@@ -180,6 +180,7 @@ const host_once_component = {
       Array.each(arr_docs, function (row, index) {
         row.push((row[6] * 10000) - row[5]) // (cores * 10000) - idle
       })
+
       const LENGTH = 60
       let final_docs = []
       // // let current_row = [[], []]
@@ -237,7 +238,8 @@ const host_once_component = {
       //   current_row[2] = row[3]
       //   current_row[3] = row[4]
       //   current_row[4] = row[5]
-      //   current_row[5] = row[6]
+      //   current_row[5] = row[7]
+      //   current_row[6] = row[6]
       //
       //   final_docs.push(Array.clone(current_row))
       //   current_row = []

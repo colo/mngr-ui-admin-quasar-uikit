@@ -168,14 +168,21 @@ export default {
         let netOptions = {
           // inputSize: 2,
           activation: 'sigmoid', // activation function
-          hiddenLayers: [4, 5],
+          hiddenLayers: [3],
           // learningRate: 0.01, // global learning rate, useful when training using streams
-          outputSize: 2
+          // outputSize: 2
+          outputSize: 1,
+          learningRate: 0.01,
+          decayRate: 0.999,
+          inputRange: 20
         }
+
         // netOptions = {}
         // const net = new brain.recurrent.GRU(netOptions)
         // const net = new brain.NeuralNetwork(netOptions)
-        const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
+        const net = new brain.recurrent.GRUTimeStep(netOptions)
+
+        // const crossValidate = new brain.CrossValidate(brain.NeuralNetwork, netOptions)
 
         let read = this.min_max(data, 0)
         let written = this.min_max(data, 1)
@@ -197,8 +204,8 @@ export default {
             output: [
               // this.normalize(d[2], sectors.min, sectors.max),
               // this.normalize(d[3], queue.min, queue.max),
-              this.normalize(d[4], idle.min, idle.max),
-              this.normalize(d[5], usage.min, usage.max)
+              this.normalize(d[4], idle.min, idle.max)
+              // this.normalize(d[5], usage.min, usage.max)
             ]
           }
           // return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
@@ -209,18 +216,13 @@ export default {
         // })
 
         const trainOptions = {
-          iterations: 20000, // the maximum times to iterate the training data --> number greater than 0
+          iterations: 2000, // the maximum times to iterate the training data --> number greater than 0
           errorThresh: 0.001, // the acceptable error percentage from training data --> number between 0 and 1
           log: true, // true to use console.log, when a function is supplied it is used --> Either true or a function
           logPeriod: 100 // iterations between logging out --> number greater than 0
           // learningRate: 0.6 // scales with delta to effect training rate --> number between 0 and 1
           // learningRate: 0.01
         }
-
-        // net.train(trainData, trainOptions)
-        const stats = crossValidate.train(trainData, trainOptions)
-        debug('crossValidate', crossValidate.toJSON())
-        // let testing = this.min_max(test)
 
         debug('test', test)
 
@@ -233,14 +235,20 @@ export default {
             output: [
               // this.normalize(d[2], sectors.min, sectors.max),
               // this.normalize(d[3], queue.min, queue.max),
-              this.normalize(d[4], idle.min, idle.max),
-              this.normalize(d[5], usage.min, usage.max)
+              this.normalize(d[4], idle.min, idle.max)
+              // this.normalize(d[5], usage.min, usage.max)
             ]
           }
         })
 
         debug('testData', testData)
-        const net = crossValidate.toNeuralNetwork()
+
+        net.train(trainData, trainOptions)
+        // const stats = crossValidate.train(trainData, trainOptions)
+        // debug('crossValidate', crossValidate.toJSON())
+        // let testing = this.min_max(test)
+
+        // const net = crossValidate.toNeuralNetwork()
 
         let accuracy = this.getAccuracy(net, testData)
 
@@ -251,9 +259,9 @@ export default {
 
         // let forecast = [[120000, 20000]]
 
-        // let forecast = [[0, 64], [800, 0], [800, 200], [23000, 3400], [180000, 64]] // normal delete - this read - this read + normal delete
+        let forecast = [[0, 287], [800, 0], [800, 200], [23000, 3400], [150000, 128]] // normal delete - this read - this read + normal delete
 
-        let forecast = [[0, 200], [800, 0], [800, 200], [48000, 60]] // normal delete - this read - this read + normal delete
+        // let forecast = [[0, 200], [800, 0], [800, 200], [48000, 60]] // normal delete - this read - this read + normal delete
 
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
@@ -263,7 +271,7 @@ export default {
           debug('RUN datapoint', datapoint)
           let output = net.run(datapoint)
           // debug('RUN forecast %o - sectors %d - queue %d - idle %d', output, this.denormalize(output[0], sectors.min, sectors.max), this.denormalize(output[1], queue.min, queue.max), this.denormalize(output[2], idle.min, idle.max))
-          debug('RUN forecast - read %d - written %d - %o - idle %d - usage %d', this.denormalize(datapoint[0], read.min, read.max), this.denormalize(datapoint[1], written.min, written.max), output, this.denormalize(output[0], idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
+          debug('RUN forecast - read %d - written %d - %o - idle %d - usage %d', this.denormalize(datapoint[0], read.min, read.max), this.denormalize(datapoint[1], written.min, written.max), output, this.denormalize(output, idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
         })
 
         debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
