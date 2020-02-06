@@ -183,6 +183,8 @@ export default {
         let queue = this.min_max(data, 3)
         let idle = this.min_max(data, 4)
         let usage = this.min_max(data, 5)
+        // let idle = { min: 0, max: data[0][6] * 10000 }
+        // let usage = { min: 0, max: data[0][6] * 10000 }
 
         debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
 
@@ -249,9 +251,9 @@ export default {
 
         // let forecast = [[120000, 20000]]
 
-        let forecast = [[0, 64], [800, 0], [800, 200], [23000, 3400], [180000, 64]] // normal delete - this read - this read + normal delete
+        // let forecast = [[0, 64], [800, 0], [800, 200], [23000, 3400], [180000, 64]] // normal delete - this read - this read + normal delete
 
-        // let forecast = [[0, 200], [800, 0], [800, 200], [48000, 60]] // normal delete - this read - this read + normal delete
+        let forecast = [[0, 200], [800, 0], [800, 200], [48000, 60]] // normal delete - this read - this read + normal delete
 
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]

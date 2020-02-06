@@ -34,8 +34,8 @@ const transform = function (values, column) {
           // row[index] = col - prev[index]
           let __val = (col - prev[index]) / ((row[0] - prev[0]) / 1000) // DERIVE
 
-          row[index] = ((index === 5 || index === 6) && __val > 40000) ? __val / 2 : __val
-          row[index] = ((index === 5 || index === 6) && row[index] > 40000) ? -1 : row[index]
+          row[index] = ((index === 5 || index === 6) && __val > (row[7] * 10000)) ? __val / 2 : __val
+          // row[index] = ((index === 5 || index === 6) && row[index] > (row[7] * 10000)) ? -1 : row[index]
           // if (index === 6) {
           //   debug('usage %s %s %d %d', new Date(prev[0]), new Date(row[0]), __val, row[index])
           // }
@@ -44,6 +44,12 @@ const transform = function (values, column) {
           // }
         }
       }
+
+      if (row[5] + row[6] > row[7] * 10000) {
+        row[5] = -1
+        row[6] = -1
+      }
+
       // })
 
       prev = prev_row
@@ -125,17 +131,19 @@ const host_once_component = {
         let ts = row.metadata.timestamp
         if (!docs[ts]) docs[ts] = { }
         // if (row.metadata.path === 'os.cpus') {
-        //   docs[ts].idle = row.data.idle
+        //   Object.each(row.data, function (val, key) {
+        //     if (key === 'idle' || key === 'cores') {
+        //       docs[ts][key] = val
+        //     } else {
+        //       if (!docs[ts].usage) docs[ts].usage = 0
+        //       docs[ts].usage += val
+        //     }
+        //   })
         // }
         if (row.metadata.path === 'os.cpus') {
-          Object.each(row.data, function (val, key) {
-            if (key === 'idle') {
-              docs[ts].idle = val
-            } else {
-              if (!docs[ts].usage) docs[ts].usage = 0
-              docs[ts].usage += val
-            }
-          })
+          docs[ts].idle = row.data.idle
+          docs[ts].cores = row.data.cores
+          // docs[ts].usage = (row.data.cores * 10000) - row.data.idle
         } else if (row.metadata.path === 'os.rethinkdb.server.read_docs') {
           docs[ts].read = Math.round(row.data.per_sec) * 1
         } else if (row.metadata.path === 'os.rethinkdb.server.written_docs') {
@@ -157,18 +165,21 @@ const host_once_component = {
       Array.each(tss, function (ts) {
         ts *= 1
         // arr_docs.push([ts, docs[ts].per_sec, docs[ts].idle])
-        arr_docs.push([ts, docs[ts].read, docs[ts].written, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle, docs[ts].usage])
+        arr_docs.push([ts, docs[ts].read, docs[ts].written, docs[ts].sectors, docs[ts].time_in_queue, docs[ts].idle, docs[ts].cores])
       })
 
       // arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined))
       arr_docs = arr_docs.filter(doc => (doc[1] !== undefined && doc[2] !== undefined && doc[3] !== undefined && doc[4] !== undefined && doc[5] !== undefined && doc[6] !== undefined))
 
-      arr_docs = transform(arr_docs, [3, 4, 5, 6])
+      arr_docs = transform(arr_docs, [3, 4, 5])
       // arr_docs = transform(arr_docs, [1, 2, 3])
 
       // arr_docs = arr_docs.filter(doc => (doc[1] > 0 && doc[2] > 0))
       arr_docs = arr_docs.filter(doc => (doc[1] >= 0 && doc[2] >= 0 && doc[4] && doc[5] >= 0 && doc[6] >= 0))
 
+      Array.each(arr_docs, function (row, index) {
+        row.push((row[6] * 10000) - row[5]) // (cores * 10000) - idle
+      })
       const LENGTH = 60
       let final_docs = []
       // // let current_row = [[], []]
@@ -183,15 +194,16 @@ const host_once_component = {
           current_row[1].push(row[2])
           current_row[2].push(row[3])
           current_row[3].push(row[4])
-          current_row[4].push(row[4] + row[5])
-          current_row[5].push(row[6])
+          // current_row[4].push(row[4] + row[5])
+          current_row[4].push(row[5])
+          current_row[5].push(row[7])
         } else {
           current_row[0].push(row[1])
           current_row[1].push(row[2])
           current_row[2].push(row[3])
           current_row[3].push(row[4])
           current_row[4].push(row[5])
-          current_row[5].push(row[6])
+          current_row[5].push(row[7])// usage
 
           current_row[0] = ss.max(current_row[0])
           current_row[1] = ss.max(current_row[1])
@@ -199,6 +211,8 @@ const host_once_component = {
           current_row[3] = ss.max(current_row[3])
           current_row[4] = ss.min(current_row[4])// idle decrease, so we need min
           current_row[5] = ss.max(current_row[5])
+
+          current_row[6] = row[6]// cores
 
           final_docs.push(Array.clone(current_row))
 
@@ -208,8 +222,9 @@ const host_once_component = {
           current_row[1].push(row[2])
           current_row[2].push(row[3])
           current_row[3].push(row[4])
-          current_row[4].push(row[4] + row[5])
-          current_row[5].push(row[6])
+          // current_row[4].push(row[4] + row[5])
+          current_row[4].push(row[5])
+          current_row[5].push(row[7])
         }
       }
       // let final_docs = []
