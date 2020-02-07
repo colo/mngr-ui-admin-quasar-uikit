@@ -6,10 +6,10 @@
 const App = require ( 'node-app-socket.io-client/index' )
 
 import * as Debug from "debug"
-const debug = Debug("apps:brain:pipelines:input:io")
+const debug = Debug("apps:neataptic:pipelines:input:io")
 
-// debug_internals = Debug("mngr-ui:apps:brain:pipelines:input:io:Internals"),
-// debug_events = Debug("mngr-ui:apps:brain:pipelines:input:io:Events");
+// debug_internals = Debug("mngr-ui:apps:neataptic:pipelines:input:io:Internals"),
+// debug_events = Debug("mngr-ui:apps:neataptic:pipelines:input:io:Events");
 
 // import store from 'src/store'
 

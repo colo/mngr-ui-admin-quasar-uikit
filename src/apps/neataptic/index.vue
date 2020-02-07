@@ -26,15 +26,15 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:brain')
+const debug = Debug('apps:neataptic')
 
 import JSPipeline from 'js-pipeline'
 
-import Pipeline from '@apps/brain/pipelines/index'
+import Pipeline from '@apps/neataptic/pipelines/index'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
-// import OsHostCard from '@apps/brain/components/hostCard.vue'
+// import OsHostCard from '@apps/neataptic/components/hostCard.vue'
 
 import { requests, store } from '@apps/neataptic/sources/index'
 // import moment from 'moment'
@@ -57,7 +57,7 @@ export default {
   // values: [],
 
   model: undefined,
-  brainData: undefined,
+  neatapticData: undefined,
   tensorData: undefined,
 
   data () {
@@ -68,9 +68,9 @@ export default {
       * dataSources
       **/
       store: false,
-      pipeline_id: 'input.brain',
+      pipeline_id: 'input.neataptic',
 
-      id: 'brain',
+      id: 'neataptic',
       path: 'all',
 
       values: [],
@@ -94,6 +94,7 @@ export default {
       deep: true,
       handler: function (data) {
         // data = JSON.parse(JSON.stringify(data))
+        // data = JSON.parse(JSON.stringify(data))
         data = this.shuffle(JSON.parse(JSON.stringify(data)))
         const SPLIT = data.length * 0.8 // 70%
         // let test = this.shuffle(data.slice(0, data.length / 2))
@@ -108,8 +109,9 @@ export default {
         let sectors = this.min_max(data, 2)
         let queue = this.min_max(data, 3)
         let idle = this.min_max(data, 4)
+        let usage = this.min_max(data, 5)
 
-        debug('sectors queue idle ', read, written, sectors, queue, idle)
+        debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
 
         let trainData = train.map(d => {
           return {
@@ -118,13 +120,15 @@ export default {
               this.normalize(d[1], written.min, written.max)
             ],
             output: [
-              this.normalize(d[2], sectors.min, sectors.max),
-              this.normalize(d[3], queue.min, queue.max),
+              // this.normalize(d[2], sectors.min, sectors.max),
+              // this.normalize(d[3], queue.min, queue.max),
               this.normalize(d[4], idle.min, idle.max)
+              // this.normalize(d[5], usage.min, usage.max)
             ]
           }
           // return { input: [this.normalize(d[0], sectors.min, sectors.max), this.normalize(d[1], queue.min, queue.max)], output: [this.normalize(d[2], idle.min, idle.max)] }
         })
+        debug('trainData', trainData)
 
         let testData = test.map(d => {
           return {
@@ -133,43 +137,61 @@ export default {
               this.normalize(d[1], written.min, written.max)
             ],
             output: [
-              this.normalize(d[2], sectors.min, sectors.max),
-              this.normalize(d[3], queue.min, queue.max),
+              // this.normalize(d[2], sectors.min, sectors.max),
+              // this.normalize(d[3], queue.min, queue.max),
               this.normalize(d[4], idle.min, idle.max)
+              // this.normalize(d[5], usage.min, usage.max)
             ]
           }
         })
 
         debug('testData', testData)
 
-        let network = new neataptic.architect.LSTM(2, 5, 3)
-        // let network = new neataptic.architect.NARX(2, [2, 3], 3, 200, 200)
+        let network = new neataptic.architect.LSTM(2, 3, 1)
+        // let network = new neataptic.architect.NARX(2, 3, 1, 1, 1)
 
         network.train(trainData, {
           // cost: neataptic.methods.cost.MSE, // default - bad
           cost: neataptic.methods.cost.CROSS_ENTROPY,
           // cost: neataptic.methods.cost.BINARY,
-          // cost: neataptic.methods.cost.MAE, // bad
+          // cost: neataptic.methods.cost.MAE, // *
           // cost: neataptic.methods.cost.MAPE, // bad
-          // cost: neataptic.methods.cost.MSLE, //bad
-          // cost: neataptic.methods.cost.HINGE, //bad
+          // cost: neataptic.methods.cost.MSLE, // bad
+          // cost: neataptic.methods.cost.HINGE, // bad
           log: 100,
           iterations: 2000,
           error: 0.001,
           clear: true,
-          rate: 0.5,
-          crossValidate:
-            {
-              testSize: 0.4,
-              testError: 0.02
-            }
+          rate: 0.5
+          // crossValidate:
+          //   {
+          //     testSize: 0.4,
+          //     testError: 0.02
+          //   }
         })
 
         // let accuracy = this.getAccuracy(network, testData)
         //
         // debug('accuracy', network.toJSON(), network.fromJSON(network.toJSON()))
 
-        let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
+        // let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
+        let forecast = [[0, 287], [800, 0], [800, 200], [23000, 3400], [150000, 128]] // normal delete - this read - this read + normal delete
+
+        // let forecastData = forecast.map(d => {
+        //   return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
+        // })
+
+        // forecastData.forEach((datapoint) => {
+        //   debug('RUN datapoint', datapoint)
+        //   let output = network.activate([datapoint[0], datapoint[1]])
+        //   debug('RUN forecast %o - sectors %d - queue %d - idle %d',
+        //     output,
+        //     this.denormalize(output[0], sectors.min, sectors.max),
+        //     this.denormalize(output[1], queue.min, queue.max),
+        //     this.denormalize(output[2], idle.min, idle.max)
+        //   )
+        // })
+
         let forecastData = forecast.map(d => {
           return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
         })
@@ -177,13 +199,11 @@ export default {
         forecastData.forEach((datapoint) => {
           debug('RUN datapoint', datapoint)
           let output = network.activate([datapoint[0], datapoint[1]])
-          debug('RUN forecast %o - sectors %d - queue %d - idle %d',
-            output,
-            this.denormalize(output[0], sectors.min, sectors.max),
-            this.denormalize(output[1], queue.min, queue.max),
-            this.denormalize(output[2], idle.min, idle.max)
-          )
+          // debug('RUN forecast %o - sectors %d - queue %d - idle %d', output, this.denormalize(output[0], sectors.min, sectors.max), this.denormalize(output[1], queue.min, queue.max), this.denormalize(output[2], idle.min, idle.max))
+          debug('RUN forecast - read %d - written %d - %o - idle %d - usage %d', this.denormalize(datapoint[0], read.min, read.max), this.denormalize(datapoint[1], written.min, written.max), output, this.denormalize(output, idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
         })
+
+        debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
 
         // testData.forEach(row => {
         //   let input = row.input
@@ -226,7 +246,7 @@ export default {
   // updated: function () {
   //   debug('updated %o', this.$options.values)
   //   let values = this.$options.values
-  //   brainvis.render.scatterplot(
+  //   neatapticvis.render.scatterplot(
   //     { name: 'Written v Idle' },
   //     { values },
   //     {
@@ -304,16 +324,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.brain'] && this.$options.pipelines['input.brain'].get_input_by_id('input.brain')) {
+      if (this.$options.pipelines['input.neataptic'] && this.$options.pipelines['input.neataptic'].get_input_by_id('input.neataptic')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.brain'].get_input_by_id('input.brain').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.brain'].get_input_by_id('input.brain').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.neataptic'].get_input_by_id('input.neataptic').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.neataptic'].get_input_by_id('input.neataptic').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.brain'].get_input_by_id('input.brain').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.brain'].get_input_by_id('input.brain').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.neataptic'].get_input_by_id('input.neataptic').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.neataptic'].get_input_by_id('input.neataptic').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)

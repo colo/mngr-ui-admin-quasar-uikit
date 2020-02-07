@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:brain:pipelines')
+const debug = Debug('apps:neataptic:pipelines')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         suspended: true,
-        id: 'input.brain',
+        id: 'input.neataptic',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.brain',
+              id: 'input.neataptic',
               module: InputIO
 
             }
@@ -88,10 +88,10 @@ export default {
   ],
   output: [
     function (payload) {
-      if (!payload.err && /^input\.brain\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.brain[', '').slice(0, -1)
+      if (!payload.err && /^input\.neataptic\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.neataptic[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.brain.' + payload.metadata.input, payload)
+        EventBus.$emit('input.neataptic.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
