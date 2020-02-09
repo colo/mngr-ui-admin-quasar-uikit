@@ -106,73 +106,74 @@ export default {
 
         let read = this.min_max(data, 0)
         let written = this.min_max(data, 1)
-        let sectors = this.min_max(data, 2)
-        let queue = this.min_max(data, 3)
-        let idle = this.min_max(data, 4)
-        let usage = this.min_max(data, 5)
+        // let sectors = this.min_max(data, 2)
+        // let queue = this.min_max(data, 3)
+        let idle = this.min_max(data, 2)
+        // idle.max = data[0][3] * 10000
+        // let usage = this.min_max(data, 5)
 
-        debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
+        debug('read %o written %o idle %o', read, written, idle)
 
         let trainData = train.map(d => {
-          // return {
-          //   input: [
-          //     this.normalize(d[0], read.min, read.max),
-          //     this.normalize(d[1], written.min, written.max)
-          //   ],
-          //   output: [
-          //     // this.normalize(d[2], sectors.min, sectors.max),
-          //     // this.normalize(d[3], queue.min, queue.max),
-          //     this.normalize(d[4], idle.min, idle.max)
-          //     // this.normalize(d[5], usage.min, usage.max)
-          //   ]
-          // }
           return {
             input: [
-              this.normalize(d[4], idle.min, idle.max)
-            ],
-            output: [
               this.normalize(d[0], read.min, read.max),
               this.normalize(d[1], written.min, written.max)
+            ],
+            output: [
               // this.normalize(d[2], sectors.min, sectors.max),
               // this.normalize(d[3], queue.min, queue.max),
-
+              this.normalize(d[2], idle.min, idle.max)
               // this.normalize(d[5], usage.min, usage.max)
             ]
           }
+          // return {
+          //   input: [
+          //     this.normalize(d[2], idle.min, idle.max)
+          //   ],
+          //   output: [
+          //     this.normalize(d[0], read.min, read.max),
+          //     this.normalize(d[1], written.min, written.max)
+          //     // this.normalize(d[2], sectors.min, sectors.max),
+          //     // this.normalize(d[3], queue.min, queue.max),
+          //
+          //     // this.normalize(d[5], usage.min, usage.max)
+          //   ]
+          // }
         })
         debug('trainData', trainData)
 
         let testData = test.map(d => {
-          // return {
-          //   input: [
-          //     this.normalize(d[0], read.min, read.max),
-          //     this.normalize(d[1], written.min, written.max)
-          //   ],
-          //   output: [
-          //     // this.normalize(d[2], sectors.min, sectors.max),
-          //     // this.normalize(d[3], queue.min, queue.max),
-          //     this.normalize(d[4], idle.min, idle.max)
-          //     // this.normalize(d[5], usage.min, usage.max)
-          //   ]
-          // }
           return {
             input: [
-              this.normalize(d[4], idle.min, idle.max)
-            ],
-            output: [
               this.normalize(d[0], read.min, read.max),
               this.normalize(d[1], written.min, written.max)
+            ],
+            output: [
               // this.normalize(d[2], sectors.min, sectors.max),
               // this.normalize(d[3], queue.min, queue.max),
-
+              this.normalize(d[2], idle.min, idle.max)
               // this.normalize(d[5], usage.min, usage.max)
             ]
           }
+          // return {
+          //   input: [
+          //     this.normalize(d[2], idle.min, idle.max)
+          //   ],
+          //   output: [
+          //     this.normalize(d[0], read.min, read.max),
+          //     this.normalize(d[1], written.min, written.max)
+          //     // this.normalize(d[2], sectors.min, sectors.max),
+          //     // this.normalize(d[3], queue.min, queue.max),
+          //
+          //     // this.normalize(d[5], usage.min, usage.max)
+          //   ]
+          // }
         })
 
         debug('testData', testData)
 
-        let network = new neataptic.architect.LSTM(1, 3, 2)
+        let network = new neataptic.architect.LSTM(2, 3, 1)
         // let network = new neataptic.architect.NARX(2, 3, 1, 1, 1)
 
         network.train(trainData, {
@@ -195,38 +196,37 @@ export default {
           //   }
         })
 
-        // let accuracy = this.getAccuracy(network, testData)
+        let accuracy = this.getAccuracy(network, testData)
         //
-        // debug('accuracy', network.toJSON(), network.fromJSON(network.toJSON()))
+        debug('accuracy', accuracy)
 
-        // // let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
-        // let forecast = [[0, 287], [800, 0], [800, 200], [23000, 3400], [150000, 128]] // normal delete - this read - this read + normal delete
+        // let forecast = [[0, 2000], [4100, 0], [4100, 2000], [170000, 0]] // normal delete - this read - this read + normal delete
+        let forecast = [[0, 287], [800, 0], [800, 200], [3700, 2600], [150000, 128]] // normal delete - this read - this read + normal delete
+
+        let forecastData = forecast.map(d => {
+          return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
+        })
+
+        forecastData.forEach((datapoint) => {
+          let output = network.activate([datapoint[0], datapoint[1]])
+          debug('RUN datapoint', datapoint, output)
+          debug('RUN forecast - read %d - written %d - idle %d', this.denormalize(datapoint[0], read.min, read.max), this.denormalize(datapoint[1], written.min, written.max), this.denormalize(output, idle.min, idle.max))
+        })
+
+        // let forecast = [0, 20000, 40000] // normal delete - this read - this read + normal delete
         //
         // let forecastData = forecast.map(d => {
-        //   return [this.normalize(d[0], read.min, read.max), this.normalize(d[1], written.min, written.max)]
+        //   return [this.normalize(d, idle.min, idle.max)]
         // })
         //
         // forecastData.forEach((datapoint) => {
         //   debug('RUN datapoint', datapoint)
-        //   let output = network.activate([datapoint[0], datapoint[1]])
+        //   let output = network.activate([datapoint])
         //   // debug('RUN forecast %o - sectors %d - queue %d - idle %d', output, this.denormalize(output[0], sectors.min, sectors.max), this.denormalize(output[1], queue.min, queue.max), this.denormalize(output[2], idle.min, idle.max))
-        //   debug('RUN forecast - read %d - written %d - %o - idle %d - usage %d', this.denormalize(datapoint[0], read.min, read.max), this.denormalize(datapoint[1], written.min, written.max), output, this.denormalize(output, idle.min, idle.max), this.denormalize(output[1], usage.min, usage.max))
+        //   debug('RUN forecast - idle %d - read %d - written %d', this.denormalize(datapoint, idle.min, idle.max), this.denormalize(output[0], read.min, read.max), this.denormalize(output[1], written.min, written.max))
         // })
 
-        let forecast = [0, 40000] // normal delete - this read - this read + normal delete
-
-        let forecastData = forecast.map(d => {
-          return [this.normalize(d, idle.min, idle.max)]
-        })
-
-        forecastData.forEach((datapoint) => {
-          debug('RUN datapoint', datapoint)
-          let output = network.activate([datapoint])
-          // debug('RUN forecast %o - sectors %d - queue %d - idle %d', output, this.denormalize(output[0], sectors.min, sectors.max), this.denormalize(output[1], queue.min, queue.max), this.denormalize(output[2], idle.min, idle.max))
-          debug('RUN forecast - idle %d - read %d - written %d', this.denormalize(datapoint, idle.min, idle.max), this.denormalize(datapoint[1], written.min, written.max), output, this.denormalize(output[0], read.min, read.max), this.denormalize(output[1], written.min, written.max))
-        })
-
-        debug('read %o written %o sectors %o queue %o idle %o usage %o', read, written, sectors, queue, idle, usage)
+        debug('read %o written %o idle %o ', read, written, idle)
       }
     }
   },
@@ -255,25 +255,17 @@ export default {
 
     getAccuracy: function (net, testData) {
       let hits = 0
+
       testData.forEach((datapoint) => {
         let input = datapoint.input
+        debug('datapoint', datapoint)
+        // let output = net.activate([input])
         let output = net.activate([input[0], input[1]])
-        // const outputArray = [Math.round(output)]
-        // debug('getAccuracy', datapoint.input, output, datapoint.output)
-        if (Math.round(output[0]) === Math.round(datapoint.output[0]) && Math.round(output[1]) === Math.round(datapoint.output[1]) && Math.round(output[2]) === Math.round(datapoint.output[2])) {
+        debug('getAccuracy', datapoint.input, output, datapoint.output)
+        // if (Math.round(output[0]) === Math.round(datapoint.output[0]) && Math.round(output[1]) === Math.round(datapoint.output[1])) {
+        if (Math.round(output[0]) === Math.round(datapoint.output[0])) {
           hits += 1
         }
-        // output.forEach((outpoint, index) => {
-        //   if (Math.round(outpoint) === Math.round(datapoint.output[index])) {
-        //     hits += 1
-        //   }
-        // })
-        //
-        // hits = hits / output.length
-
-        // if (outputArray[0] === Math.round(datapoint.output[0])) {
-        //   hits += 1
-        // }
       })
       return hits / testData.length
     },
