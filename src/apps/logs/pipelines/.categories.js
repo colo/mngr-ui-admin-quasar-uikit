@@ -3,7 +3,7 @@
 // import InputIOApp from '@libs/input/poller/io.app'
 import { EventBus } from '@libs/eventbus'
 
-import InputIOLogs from './input/io.logs'
+import InputIO from './input/io'
 
 // import DefaultConn from '@etc/default.io'
 
@@ -13,7 +13,7 @@ import InputIOLogs from './input/io.logs'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:logslibs:pipelines')
+const debug = Debug('apps:os:pipelines:categories')
 
 let qs = require('qs')
 
@@ -21,15 +21,15 @@ export default {
   input: [
     {
       poll: {
-        // suspended: true,
-        id: 'input.logs',
+        suspended: true,
+        id: 'input.os.categories',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.logs',
-              module: InputIOLogs
+              id: 'input.os.categories',
+              module: InputIO
 
             }
           )
@@ -38,7 +38,7 @@ export default {
         connect_retry_count: -1,
         connect_retry_periodical: 1000,
         requests: {
-          periodical: 5000
+          periodical: 10000
         }
       }
     }
@@ -88,9 +88,11 @@ export default {
   ],
   output: [
     function (payload) {
-      debug('OUTPUT', payload)
-
-      if (!payload.err) { EventBus.$emit(payload.metadata.input, payload) }
+      if (!payload.err && /^input\.os\.categories\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.os.categories[', '').slice(0, -1)
+        debug('OUTPUT', payload)
+        EventBus.$emit('input.os.categories.' + payload.metadata.input, payload)
+      }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
     }

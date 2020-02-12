@@ -1,1 +1,1 @@
-../apps/vhosts/etc/vhosts.io.js
+../apps/vhosts/etc/io.js

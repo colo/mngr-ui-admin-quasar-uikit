@@ -1,1 +1,1 @@
-../apps/munin/etc/munin.io.js
+../apps/munin/etc/io.js

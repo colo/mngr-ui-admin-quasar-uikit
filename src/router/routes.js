@@ -194,6 +194,58 @@ const routes = [
 
         ]
       },
+      {
+        path: 'logs',
+        name: 'logs',
+        redirect: { name: 'logs_webs' },
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "logs" */ '@apps/logs/index.vue'),
+        meta: {
+          breadcrumb: { label: 'Logs', icon: 'widgets', app: 'logs' }
+        },
+
+        children: [
+          {
+            path: 'webs',
+            name: 'logs_webs',
+            component: () => import(/* webpackChunkName: "logs.webs" */ '@apps/logs/pages/webs.vue'),
+            meta: {
+              breadcrumb: { label: 'Logs Webs', icon: 'widgets', app: 'logs' }
+            },
+            children: [
+              {
+                path: ':web',
+                name: 'logs_web',
+                component: () => import(/* webpackChunkName: "logs.web" */ '@apps/logs/pages/web.vue'),
+                meta: {
+                  breadcrumb: { label: 'Logs Host', icon: 'widgets', app: 'logs' }
+                }
+              }
+            ]
+          }
+          // {
+          //   path: 'categories',
+          //   name: 'logs_categories',
+          //   component: () => import(/* webpackChunkName: "logs.categories" */ '@apps/logs/pages/categories.vue'),
+          //   meta: {
+          //     breadcrumb: { label: 'Logs Categories', icon: 'widgets', app: 'logs' }
+          //   },
+          //   children: [
+          //     {
+          //       path: ':category',
+          //       name: 'logs_category',
+          //       component: () => import(/* webpackChunkName: "logs.category" */ '@apps/logs/pages/category.vue'),
+          //       meta: {
+          //         breadcrumb: { label: 'Logs Category', icon: 'widgets', app: 'logs' }
+          //       }
+          //     }
+          //   ]
+          // }
+
+        ]
+      },
       // {
       //   path: '/tf',
       //   name: 'tf',

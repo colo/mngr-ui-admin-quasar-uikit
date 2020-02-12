@@ -20,62 +20,62 @@
         <vk-breadcrumb-item :href="href" @click="navigate">Home</vk-breadcrumb-item>
       </router-link>
 
-      <router-link to="/os" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      <router-link to="/logs" v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
-        <vk-breadcrumb-item :href="href" @click="navigate">OS</vk-breadcrumb-item>
+        <vk-breadcrumb-item :href="href" @click="navigate">Logs</vk-breadcrumb-item>
       </router-link>
 
-      <router-link to="/os/hosts" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      <router-link to="/logs/webs" v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
-        <vk-breadcrumb-item v-bind="(!host) ? {'disabled' : true} : ''" :href="href" @click="navigate">Hosts</vk-breadcrumb-item>
+        <vk-breadcrumb-item v-bind="(!web) ? {'disabled' : true} : ''" :href="href" @click="navigate">Webs</vk-breadcrumb-item>
       </router-link>
 
-      <vk-breadcrumb-item v-if="host">{{host}}</vk-breadcrumb-item>
+      <vk-breadcrumb-item v-if="web">{{web}}</vk-breadcrumb-item>
 
     </vk-breadcrumb>
 
-    <router-link
-      to="/os/categories"
+    <!-- <router-link
+      to="/logs/categories"
       v-slot="{ href, route, navigate, isActive, isExactActive }"
     >
 
       <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Categories</vk-button-link>
-    </router-link>
+    </router-link> -->
 
     </vk-card>
 
-    <template v-for="(host_paths, host_name) in hosts_paths">
-      <os-host-card
-        :key="host_name"
-        v-if="!host || host_name === host"
-        :categories="host_paths"
-        :host="host_name"
+    <template v-for="(web_paths, web_name) in webs_paths">
+      <os-web-card
+        :key="web_name"
+        v-if="!web || web_name === web"
+        :categories="web_paths"
+        :web="web_name"
       />
     </template>
 
     <router-view :key="$route.path"></router-view>
 
-    <template v-for="(host_paths, host_name) in hosts_paths">
-      <os-host-card
-        :key="host_name+'.bottom'"
-        v-if="host_name === host"
-        :categories="host_paths"
-        :host="host_name"
+    <template v-for="(web_paths, web_name) in webs_paths">
+      <os-web-card
+        :key="web_name+'.bottom'"
+        v-if="web_name === web"
+        :categories="web_paths"
+        :web="web_name"
       />
     </template>
 
-    <!-- <template v-for="(host_paths, host_name) in hosts_paths">
-      <os-host-card
-        :key="host_name"
-        v-if="!host"
-        :categories="host_paths"
-        :host="host_name"
+    <!-- <template v-for="(web_paths, web_name) in webs_paths">
+      <os-web-card
+        :key="web_name"
+        v-if="!web"
+        :categories="web_paths"
+        :web="web_name"
       />
-      <q-page-sticky v-else position="top" :key="host_name+'.sticky'">
-        <os-host-card
-          v-if="host_name === host"
-          :categories="host_paths"
-          :host="host_name"
+      <q-page-sticky v-else position="top" :key="web_name+'.sticky'">
+        <os-web-card
+          v-if="web_name === web"
+          :categories="web_paths"
+          :web="web_name"
         />
       </q-page-sticky>
     </template> -->
@@ -83,22 +83,22 @@
     <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
       <q-btn fab icon="keyboard_arrow_up" color="accent" />
     </q-page-scroller>
-    <!-- v-if="!host || host_name === host" -->
+    <!-- v-if="!web || web_name === web" -->
 
      <!-- :key="$route.fullPath" -->
-    <!-- <vk-card class="uk-background-secondary uk-light" v-for="(categories, host) in hosts_paths" :key="host">
+    <!-- <vk-card class="uk-background-secondary uk-light" v-for="(categories, web) in webs_paths" :key="web">
 
       <vk-card-title>
-        <router-link :to="'/os/hosts/'+host" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <router-link :to="'/logs/webs/'+web" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
-          <h3 class="uk-light"><a class="uk-link-heading" :href="href" @click="navigate">{{host}}</a></h3>
+          <h3 class="uk-light"><a class="uk-link-heading" :href="href" @click="navigate">{{web}}</a></h3>
         </router-link>
 
       </vk-card-title>
 
       <ul class="uk-subnav uk-subnav-divider" uk-margin>
-        <li v-for="category in categories" :key="host+'.'+category">
-          <router-link :to="'/os/hosts/'+host+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <li v-for="category in categories" :key="web+'.'+category">
+          <router-link :to="'/logs/webs/'+web+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }"
           >
             <a :href="href" @click="navigate">{{category}}</a>
           </router-link>
@@ -113,23 +113,23 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pages:hosts')
+const debug = Debug('apps:os:pages:webs')
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/os/pipelines/hosts'
+import Pipeline from '@apps/logs/pipelines/webs'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
-import OsHostCard from '@apps/os/components/hostCard.vue'
+import LogsWebCard from '@apps/logs/components/webCard.vue'
 
-import { requests, store } from '@apps/os/sources/hosts/index'
+import { requests, store } from '@apps/logs/sources/webs/index'
 
 export default {
   mixins: [DataSourcesMixin],
-  components: { OsHostCard },
+  components: { LogsWebCard },
   // extends: DataSourcesMixin,
 
-  name: 'OSHosts',
+  name: 'LogsWebs',
 
   // pipelines: {},
   // __pipelines_cfg: {},
@@ -139,16 +139,16 @@ export default {
     return {
       height: '0px',
 
-      // host: undefined,
-      hosts_paths: {},
+      // web: undefined,
+      webs_paths: {},
       paths: [],
       /**
       * dataSources
       **/
       store: false,
-      pipeline_id: 'input.os.hosts',
+      pipeline_id: 'input.logs.webs',
 
-      id: 'os.hosts',
+      id: 'logs.webs',
       path: 'all',
 
       components: {
@@ -166,8 +166,8 @@ export default {
     }
   },
   computed: {
-    'host': function () {
-      return (this.$route && this.$route.params && this.$route.params.host) ? this.$route.params.host : undefined
+    'web': function () {
+      return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined
     }
   },
   methods: {
@@ -177,16 +177,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.os.hosts'] && this.$options.pipelines['input.os.hosts'].get_input_by_id('input.os.hosts')) {
+      if (this.$options.pipelines['input.logs.webs'] && this.$options.pipelines['input.logs.webs'].get_input_by_id('input.logs.webs')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.os.hosts'].get_input_by_id('input.os.hosts').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.os.hosts'].get_input_by_id('input.os.hosts').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.logs.webs'].get_input_by_id('input.logs.webs').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.logs.webs'].get_input_by_id('input.logs.webs').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.os.hosts'].get_input_by_id('input.os.hosts').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.os.hosts'].get_input_by_id('input.os.hosts').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.logs.webs'].get_input_by_id('input.logs.webs').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.logs.webs'].get_input_by_id('input.logs.webs').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)

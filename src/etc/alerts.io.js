@@ -1,1 +1,1 @@
-../apps/alerts/etc/alerts.io.js
+../apps/alerts/etc/io.js

@@ -1,1 +1,1 @@
-../apps/logs/etc/logs.io.js
+../apps/logs/etc/io.js

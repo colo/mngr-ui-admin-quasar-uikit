@@ -1,1 +1,1 @@
-../apps/checks/etc/checks.io.js
+../apps/checks/etc/io.js

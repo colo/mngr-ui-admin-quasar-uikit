@@ -1,1 +1,1 @@
-../apps/root/etc/root.io.js
+../apps/root/etc/io.js

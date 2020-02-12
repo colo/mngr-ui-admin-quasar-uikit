@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pipelines:host')
+const debug = Debug('apps:os:pipelines:webs')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         suspended: true,
-        id: 'input.os.host',
+        id: 'input.logs.webs',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.os.host',
+              id: 'input.logs.webs',
               module: InputIO
 
             }
@@ -38,7 +38,7 @@ export default {
         connect_retry_count: -1,
         connect_retry_periodical: 1000,
         requests: {
-          periodical: 5000
+          periodical: 10000
         }
       }
     }
@@ -87,18 +87,11 @@ export default {
     }
   ],
   output: [
-    // function (payload) {
-    //   debug('OUTPUT', payload)
-    //
-    //   if (!payload.err) { EventBus.$emit('input.os.host.' + payload.metadata.input, payload) }
-    //
-    //   // if (!payload.err) { EventBus.$emit('log', payload) }
-    // }
     function (payload) {
-      if (!payload.err && /^input\.os\.host\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.os.host[', '').slice(0, -1)
+      if (!payload.err && /^input\.logs\.webs\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.logs.webs[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.os.host.' + payload.metadata.input, payload)
+        EventBus.$emit('input.logs.webs.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }

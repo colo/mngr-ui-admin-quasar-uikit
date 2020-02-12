@@ -6,15 +6,15 @@
 const App = require ( 'node-app-socket.io-client/index' )
 
 import * as Debug from "debug"
-const debug = Debug("apps:logslibs:pipelines:input:io.logs")
+const debug = Debug("apps:logs:pipelines:input:io")
 
-// debug_internals = Debug("mngr-ui:apps:logslibs:pipelines:input:io.logs:Internals"),
-// debug_events = Debug("mngr-ui:apps:logslibs:pipelines:input:io.logs:Events");
+// debug_internals = Debug("mngr-ui:apps:logs:pipelines:input:io:Internals"),
+// debug_events = Debug("mngr-ui:apps:logs:pipelines:input:io:Events");
 
 // import store from 'src/store'
 
 // import DefaultConn from '@etc/default.io'
-import LogsIO from '@etc/logs.io'
+import IO from '@etc/logs.io'
 
 export default new Class({
   Extends: App,
@@ -60,7 +60,7 @@ export default new Class({
 				// 	callbacks: ['app_doc'],
 				// 	// middlewares: [], //socket.use(fn)
 				// }],
-        'logs': [{
+        'all': [{
 					// path: ':param',
 					// once: true, //socket.once
 					callbacks: ['logs'],
@@ -88,49 +88,53 @@ export default new Class({
   // },
   logs: function(socket, next, doc){
     // let {type} = doc
+    debug('logs %o', doc)
 
     if(doc.status){
       debug('ERROR logs %o', doc)
     }
-    else if(
-      doc.data
-      && (!doc.metadata.opts || !doc.metadata.opts.params || Object.getLength(doc.metadata.opts.params) === 0)){
-      debug('logs %o', doc)
-      // Array.each(doc.logs.tags, function(tag){
-      //   debug('TAG %s', tag)
-      //   // this.io.emit('/tags/'+tag)
-      //   this.io.emit('/', {
-      //     params: { prop: 'tags' },
-      //     range: "posix 1557135759000-1557136059000/*",
-      //     body: {
-      //       // "transformation" : "limit:30000",
-      //       "params":{
-      //     		"value": tag
-      //     	}
-      //     }
-      //   })
-      //
-      // }.bind(this))
-      //
-      // Array.each(doc.logs.hosts, function(host){
-      //   debug('HOST %s', host)
-      //   // this.io.emit('/tags/'+tag)
-      //   this.io.emit('/', {
-      //     params: { prop: 'hosts' },
-      //     range: "posix 1557135759000-1557136059000/*",
-      //     body: {
-      //       // "transformation" : "limit:30000",
-      //     	"params":{
-      //     		"value": host
-      //     	}
-      //     }
-      //   })
-      //
-      // }.bind(this))
+    else if (doc.metadata && Array.isArray(doc.metadata.from)) {
+
     }
-    else{
-      debug('OTHERS logs %o', doc)
-    }
+    // else if(
+    //   doc.data
+    //   && (!doc.metadata.opts || !doc.metadata.opts.params || Object.getLength(doc.metadata.opts.params) === 0)){
+    //   debug('logs %o', doc)
+    //   // Array.each(doc.logs.tags, function(tag){
+    //   //   debug('TAG %s', tag)
+    //   //   // this.io.emit('/tags/'+tag)
+    //   //   this.io.emit('/', {
+    //   //     params: { prop: 'tags' },
+    //   //     range: "posix 1557135759000-1557136059000/*",
+    //   //     body: {
+    //   //       // "transformation" : "limit:30000",
+    //   //       "params":{
+    //   //     		"value": tag
+    //   //     	}
+    //   //     }
+    //   //   })
+    //   //
+    //   // }.bind(this))
+    //   //
+    //   // Array.each(doc.logs.hosts, function(host){
+    //   //   debug('HOST %s', host)
+    //   //   // this.io.emit('/tags/'+tag)
+    //   //   this.io.emit('/', {
+    //   //     params: { prop: 'hosts' },
+    //   //     range: "posix 1557135759000-1557136059000/*",
+    //   //     body: {
+    //   //       // "transformation" : "limit:30000",
+    //   //     	"params":{
+    //   //     		"value": host
+    //   //     	}
+    //   //     }
+    //   //   })
+    //   //
+    //   // }.bind(this))
+    // }
+    // else{
+    //   debug('OTHERS logs %o', doc)
+    // }
 
     this.fireEvent('onDoc', [doc, { input_type: this, app: null }])
 
@@ -161,7 +165,7 @@ export default new Class({
   //   //   this.io.close()
   //
 	// 	// arguments[1]()
-	// 	// this.io.to('root').emit('response', 'a new user has joined the room saying '+arguments[2]);
+	// 	// this.io.to('logs').emit('response', 'a new user has joined the room saying '+arguments[2]);
 	// 	// next(socket)
 	// },
 
@@ -171,15 +175,16 @@ export default new Class({
 		this.parent(options);//override default options
 
     // let _io = new App(DefaultConn)
-    this.add_io(LogsIO)
+    this.add_io(IO)
 
-		this.profile('root_init');//start profiling
+		this.profile('logs_init');//start profiling
 
 
     this.addEvent('onConnect', function(){
       debug('initialize socket.onConnect', this.options.requests)
-      // setTimeout(this.fireEvent.bind(this), 1000, 'onResume');
 
+      // setTimeout(this.fireEvent.bind(this), 1000, 'onResume');
+      // // // this.fireEvent('onOnce')
       // setTimeout(this.fireEvent.bind(this), 1000, 'onOnce');
       //
       // setTimeout(function(){
@@ -202,7 +207,7 @@ export default new Class({
       //   // },
       //   // body: {
       //   // 	"q": [
-      //   // 		{"data": ["body_bytes_sent", "remote_addr", {"user_agent": {"os": ["family"]}}]},
+      //   // 		{"data": ["body_bytes_sent", "remote_addr", {"user_agent": {"logs": ["family"]}}]},
       //   // 		{"metadata": ["host"]}
       //   // 	]
       //   //
@@ -220,7 +225,7 @@ export default new Class({
       //   // },
       //   // body: {
       //   // 	"q": [
-      //   // 		{"data": ["body_bytes_sent", "remote_addr", {"user_agent": {"os": ["family"]}}]},
+      //   // 		{"data": ["body_bytes_sent", "remote_addr", {"user_agent": {"logs": ["family"]}}]},
       //   // 		{"metadata": ["host"]}
       //   // 	]
       //   //
@@ -317,16 +322,10 @@ export default new Class({
       // })
       //
       //
-      // this.io.emit('/', {
-      //   query: {
-      //     register: 'periodical',
-      //     'transformation': [
-      //       { 'orderBy': { 'index': 'r.asc(timestamp)' } },
-      //       'limit:30000'
-      //     ]
-      //   }
-      //
-      // })
+
+      // this.io.emit('/')
+
+      // this.io.emit('/', { query: {}})
 
       /**
       * test queries
@@ -336,12 +335,23 @@ export default new Class({
 
     }.bind(this))
 
+    this.addEvent('onExit', function(){
+      debug('onExit')
+
+      // this.io.on('off', 'all')
+      this.io.emit('off')
+
+      this.remove_io_routes()
+
+      // if(this.io.disconnected == false)
+        // this.io.close()
+    }.bind(this))
+
     this.addEvent('onSuspend', function(){
       debug('onSuspend')
 
       // this.io.on('off', 'all')
-      // this.io.emit('off')
-      this.io.on('off', 'logs')
+      this.io.emit('off')
 
       // this.remove_io_routes()
 
@@ -349,20 +359,9 @@ export default new Class({
         // this.io.close()
     }.bind(this))
 
-    this.addEvent('onExit', function(){
-      debug('onExit')
+		this.profile('logs_init');//end profiling
 
-      this.io.on('off', 'logs')
-
-      this.remove_io_routes()
-
-      // if(this.io.disconnected == false)
-      //   this.io.close()
-    })
-
-		this.profile('root_init');//end profiling
-
-		this.log('root', 'info', 'root started');
+		this.log('logs', 'info', 'logs started');
   },
 
 });
