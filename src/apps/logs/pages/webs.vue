@@ -44,7 +44,7 @@
 
     </vk-card>
 
-    <template v-for="(web_paths, web_name) in webs_paths">
+    <!-- <template v-for="(web_paths, web_name) in webs_paths">
       <os-web-card
         :key="web_name"
         v-if="!web || web_name === web"
@@ -62,49 +62,100 @@
         :categories="web_paths"
         :web="web_name"
       />
-    </template>
-
-    <!-- <template v-for="(web_paths, web_name) in webs_paths">
-      <os-web-card
-        :key="web_name"
-        v-if="!web"
-        :categories="web_paths"
-        :web="web_name"
-      />
-      <q-page-sticky v-else position="top" :key="web_name+'.sticky'">
-        <os-web-card
-          v-if="web_name === web"
-          :categories="web_paths"
-          :web="web_name"
-        />
-      </q-page-sticky>
     </template> -->
+
+    <vk-card class="uk-background-secondary">
+      <!-- <div class="uk-overflow-auto">
+      <vk-table :data="vhosts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
+        <vk-table-column-sort title="URI" cell="uri" linked></vk-table-column-sort>
+        <vk-table-column title="Prot" cell="port"></vk-table-column>
+        <vk-table-column title="Schema" cell="schema"></vk-table-column>
+        <vk-table-column title="Host" cell="host"></vk-table-column>
+        <vk-table-column title="Last Update" cell="timestamp"></vk-table-column>
+        <vk-table-column title="Type" cell="path"></vk-table-column>
+      </vk-table>
+      </div> -->
+      <q-table
+        v-if="!web"
+        class="my-sticky-header-table"
+        title="Web Logs"
+        :data="webs"
+        :columns="columns"
+        :row-key="row => row.domain +'.'+ row.host +'.'+ row.path"
+        :pagination.sync="pagination"
+        virtual-scroll
+        :rows-per-page-options="[0]"
+        dark
+        color="amber"
+        :visible-columns="($q.screen.lt.sm) ? visibleColumns : allColumns"
+        :loading="loading"
+        :filter="filter"
+      >
+        <template v-slot:top="props">
+          <q-select
+            v-if="$q.screen.lt.sm"
+            v-model="visibleColumns"
+            multiple
+            borderless
+            dense
+            options-dense
+            :display-value="$q.lang.table.columns"
+            emit-value
+            map-options
+            :options="columns"
+            option-value="name"
+            style="min-width: 150px"
+          />
+          <q-space />
+          <!-- <div v-if="$q.screen.gt.xs" class="col">
+            <q-toggle v-model="visibleColumns" val="schema" label="Schema" />
+            <q-toggle v-model="visibleColumns" val="uri" label="URI" />
+            <q-toggle v-model="visibleColumns" val="port" label="Port" />
+            <q-toggle v-model="visibleColumns" val="host" label="Host" />
+            <q-toggle v-model="visibleColumns" val="timestamp" label="Last Update" />
+            <q-toggle v-model="visibleColumns" val="path" label="Type" />
+          </div> -->
+
+          <q-input borderless dense debounce="100" v-model="filter" placeholder="Search">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn
+          flat round dense
+          :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
+          @click="props.toggleFullscreen"
+          class="q-ml-md"
+        />
+        </template>
+
+        <template v-slot:body="props">
+        <q-tr :props="props">
+
+          <q-td key="domain" :props="props">
+            {{ props.row.domain }}
+            <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
+            <q-btn :to="'/logs/webs/' + props.row.path" flat icon="open_in_new" />
+          </q-td>
+
+          <q-td key="host" :props="props">
+            {{ props.row.host }}
+          </q-td>
+          <!-- <q-td key="timestamp" :props="props">
+            {{ format_time(props.row.timestamp) }}
+          </q-td> -->
+          <q-td key="path" :props="props">
+            {{ props.row.path }}
+          </q-td>
+        </q-tr>
+        </template>
+      </q-table>
+    </vk-card>
 
     <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
       <q-btn fab icon="keyboard_arrow_up" color="accent" />
     </q-page-scroller>
-    <!-- v-if="!web || web_name === web" -->
 
-     <!-- :key="$route.fullPath" -->
-    <!-- <vk-card class="uk-background-secondary uk-light" v-for="(categories, web) in webs_paths" :key="web">
-
-      <vk-card-title>
-        <router-link :to="'/logs/webs/'+web" v-slot="{ href, route, navigate, isActive, isExactActive }"
-        >
-          <h3 class="uk-light"><a class="uk-link-heading" :href="href" @click="navigate">{{web}}</a></h3>
-        </router-link>
-
-      </vk-card-title>
-
-      <ul class="uk-subnav uk-subnav-divider" uk-margin>
-        <li v-for="category in categories" :key="web+'.'+category">
-          <router-link :to="'/logs/webs/'+web+'#'+category" v-slot="{ href, route, navigate, isActive, isExactActive }"
-          >
-            <a :href="href" @click="navigate">{{category}}</a>
-          </router-link>
-        </li>
-      </ul>
-    </vk-card> -->
   </q-page>
 </template>
 
@@ -139,9 +190,40 @@ export default {
     return {
       height: '0px',
 
+      webs: [],
+
+      filter: '',
+      loading: true,
+      allColumns: ['domain', 'host', 'path'],
+      visibleColumns: ['domain'],
+      pagination: {
+        rowsPerPage: 50
+      },
+
+      columns: [
+        // { name: 'schema', label: 'Schema', field: 'schema', sortable: true, align: 'left' },
+        {
+          name: 'domain',
+          required: true,
+          label: 'Domain',
+          align: 'left',
+          field: 'domain',
+          sortable: true
+        },
+        { name: 'host', align: 'left', label: 'Host', field: 'host', sortable: true },
+        // {
+        //   name: 'timestamp',
+        //   align: 'left',
+        //   label: 'Last Update',
+        //   field: 'timestamp',
+        //   sortable: true
+        // },
+        { name: 'path', align: 'left', label: 'Type', field: 'path', sortable: true }
+      ],
+
       // web: undefined,
-      webs_paths: {},
-      paths: [],
+      // webs_paths: {},
+      // paths: [],
       /**
       * dataSources
       **/
@@ -227,3 +309,28 @@ export default {
   }
 }
 </script>
+
+<style lang="sass">
+.my-sticky-header-table
+  /* max height is important */
+  .q-table__middle
+    max-height: 600px
+    // min-height: 600px
+
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th
+    /* bg color is important for th; just specify one */
+    background-color: #1d1d1d
+
+  thead tr th
+    position: sticky
+    z-index: 1
+  thead tr:first-child th
+    top: 0
+
+  /* this is when the loading indicator appears */
+  &.q-table--loading thead tr:last-child th
+    /* height of all previous header rows */
+    top: 48px
+</style>
