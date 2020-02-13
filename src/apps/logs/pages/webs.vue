@@ -64,6 +64,8 @@
       />
     </template> -->
 
+    <router-view :key="$route.path"></router-view>
+
     <vk-card class="uk-background-secondary">
       <!-- <div class="uk-overflow-auto">
       <vk-table :data="vhosts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
@@ -135,17 +137,21 @@
           <q-td key="domain" :props="props">
             {{ props.row.domain }}
             <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
-            <q-btn :to="'/logs/webs/' + props.row.path" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/?domain=' + props.row.domain" flat icon="open_in_new" />
           </q-td>
 
           <q-td key="host" :props="props">
             {{ props.row.host }}
+
+            <q-btn :to="'/logs/webs/?host=' + props.row.host" flat icon="open_in_new" />
           </q-td>
           <!-- <q-td key="timestamp" :props="props">
             {{ format_time(props.row.timestamp) }}
           </q-td> -->
           <q-td key="path" :props="props">
             {{ props.row.path }}
+
+            <q-btn :to="'/logs/webs/?path=' + props.row.path" flat icon="open_in_new" />
           </q-td>
         </q-tr>
         </template>
@@ -171,13 +177,13 @@ import Pipeline from '@apps/logs/pipelines/webs'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
-import LogsWebCard from '@apps/logs/components/webCard.vue'
+// import LogsWebCard from '@apps/logs/components/webCard.vue'
 
 import { requests, store } from '@apps/logs/sources/webs/index'
 
 export default {
   mixins: [DataSourcesMixin],
-  components: { LogsWebCard },
+  // components: { LogsWebCard },
   // extends: DataSourcesMixin,
 
   name: 'LogsWebs',
@@ -252,6 +258,14 @@ export default {
       return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined
     }
   },
+  // computed: {
+  //   'web': function () {
+  //     // return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined
+  //     return (this.$route && this.$route.query)
+  //       ? (this.$route.query.domain) ? this.$route.query.domain : (this.$route.query.host) ? this.$route.query.host : this.$route.query.path
+  //       : undefined
+  //   }
+  // },
   methods: {
     /**
     * @start pipelines

@@ -7,8 +7,6 @@ const HOUR = 60 * MINUTE
 
 const logs_webs_paths = {
   params: function (_key, vm) {
-    debug('PERIODICAL %o %o', _key, vm)
-
     let source
     let key
 
@@ -16,6 +14,7 @@ const logs_webs_paths = {
       key = ['hosts.range']
     }
 
+    debug('PERIODICAL %o %o', _key, vm)
     // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
 
     if (
@@ -24,7 +23,7 @@ const logs_webs_paths = {
       source = [{
         params: { id: _key },
         // range: 'posix ' + (Date.now() - HOUR) + '-' + Date.now() + '/*',
-        range: 'posix 1557134755000' + '-' + 1557134755000 + HOUR + '/*', //= > home test data
+        range: 'posix 1557134755000' + '-' + 1557134755000 + SECOND + '/*', //= > home test data
 
         path: 'all',
         query: {
@@ -44,6 +43,10 @@ const logs_webs_paths = {
     }
 
     // debug('MyChart periodical KEY ', key, source)
+
+    // if (!vm.web) {
+    //
+    // }
 
     return { key, source }
   },
