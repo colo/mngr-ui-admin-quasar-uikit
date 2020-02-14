@@ -20,10 +20,20 @@ const logs_webs_paths = {
     if (
       _key
     ) {
+      // // const START = 1557134755000 //= > home test data
+      // const START = 1557136052000 //= > office test data
+      // const END = START + SECOND
+
+      /**
+      * production
+      **/
+      const END = Date.now()
+      const START = END - HOUR
+
       source = [{
         params: { id: _key },
-        // range: 'posix ' + (Date.now() - HOUR) + '-' + Date.now() + '/*',
-        range: 'posix 1557134755000' + '-' + 1557134755000 + SECOND + '/*', //= > home test data
+        // range: 'posix ' + (Date.now() - HOUR) + '-' + Date.now() + '/*', //prod
+        range: 'posix ' + START + '-' + END + '/*',
 
         path: 'all',
         query: {
