@@ -255,7 +255,7 @@ export default {
     },
     __query_to_key: function (query) {
       if (typeof query === 'function') {
-        let _result = query.attempt()
+        let _result = query.attempt([undefined, this])
         debug('__query_to_key', _result)
         return _result.key
       } else if (typeof query === 'string') {

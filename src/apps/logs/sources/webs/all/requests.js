@@ -20,14 +20,14 @@ const logs_webs_paths = {
     if (
       _key
     ) {
-      // // const START = 1557134755000 //= > home test data
-      // const START = 1557136052000 //= > office test data
-      // const END = START + SECOND
+      // const END = 1557134755000 //= > home test data
+      const END = 1557246080000 //= > office test data
 
       /**
       * production
       **/
-      const END = Date.now()
+      // const END = Date.now()
+
       const START = END - HOUR
 
       source = [{

@@ -25,12 +25,12 @@
         <vk-breadcrumb-item :href="href" @click="navigate">Logs</vk-breadcrumb-item>
       </router-link>
 
-      <router-link to="/logs/webs" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      <!-- <router-link to="/logs/webs" v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
         <vk-breadcrumb-item v-bind="(!web) ? {'disabled' : true} : ''" :href="href" @click="navigate">Webs</vk-breadcrumb-item>
-      </router-link>
+      </router-link> -->
 
-      <vk-breadcrumb-item v-if="web">{{web}}</vk-breadcrumb-item>
+      <vk-breadcrumb-item >Webs</vk-breadcrumb-item>
 
     </vk-breadcrumb>
 
@@ -77,8 +77,9 @@
         <vk-table-column title="Type" cell="path"></vk-table-column>
       </vk-table>
       </div> -->
+
+      <!-- v-if="!web" -->
       <q-table
-        v-if="!web"
         class="my-sticky-header-table"
         title="Web Logs"
         :data="webs"
@@ -137,13 +138,13 @@
           <q-td key="domain" :props="props">
             {{ props.row.domain }}
             <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
-            <q-btn :to="'/logs/webs/domain/' + props.row.domain" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain" flat icon="open_in_new" />
           </q-td>
 
           <q-td key="host" :props="props">
             {{ props.row.host }}
 
-            <q-btn :to="'/logs/webs/host/' + props.row.host" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?host=' + props.row.host" flat icon="open_in_new" />
           </q-td>
           <!-- <q-td key="timestamp" :props="props">
             {{ format_time(props.row.timestamp) }}
@@ -151,7 +152,7 @@
           <q-td key="path" :props="props">
             {{ props.row.path }}
 
-            <q-btn :to="'/logs/webs/path/' + props.row.path" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?path=' + props.row.path" flat icon="open_in_new" />
           </q-td>
         </q-tr>
         </template>
@@ -236,7 +237,7 @@ export default {
       store: false,
       pipeline_id: 'input.logs.webs.all',
 
-      id: 'logs.webs',
+      id: 'logs.webs.all',
       path: 'all',
 
       components: {
@@ -253,11 +254,11 @@ export default {
       }
     }
   },
-  computed: {
-    'web': function () {
-      return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined
-    }
-  },
+  // computed: {
+  //   'web': function () {
+  //     return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined
+  //   }
+  // },
   // computed: {
   //   'web': function () {
   //     // return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined

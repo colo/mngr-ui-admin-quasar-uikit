@@ -225,11 +225,11 @@ const routes = [
                 }
               },
               {
-                path: ':type/:web',
-                name: 'logs_webs_single',
-                component: () => import(/* webpackChunkName: "logs.webs.single" */ '@apps/logs/pages/webs/single.vue'),
+                path: 'filter',
+                name: 'logs_webs_filter',
+                component: () => import(/* webpackChunkName: "logs.webs.filter" */ '@apps/logs/pages/webs/filter.vue'),
                 meta: {
-                  breadcrumb: { label: 'Logs Webs Single', icon: 'widgets', app: 'logs' }
+                  breadcrumb: { label: 'Logs Webs Filter', icon: 'widgets', app: 'logs' }
                 }
               }
             ]
