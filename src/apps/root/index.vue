@@ -2,56 +2,7 @@
   <q-page>
     <!-- <img alt="Vue logo" src="../../assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-    <vk-card class="uk-background-secondary">
 
-      <router-link
-        to="/logs"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Logs</vk-button-link>
-      </router-link>
-
-      <router-link
-        to="/os"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">OS</vk-button-link>
-      </router-link>
-
-      <router-link
-        to="/munin"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Munin</vk-button-link>
-      </router-link>
-
-      <router-link
-        to="/vhosts"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Vhosts</vk-button-link>
-      </router-link>
-
-      <router-link
-        to="/checks"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Checks</vk-button-link>
-      </router-link>
-
-      <router-link
-        to="/alerts"
-        v-slot="{ href, route, navigate, isActive, isExactActive }"
-      >
-
-        <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Alerts</vk-button-link>
-      </router-link>
-    </vk-card>
   </q-page>
 </template>
 

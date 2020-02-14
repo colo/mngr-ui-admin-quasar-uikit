@@ -210,17 +210,26 @@ const routes = [
           {
             path: 'webs',
             name: 'logs_webs',
+            redirect: { name: 'logs_webs_all' },
             component: () => import(/* webpackChunkName: "logs.webs" */ '@apps/logs/pages/webs.vue'),
             meta: {
               breadcrumb: { label: 'Logs Webs', icon: 'widgets', app: 'logs' }
             },
             children: [
               {
-                path: ':web',
-                name: 'logs_web',
-                component: () => import(/* webpackChunkName: "logs.web" */ '@apps/logs/pages/web.vue'),
+                path: '',
+                name: 'logs_webs_all',
+                component: () => import(/* webpackChunkName: "logs.webs.all" */ '@apps/logs/pages/webs/all.vue'),
                 meta: {
-                  breadcrumb: { label: 'Logs Host', icon: 'widgets', app: 'logs' }
+                  breadcrumb: { label: 'Logs Webs All', icon: 'widgets', app: 'logs' }
+                }
+              },
+              {
+                path: ':type/:web',
+                name: 'logs_webs_single',
+                component: () => import(/* webpackChunkName: "logs.webs.single" */ '@apps/logs/pages/webs/single.vue'),
+                meta: {
+                  breadcrumb: { label: 'Logs Webs Single', icon: 'widgets', app: 'logs' }
                 }
               }
             ]

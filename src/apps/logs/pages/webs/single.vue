@@ -1,37 +1,46 @@
 <template>
-  <div>
+  <q-page>
+    <vk-card class="uk-background-secondary">
+    <vk-breadcrumb>
+      <router-link to="/" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item :href="href" @click="navigate">Home</vk-breadcrumb-item>
+      </router-link>
 
-  <template v-for="(category) in plugins_categories">
-    <a :id="category" :key="category+'.anchor'"/>
-    <vk-card class="uk-background-secondary uk-light" :key="category">
-      <vk-card-title>
-        <h3 class="uk-light">{{category}}</h3>
-      </vk-card-title>
-      <!-- <template v-for="(config, name) in plugins_config_per_category">
-        <os-plugin-dygraph :ref="name" :id="category+'.'+name" :data="plugins[name]" :config="config" :key="category+'.'+name+'.plugin'"/>
-      </template> -->
-      <template v-for="(name) in plugins">
+      <router-link to="/logs" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item :href="href" @click="navigate">Logs</vk-breadcrumb-item>
+      </router-link>
 
-        <!-- {{category}}
-        {{name}} -->
-        <!-- <a :id="name" :key="name+'.anchor'"/> -->
-        <os-plugin-dygraph v-if="name.indexOf(category) > -1" :ref="name" :id="'os.'+name" :name="name"  :key="name+'.plugin'"/>
-          <!-- :data="plugin" -->
-      </template>
+      <router-link to="/logs/webs" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item :href="href" @click="navigate">Webs</vk-breadcrumb-item>
+      </router-link>
+
+      <router-link :to="'/logs/webs/'+type" v-slot="{ href, route, navigate, isActive, isExactActive }"
+      >
+        <vk-breadcrumb-item v-bind="(!type) ? {'disabled' : true} : ''" :href="href" @click="navigate">{{type}}</vk-breadcrumb-item>
+      </router-link>
+
+      <vk-breadcrumb-item v-if="web">{{web}}</vk-breadcrumb-item>
+
+    </vk-breadcrumb>
+
+    <!-- <router-link
+      to="/logs/categories"
+      v-slot="{ href, route, navigate, isActive, isExactActive }"
+    >
+
+      <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Categories</vk-button-link>
+    </router-link> -->
+
     </vk-card>
-
-  </template>
-
-    <!-- <template v-for="(plugin, name) in plugins">
-
-      <os-plugin-dygraph :ref="name" :id="name" :data="plugin" :key="name+'.plugin'"/>
-    </template> -->
-</div>
+  </q-page>
 </template>
 
 <script>
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:pages:web')
+const debug = Debug('apps:logs:pages:webs:single')
 
 //
 
@@ -42,9 +51,9 @@ import OsPluginDygraph from '@apps/logs/components/pluginDygraph'
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/logs/pipelines/web'
+import Pipeline from '@apps/logs/pipelines/webs/single'
 
-import { requests, store } from '../sources/web/index'
+import { requests, store } from '@apps/logs/sources/webs/single/index'
 
 // const MAX_FEED_DATA = 10
 
@@ -57,12 +66,12 @@ export default {
 
   data () {
     return {
-      id: 'logs.web',
+      id: 'logs.webs.single',
       path: 'all',
 
       // os: [],
       store: false,
-      pipeline_id: 'input.logs.web',
+      pipeline_id: 'input.logs.webs.single',
 
       plugins: [],
       // plugins_config: {},
@@ -77,7 +86,7 @@ export default {
           //   }
           // }
           source: {
-            requests: requests
+            // requests: requests
 
             // store: store
           }
@@ -87,6 +96,14 @@ export default {
     }
   },
 
+  computed: {
+    'web': function () {
+      return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined
+    },
+    'type': function () {
+      return (this.$route && this.$route.params && this.$route.params.type) ? this.$route.params.type : undefined
+    }
+  },
   watch: {
     // 'plugins_config': function (val) {
     //   debug('watch plugins_config %o', val.graph)
@@ -100,22 +117,22 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.logs.web'] && this.$options.pipelines['input.logs.web'].get_input_by_id('input.os')) {
+      if (this.$options.pipelines['input.logs.webs.single'] && this.$options.pipelines['input.logs.webs.single'].get_input_by_id('input.os')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.logs.web'].get_input_by_id('input.os').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.logs.web'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.logs.webs.single'].get_input_by_id('input.os').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.logs.webs.single'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.logs.web'].get_input_by_id('input.os').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.logs.web'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.logs.webs.single'].get_input_by_id('input.os').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.logs.webs.single'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)
 
         let pipeline_id = template.input[0].poll.id
-        // let pipeline_id = 'input.logs.web'
+        // let pipeline_id = 'input.logs.webs.single'
 
         template.input[0].poll.conn[0].requests = this.__components_sources_to_requests(this.components)
 
@@ -148,12 +165,8 @@ export default {
     * @end pipelines
     **/
 
-  },
-  computed: {
-    'web': function () {
-      return (this.$route && this.$route.params && this.$route.params.web) ? this.$route.params.web : undefined
-    }
   }
+
   // computed: {
   //
   // //   count: function () {
@@ -166,7 +179,7 @@ export default {
   // //   }
   // },
   // mounted: function () {
-  //   this.pipeline_id = 'input.logs.web'
+  //   this.pipeline_id = 'input.logs.webs.single'
   // },
   // create: function () {
   //   debug('created HOST %s %o %o', this.web, this.$options.range_component, this.$options.__pipelines_cfg)

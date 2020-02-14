@@ -3,7 +3,7 @@
 // import InputIOApp from '@libs/input/poller/io.app'
 import { EventBus } from '@libs/eventbus'
 
-import InputIO from './input/io'
+import InputIO from '../input/io'
 
 // import DefaultConn from '@etc/default.io'
 
@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pipelines:webs')
+const debug = Debug('apps:logs:pipelines:webs:single')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         suspended: true,
-        id: 'input.logs.webs',
+        id: 'input.logs.webs.single',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.logs.webs',
+              id: 'input.logs.webs.single',
               module: InputIO
 
             }
@@ -38,7 +38,7 @@ export default {
         connect_retry_count: -1,
         connect_retry_periodical: 1000,
         requests: {
-          periodical: 10000
+          periodical: 5000
         }
       }
     }
@@ -87,11 +87,18 @@ export default {
     }
   ],
   output: [
+    // function (payload) {
+    //   debug('OUTPUT', payload)
+    //
+    //   if (!payload.err) { EventBus.$emit('input.logs.webs.single.' + payload.metadata.input, payload) }
+    //
+    //   // if (!payload.err) { EventBus.$emit('log', payload) }
+    // }
     function (payload) {
-      if (!payload.err && /^input\.logs\.webs\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.logs.webs[', '').slice(0, -1)
+      if (!payload.err && /^input\.logs\.webs\.single\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.logs.webs.single[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.logs.webs.' + payload.metadata.input, payload)
+        EventBus.$emit('input.logs.webs.single.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
