@@ -8,6 +8,22 @@ const HOUR = 60 * MINUTE
 const generic_callback = function (data, metadata, key, vm) {
   debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
 
+  if (/periodical/.test(key) && (data.logs || Object.getLength(data) > 0)) {
+    let _data
+    if (data.logs) _data = data.logs // comes from 'Range'
+    else _data = data // comes from 'register'
+
+    debug('PERIODICAL HOST CALLBACK _data %o', _data)
+
+    let logs = []
+    let log_template = _data[0].metadata
+    Array.each(_data[0].data.log, function (row) {
+      logs.push(Object.merge(Object.clone(log_template), { log: row.value, timestamp: row.timestamp }))
+    })
+
+    if (logs.length > 0) { vm.logs = logs; vm.loading_logs = false }
+  }
+
   // if (/periodical/.test(key) && (data.os || Object.getLength(data) > 0)) {
   //   let _data
   //   if (data.os) _data = data.os // comes from 'Range'
@@ -227,14 +243,14 @@ const host_once_component = {
     let key
 
     if (!_key) {
-      // key = ['periodical.once', 'minute.once', 'hour.once']// 'config.once',
-      key = ['periodical.once']// 'config.once',
+      key = ['periodical.once', 'minute.once', 'hour.once']// 'config.once',
+      // key = ['periodical.once']// 'config.once',
     }
 
     if (
       _key
     ) {
-      // const END = 1557134755000 //= > home test data
+      // const END = 1557266400000 + MINUTE //= > home test data
       const END = 1557246080000 //= > office test data
 
       /**
@@ -242,7 +258,7 @@ const host_once_component = {
       **/
       // const END = Date.now()
 
-      const START = END - HOUR
+      let START = END - MINUTE
 
       switch (_key) {
         case 'periodical.once':
@@ -252,15 +268,57 @@ const host_once_component = {
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             range: 'posix ' + START + '-' + END + '/*',
             query: {
-              'from': 'logs_historical',
+              'from': 'logs',
               // 'register': 'changes',
-              // 'format': 'tabular',
+              'format': 'stat',
               'index': false,
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/
               'q': [
-                'data'
+                'data',
+                'metadata'
+              ],
+              'transformation': [
+                {
+                  'orderBy': { 'index': 'r.desc(timestamp)' }
+                }
+                // { 'limit': 10 }
+              ],
+              'filter': [
+                { 'metadata': vm.filter },
+                "r.row('metadata')('type').eq('periodical')"
+              ]
+
+            }
+          }]
+          break
+
+        case 'minute.once':
+          START = END - HOUR
+
+          source = [{
+            params: { id: _key },
+            path: 'all',
+            // range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + START + '-' + END + '/*',
+            query: {
+              'from': 'logs_historical',
+              // 'register': 'changes',
+              'format': 'stat',
+              'index': false,
+              /**
+              * right now needed to match OUTPUT 'id' with this query (need to @fix)
+              **/
+              'q': [
+                // {
+                //   'metadata': [
+                //     'timestamp',
+                //     'path'
+                //   ]
+                // },
+                'data',
+                'metadata'
               ],
               'transformation': [
                 {
@@ -274,46 +332,49 @@ const host_once_component = {
 
             }
           }]
+
           break
 
-        // case 'minute.once':
-        //   source = [{
-        //     params: { id: _key },
-        //     path: 'all',
-        //     range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
-        //     query: {
-        //       'from': 'os_historical',
-        //       // 'register': 'changes',
-        //       'format': 'tabular',
-        //       'index': false,
-        //       /**
-        //       * right now needed to match OUTPUT 'id' with this query (need to @fix)
-        //       **/
-        //       'q': [
-        //         // {
-        //         //   'metadata': [
-        //         //     'timestamp',
-        //         //     'path'
-        //         //   ]
-        //         // },
-        //         // 'metadata',
-        //         'data'
-        //       ],
-        //       'transformation': [
-        //         {
-        //           'orderBy': { 'index': 'r.desc(timestamp)' }
-        //         }
-        //       ],
-        //       'filter': [
-        //         { 'metadata': { 'host': vm.host } },
-        //         { 'metadata': { 'type': 'minute' } },
-        //         "r.row('metadata')('path').ne('os.procs')"
-        //       ]
-        //
-        //     }
-        //   }]
-        //
-        //   break
+        case 'hour.once':
+          START = END - (2 * HOUR)
+
+          source = [{
+            params: { id: _key },
+            path: 'all',
+            // range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + START + '-' + END + '/*',
+            query: {
+              'from': 'logs_historical',
+              // 'register': 'changes',
+              'format': 'stat',
+              'index': false,
+              /**
+              * right now needed to match OUTPUT 'id' with this query (need to @fix)
+              **/
+              'q': [
+                // {
+                //   'metadata': [
+                //     'timestamp',
+                //     'path'
+                //   ]
+                // },
+                'data',
+                'metadata'
+              ],
+              'transformation': [
+                {
+                  'orderBy': { 'index': 'r.desc(timestamp)' }
+                }
+              ],
+              'filter': [
+                { 'metadata': vm.filter },
+                "r.row('metadata')('type').eq('hour')"
+              ]
+
+            }
+          }]
+
+          break
       }
     }
 

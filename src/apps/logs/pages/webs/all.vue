@@ -92,7 +92,7 @@
         color="amber"
         :visible-columns="($q.screen.lt.sm) ? visibleColumns : allColumns"
         :loading="loading"
-        :filter="filter"
+        :filter="search_filter"
       >
         <template v-slot:top="props">
           <q-select
@@ -119,7 +119,7 @@
             <q-toggle v-model="visibleColumns" val="path" label="Type" />
           </div> -->
 
-          <q-input borderless dense debounce="100" v-model="filter" placeholder="Search">
+          <q-input borderless dense debounce="100" v-model="search_filter" placeholder="Search">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
@@ -199,7 +199,7 @@ export default {
 
       webs: [],
 
-      filter: '',
+      search_filter: '',
       loading: true,
       allColumns: ['domain', 'host', 'path'],
       visibleColumns: ['domain'],

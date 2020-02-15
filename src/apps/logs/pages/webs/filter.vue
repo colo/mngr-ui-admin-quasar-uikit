@@ -30,15 +30,111 @@
 
     </vk-breadcrumb>
 
-    <!-- <router-link
-      to="/logs/categories"
-      v-slot="{ href, route, navigate, isActive, isExactActive }"
-    >
-
-      <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Categories</vk-button-link>
-    </router-link> -->
-
     </vk-card>
+
+    <vk-card class="uk-background-secondary">
+      <!-- <div class="uk-overflow-auto">
+      <vk-table :data="vhosts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
+        <vk-table-column-sort title="URI" cell="uri" linked></vk-table-column-sort>
+        <vk-table-column title="Prot" cell="port"></vk-table-column>
+        <vk-table-column title="Schema" cell="schema"></vk-table-column>
+        <vk-table-column title="Host" cell="host"></vk-table-column>
+        <vk-table-column title="Last Update" cell="timestamp"></vk-table-column>
+        <vk-table-column title="Type" cell="path"></vk-table-column>
+      </vk-table>
+      </div> -->
+
+      <!-- v-if="!web" -->
+      <q-table
+        class="my-sticky-header-table"
+        title="Web Logs"
+        :data="logs"
+        :columns="columns"
+        :row-key="row => row.timestamp + row.domain +'.'+ row.host +'.'+ row.path"
+        :pagination.sync="pagination"
+        virtual-scroll
+        :rows-per-page-options="[0]"
+        dark
+        color="amber"
+        :visible-columns="($q.screen.lt.sm) ? visibleColumns : allColumns"
+        :loading="loading_logs"
+        :filter="search_filter"
+      >
+        <template v-slot:top="props">
+          <q-select
+            v-if="$q.screen.lt.sm"
+            v-model="visibleColumns"
+            multiple
+            borderless
+            dense
+            options-dense
+            :display-value="$q.lang.table.columns"
+            emit-value
+            map-options
+            :options="columns"
+            option-value="name"
+            style="min-width: 150px"
+          />
+          <q-space />
+          <!-- <div v-if="$q.screen.gt.xs" class="col">
+            <q-toggle v-model="visibleColumns" val="schema" label="Schema" />
+            <q-toggle v-model="visibleColumns" val="uri" label="URI" />
+            <q-toggle v-model="visibleColumns" val="port" label="Port" />
+            <q-toggle v-model="visibleColumns" val="host" label="Host" />
+            <q-toggle v-model="visibleColumns" val="timestamp" label="Last Update" />
+            <q-toggle v-model="visibleColumns" val="path" label="Type" />
+          </div> -->
+
+          <q-input borderless dense debounce="100" v-model="search_filter" placeholder="Search">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn
+          flat round dense
+          :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
+          @click="props.toggleFullscreen"
+          class="q-ml-md"
+        />
+        </template>
+
+        <template v-slot:body="props">
+        <q-tr :props="props">
+
+          <q-td key="date" :props="props">
+            {{ format_time(props.row.timestamp) }}
+          </q-td>
+
+          <q-td key="log" :props="props">
+            {{ format_log(props.row.log) }}
+          </q-td>
+
+          <q-td key="domain" :props="props">
+            {{ props.row.domain }}
+            <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
+            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain" flat icon="open_in_new" />
+          </q-td>
+
+          <q-td key="host" :props="props">
+            {{ props.row.host }}
+
+            <q-btn :to="'/logs/webs/filter/?host=' + props.row.host" flat icon="open_in_new" />
+          </q-td>
+
+          <q-td key="path" :props="props">
+            {{ props.row.path }}
+
+            <q-btn :to="'/logs/webs/filter/?path=' + props.row.path" flat icon="open_in_new" />
+          </q-td>
+        </q-tr>
+        </template>
+      </q-table>
+    </vk-card>
+
+    <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
+      <q-btn fab icon="keyboard_arrow_up" color="accent" />
+    </q-page-scroller>
+
   </q-page>
 </template>
 
@@ -60,6 +156,7 @@ import Pipeline from '@apps/logs/pipelines/webs/filter'
 import { requests, store } from '@apps/logs/sources/webs/filter/index'
 
 // const MAX_FEED_DATA = 10
+import moment from 'moment'
 
 export default {
   mixins: [DataSourcesMixin],
@@ -77,9 +174,52 @@ export default {
       store: false,
       pipeline_id: 'input.logs.webs.filter',
 
-      plugins: [],
-      // plugins_config: {},
-      plugins_categories: [],
+      logs: [],
+
+      search_filter: '',
+      loading_logs: true,
+      allColumns: ['date', 'log', 'domain', 'host', 'path'],
+      visibleColumns: ['log'],
+      pagination: {
+        rowsPerPage: 10
+      },
+
+      columns: [
+        // { name: 'schema', label: 'Schema', field: 'schema', sortable: true, align: 'left' },
+        {
+          name: 'date',
+          required: true,
+          label: 'Date',
+          align: 'left',
+          field: 'timestamp',
+          sortable: true
+        },
+        {
+          name: 'log',
+          required: true,
+          label: 'Log',
+          align: 'left',
+          field: 'log',
+          sortable: true
+        },
+        {
+          name: 'domain',
+          required: true,
+          label: 'Domain',
+          align: 'left',
+          field: 'domain',
+          sortable: true
+        },
+        { name: 'host', align: 'left', label: 'Host', field: 'host', sortable: true },
+        // {
+        //   name: 'timestamp',
+        //   align: 'left',
+        //   label: 'Last Update',
+        //   field: 'timestamp',
+        //   sortable: true
+        // },
+        { name: 'path', align: 'left', label: 'Type', field: 'path', sortable: true }
+      ],
 
       components: {
         range: {
@@ -128,7 +268,12 @@ export default {
     // }
   },
   methods: {
-
+    format_time: function (timestamp) {
+      return moment(timestamp).format('dddd, MMMM Do YYYY, h:mm:ss a')
+    },
+    format_log: function (log) {
+      return (log.length <= 100) ? log : log.substring(0, 96) + '...'
+    },
     /**
     * @start pipelines
     **/
@@ -218,3 +363,28 @@ export default {
 
 }
 </script>
+
+<style lang="sass">
+.my-sticky-header-table
+  /* max height is important */
+  .q-table__middle
+    max-height: 600px
+    // min-height: 600px
+
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th
+    /* bg color is important for th; just specify one */
+    background-color: #1d1d1d
+
+  thead tr th
+    position: sticky
+    z-index: 1
+  thead tr:first-child th
+    top: 0
+
+  /* this is when the loading indicator appears */
+  &.q-table--loading thead tr:last-child th
+    /* height of all previous header rows */
+    top: 48px
+</style>
