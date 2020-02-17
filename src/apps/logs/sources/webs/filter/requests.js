@@ -24,8 +24,8 @@ let world_map_city_counter = []
 const generic_callback = function (data, metadata, key, vm) {
   debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
 
-  // const END = 1557246080000 // test data
-  const END = Date.now() // production
+  const END = 1557246080000 // test data
+  // const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
     const START = END - MINUTE
@@ -506,12 +506,12 @@ const host_once_component = {
       _key
     ) {
       // const END = 1557266400000 + MINUTE //= > home test data
-      // const END = 1557246080000 //= > office test data
+      const END = 1557246080000 //= > office test data
 
       /**
       * production
       **/
-      const END = Date.now()
+      // const END = Date.now()
 
       let START
 
