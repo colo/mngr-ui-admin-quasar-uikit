@@ -34,28 +34,64 @@
 
     <vk-card class="uk-background-secondary">
       periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
-      periodical.current_bytes_sent: {{ periodical.current_bytes_sent }}
+      periodical.hits: {{ periodical.hits }} <br/>
+
       <hr>
+
+      periodical.current_bytes_sent: {{ periodical.current_bytes_sent }}
+
+      <hr>
+
+      <div v-for="(val, status) in periodical.status_counter" :key="status">
+        periodical.status_counter: {{status}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, city) in periodical.city_counter" :key="city">
+        periodical.city_counter: {{city}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, country) in periodical.country_counter" :key="country">
+        periodical.country_counter: {{country}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, continent) in periodical.continent_counter" :key="continent">
+        periodical.continent_counter: {{continent}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
       <div v-for="(val, os) in periodical.user_agent_os_counter" :key="os">
         periodical.user_agent_os_counter: {{os}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, os) in periodical.user_agent_os_family_counter" :key="os">
+      <div v-for="(val, os) in periodical.user_agent_os_family_counter" :key="os+'-'+val">
         periodical.user_agent_os_family_counter: {{os}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, engine) in periodical.user_agent_engine_counter" :key="engine">
+      <div v-for="(val, engine) in periodical.user_agent_engine_counter" :key="engine+'-'+val">
         periodical.user_agent_engine_counter: {{engine}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, browser) in periodical.user_agent_browser_counter" :key="browser">
+      <div v-for="(val, browser) in periodical.user_agent_browser_counter" :key="browser+'-'+val">
         periodical.user_agent_browser_counter: {{browser}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, device) in periodical.user_agent_device_counter" :key="device+'-'+val">
+        periodical.user_agent_device_counter: {{device}} - {{val}} <br/>
       </div>
     </vk-card>
 
@@ -199,11 +235,22 @@ export default {
 
       periodical: {
         total_bytes_sent: 0,
+        hits: 0,
+
         current_bytes_sent: 0,
+
+        status_counter: {},
+
+        city_counter: {},
+        country_counter: {},
+        continent_counter: {},
+
         user_agent_os_counter: {},
         user_agent_os_family_counter: {},
         user_agent_engine_counter: {},
-        user_agent_browser_counter: {}
+        user_agent_browser_counter: {},
+        user_agent_device_counter: {}
+
       },
 
       store: false,
