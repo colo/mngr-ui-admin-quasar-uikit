@@ -5,10 +5,21 @@ const SECOND = 1000
 const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
 
+let total_bytes_sent = {}
+let user_agent_os_counter = {}
+let user_agent_os_family_counter = {}
+let user_agent_engine_counter = {}
+let user_agent_browser_counter = {}
+
 const generic_callback = function (data, metadata, key, vm) {
   debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
 
+  const END = 1557246080000 // test data
+  // const END = Date.now() //production
+
   if (/periodical/.test(key) && (data.logs || Object.getLength(data) > 0)) {
+    const START = END - MINUTE
+
     let _data
     if (data.logs) _data = data.logs // comes from 'Range'
     else _data = data // comes from 'register'
@@ -16,12 +27,91 @@ const generic_callback = function (data, metadata, key, vm) {
     debug('PERIODICAL HOST CALLBACK _data %o', _data)
 
     let logs = []
+
+    let current_bytes_sent = 0
+
     let log_template = _data[0].metadata
     Array.each(_data[0].data.log, function (row) {
       logs.push(Object.merge(Object.clone(log_template), { log: row.value, timestamp: row.timestamp }))
     })
 
+    Array.each(_data[0].data.body_bytes_sent, function (row, index) {
+      if (index === 0) {
+        current_bytes_sent = row.value
+      }
+      // logs.push(Object.merge(Object.clone(log_template), { log: row.value, timestamp: row.timestamp }))
+      total_bytes_sent[row.timestamp] = row.value
+    })
+
+    let periodical_total_bytes_sent = 0
+    Object.each(total_bytes_sent, function (val, ts) {
+      if (ts < START) {
+        delete total_bytes_sent[ts]
+      } else {
+        periodical_total_bytes_sent += val
+      }
+    })
+
+    Array.each(_data[0].data.user_agent, function (row, index) {
+      // debug('OS %s', row.value.os.family)
+
+      let os = row.value.os.family
+
+      user_agent_os_family_counter[row.timestamp] = os
+
+      os = (row.value.os.major) ? os + ' ' + row.value.os.major : os
+      // os = (row.value.os.minor) ? os + '.' + row.value.os.minor : os
+      user_agent_os_counter[row.timestamp] = os
+
+      let engine = row.value.engine.family
+      engine = (row.value.engine.major) ? engine + ' ' + row.value.engine.major : engine
+      engine = (row.value.engine.minor) ? engine + '.' + row.value.engine.minor : engine
+      engine = (row.value.engine.patch) ? engine + '.' + row.value.engine.patch : engine
+
+      user_agent_engine_counter[row.timestamp] = engine
+
+      let browser = row.value.ua.family
+      browser = (row.value.ua.major) ? browser + ' ' + row.value.ua.major : browser
+      browser = (row.value.ua.minor) ? browser + '.' + row.value.ua.minor : browser
+      browser = (row.value.ua.patch) ? browser + '.' + row.value.ua.patch : browser
+
+      user_agent_browser_counter[row.timestamp] = browser
+    })
+
+    let periodical_user_agent_os_counter = {}
+    let periodical_user_agent_os_family_counter = {}
+    let periodical_user_agent_engine_counter = {}
+    let periodical_user_agent_browser_counter = {}
+
+    Object.each(user_agent_os_counter, function (val, ts) {
+      if (ts < START) {
+        delete user_agent_os_counter[ts]
+        delete user_agent_os_family_counter[ts]
+      } else {
+        let family = user_agent_os_family_counter[ts]
+        let engine = user_agent_engine_counter[ts]
+        let browser = user_agent_browser_counter[ts]
+
+        if (!periodical_user_agent_os_counter[val]) periodical_user_agent_os_counter[val] = 0
+        if (!periodical_user_agent_os_family_counter[family]) periodical_user_agent_os_family_counter[family] = 0
+        if (!periodical_user_agent_engine_counter[engine]) periodical_user_agent_engine_counter[engine] = 0
+        if (!periodical_user_agent_browser_counter[browser]) periodical_user_agent_browser_counter[browser] = 0
+
+        periodical_user_agent_os_counter[val] += 1
+        periodical_user_agent_os_family_counter[family] += 1
+        periodical_user_agent_engine_counter[engine] += 1
+        periodical_user_agent_browser_counter[browser] += 1
+      }
+    })
+
     if (logs.length > 0) { vm.logs = logs; vm.loading_logs = false }
+
+    vm.$set(vm.periodical, 'total_bytes_sent', periodical_total_bytes_sent)
+    vm.$set(vm.periodical, 'user_agent_os_counter', periodical_user_agent_os_counter)
+    vm.$set(vm.periodical, 'user_agent_os_family_counter', periodical_user_agent_os_family_counter)
+    vm.$set(vm.periodical, 'user_agent_engine_counter', periodical_user_agent_engine_counter)
+    vm.$set(vm.periodical, 'user_agent_browser_counter', periodical_user_agent_browser_counter)
+    vm.$set(vm.periodical, 'current_bytes_sent', current_bytes_sent)
   }
 
   // if (/periodical/.test(key) && (data.os || Object.getLength(data) > 0)) {
@@ -258,10 +348,12 @@ const host_once_component = {
       **/
       // const END = Date.now()
 
-      let START = END - MINUTE
+      let START
 
       switch (_key) {
         case 'periodical.once':
+          START = END - MINUTE
+
           source = [{
             params: { id: _key },
             path: 'all',

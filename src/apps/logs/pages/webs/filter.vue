@@ -33,6 +33,33 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
+      periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
+      periodical.current_bytes_sent: {{ periodical.current_bytes_sent }}
+      <hr>
+      <div v-for="(val, os) in periodical.user_agent_os_counter" :key="os">
+        periodical.user_agent_os_counter: {{os}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, os) in periodical.user_agent_os_family_counter" :key="os">
+        periodical.user_agent_os_family_counter: {{os}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, engine) in periodical.user_agent_engine_counter" :key="engine">
+        periodical.user_agent_engine_counter: {{engine}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, browser) in periodical.user_agent_browser_counter" :key="browser">
+        periodical.user_agent_browser_counter: {{browser}} - {{val}} <br/>
+      </div>
+    </vk-card>
+
+    <vk-card class="uk-background-secondary">
       <!-- <div class="uk-overflow-auto">
       <vk-table :data="vhosts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
         <vk-table-column-sort title="URI" cell="uri" linked></vk-table-column-sort>
@@ -170,7 +197,15 @@ export default {
       id: 'logs.webs.filter',
       path: 'all',
 
-      // os: [],
+      periodical: {
+        total_bytes_sent: 0,
+        current_bytes_sent: 0,
+        user_agent_os_counter: {},
+        user_agent_os_family_counter: {},
+        user_agent_engine_counter: {},
+        user_agent_browser_counter: {}
+      },
+
       store: false,
       pipeline_id: 'input.logs.webs.filter',
 
@@ -266,6 +301,14 @@ export default {
     // 'plugins_config': function (val) {
     //   debug('watch plugins_config %o', val.graph)
     // }
+
+    // 'periodical.total_bytes_sent': {
+    //   handler: function(val){
+    //       periodical_total_bytes_sent
+    //   }
+    //   deep:true
+    // }
+
   },
   methods: {
     format_time: function (timestamp) {
