@@ -1,5 +1,6 @@
 <template>
   <q-page>
+
     <vk-card class="uk-background-secondary">
     <vk-breadcrumb>
       <router-link to="/" v-slot="{ href, route, navigate, isActive, isExactActive }"
@@ -33,6 +34,8 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
+      <world-map :cities="periodical.world_map_cities"/>
+
       periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
       periodical.hits: {{ periodical.hits }} <br/>
 
@@ -211,6 +214,8 @@ const debug = Debug('apps:logs:pages:webs:filter')
 
 // import OsPluginDygraph from '@apps/logs/components/pluginDygraph'
 
+import WorldMap from '@apps/logs/components/worldMap'
+
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import JSPipeline from 'js-pipeline'
@@ -224,7 +229,7 @@ import moment from 'moment'
 export default {
   mixins: [DataSourcesMixin],
 
-  // components: { OsPluginDygraph },
+  components: { WorldMap },
 
   name: 'LogsWebFilter',
 
@@ -246,6 +251,7 @@ export default {
         city_counter: {},
         country_counter: {},
         continent_counter: {},
+        world_map_cities: [],
 
         user_agent_os_counter: {},
         user_agent_os_family_counter: {},

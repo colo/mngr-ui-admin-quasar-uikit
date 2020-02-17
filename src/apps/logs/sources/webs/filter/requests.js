@@ -19,6 +19,7 @@ let status_counter = {}
 let city_counter = {}
 let country_counter = {}
 let continent_counter = {}
+let world_map_city_counter = []
 
 const generic_callback = function (data, metadata, key, vm) {
   debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
@@ -26,12 +27,14 @@ const generic_callback = function (data, metadata, key, vm) {
   // const END = 1557246080000 // test data
   const END = Date.now() // production
 
-  if (/periodical/.test(key) && (data.logs || Object.getLength(data) > 0)) {
+  if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
     const START = END - MINUTE
 
     let _data
     if (data.logs) _data = data.logs // comes from 'Range'
     else _data = data // comes from 'register'
+
+    if (!_data.data) _data.data = {}
 
     debug('PERIODICAL HOST CALLBACK _data %o', _data)
 
@@ -97,22 +100,32 @@ const generic_callback = function (data, metadata, key, vm) {
     /**
     * city - country - continent
     **/
+    let _tmp_periodical_world_map_city_counter = {}
     Array.each(_data[0].data.geoip, function (row, index) {
       let country = (row.value.country) ? (row.value.country.names) ? (row.value.country.names.en) ? row.value.country.names.en : row.value.country.names.es : undefined : undefined
       let continent = (row.value.continent) ? (row.value.continent.names) ? (row.value.continent.names.en) ? row.value.continent.names.en : row.value.continent.names.es : undefined : undefined
       let city = (row.value.city && country) ? (row.value.city.names) ? (row.value.city.names.en) ? row.value.city.names.en + ' - ' + country : row.value.city.names.es + ' - ' + country : undefined : undefined
 
+      let world_map_city = (row.value.location && row.value.location.latitude && row.value.location.longitude) ? row.value.location + ':' + row.value.location.latitude : undefined
+      let world_map_city_name = (row.value.city) ? (row.value.city.names) ? (row.value.city.names.en) ? row.value.city.names.en + ' - ' + country : row.value.city.names.es + ' - ' + country : undefined : undefined
+
       if (city && !city_counter[row.timestamp]) city_counter[row.timestamp] = {}
       if (country && !country_counter[row.timestamp]) country_counter[row.timestamp] = {}
       if (continent && !continent_counter[row.timestamp]) continent_counter[row.timestamp] = {}
 
+      if (world_map_city && world_map_city_name && !world_map_city_counter[row.timestamp]) world_map_city_counter[row.timestamp] = {}
+
       if (city && country && !city_counter[row.timestamp][city]) city_counter[row.timestamp][city] = 0
-      if (country && !country_counter[row.timestamp][row.value.country.names.en]) country_counter[row.timestamp][country] = 0
-      if (continent && !continent_counter[row.timestamp][row.value.continent.names.en]) continent_counter[row.timestamp][continent] = 0
+      if (country && !country_counter[row.timestamp][country]) country_counter[row.timestamp][country] = 0
+      if (continent && !continent_counter[row.timestamp][continent]) continent_counter[row.timestamp][continent] = 0
+
+      if (world_map_city && world_map_city_name && !world_map_city_counter[row.timestamp][world_map_city]) world_map_city_counter[row.timestamp][world_map_city] = { name: world_map_city_name, count: 0, latitude: row.value.location.latitude, longitude: row.value.location.longitude }
 
       if (city) { city_counter[row.timestamp][city] += 1 }
       if (country) country_counter[row.timestamp][country] += 1
       if (continent) continent_counter[row.timestamp][continent] += 1
+
+      if (world_map_city && world_map_city_name) world_map_city_counter[row.timestamp][world_map_city].count += 1
     })
 
     let periodical_city_counter = {}
@@ -124,9 +137,11 @@ const generic_callback = function (data, metadata, key, vm) {
         delete city_counter[ts]
         delete country_counter[ts]
         delete continent_counter[ts]
+        delete world_map_city_counter[ts]
       } else {
         let country_val = country_counter[ts]
         let continent_val = continent_counter[ts]
+        let world_map_city_val = world_map_city_counter[ts]
 
         Object.each(val, function (data, city) {
           if (!periodical_city_counter[city]) periodical_city_counter[city] = 0
@@ -142,7 +157,28 @@ const generic_callback = function (data, metadata, key, vm) {
           if (!periodical_continent_counter[continent]) periodical_continent_counter[continent] = 0
           periodical_continent_counter[continent] += data
         })
+
+        Object.each(world_map_city_val, function (data, world_map_city) {
+          // if (!periodical_continent_counter[continent]) periodical_continent_counter[continent] = 0
+          // periodical_continent_counter[continent] += data
+
+          if (!_tmp_periodical_world_map_city_counter[world_map_city]) {
+            _tmp_periodical_world_map_city_counter[world_map_city] = data
+          } else {
+            _tmp_periodical_world_map_city_counter[world_map_city].count += data.count
+          }
+        })
       }
+    })
+
+    let periodical_world_map_city_counter = []
+
+    Object.each(_tmp_periodical_world_map_city_counter, function (data, world_map_city) {
+      periodical_world_map_city_counter.push({
+        title: data.name + ' ( hits: ' + data.count + ' )',
+        latitude: data.latitude,
+        longitude: data.longitude
+      })
     })
 
     /**
@@ -234,6 +270,7 @@ const generic_callback = function (data, metadata, key, vm) {
     vm.$set(vm.periodical, 'city_counter', periodical_city_counter)
     vm.$set(vm.periodical, 'country_counter', periodical_country_counter)
     vm.$set(vm.periodical, 'continent_counter', periodical_continent_counter)
+    vm.$set(vm.periodical, 'world_map_cities', periodical_world_map_city_counter)
 
     vm.$set(vm.periodical, 'user_agent_os_counter', periodical_user_agent_os_counter)
     vm.$set(vm.periodical, 'user_agent_os_family_counter', periodical_user_agent_os_family_counter)
