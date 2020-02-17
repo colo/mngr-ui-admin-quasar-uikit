@@ -216,7 +216,13 @@ const generic_callback = function (data, metadata, key, vm) {
       }
     })
 
-    if (logs.length > 0) { vm.logs = logs; vm.loading_logs = false }
+    vm.periodical = {}
+
+    if (logs.length > 0) {
+      // vm.logs = logs
+      vm.$set(vm.periodical, 'logs', logs)
+      vm.loading_logs = false
+    }
 
     vm.$set(vm.periodical, 'total_bytes_sent', periodical_total_bytes_sent)
     vm.$set(vm.periodical, 'hits', periodical_hits)

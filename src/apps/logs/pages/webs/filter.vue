@@ -111,7 +111,7 @@
       <q-table
         class="my-sticky-header-table"
         title="Web Logs"
-        :data="logs"
+        :data="periodical.logs"
         :columns="columns"
         :row-key="row => row.timestamp + row.domain +'.'+ row.host +'.'+ row.path"
         :pagination.sync="pagination"
@@ -234,6 +234,8 @@ export default {
       path: 'all',
 
       periodical: {
+        logs: [],
+
         total_bytes_sent: 0,
         hits: 0,
 
@@ -256,7 +258,7 @@ export default {
       store: false,
       pipeline_id: 'input.logs.webs.filter',
 
-      logs: [],
+      // logs: [],
 
       search_filter: '',
       loading_logs: true,
