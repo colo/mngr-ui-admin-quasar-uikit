@@ -69,6 +69,30 @@
 
       <hr>
 
+      <div v-for="(val, addr) in periodical.addr_counter" :key="addr">
+        periodical.addr_counter: {{addr}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, user) in periodical.user_counter" :key="user">
+        periodical.user_counter: {{user}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, referer) in periodical.referer_counter" :key="referer">
+        periodical.referer_counter: {{referer}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, type) in periodical.type_counter" :key="type">
+        periodical.type_counter: {{type}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
       <div v-for="(val, os) in periodical.user_agent_os_counter" :key="os">
         periodical.user_agent_os_counter: {{os}} - {{val}} <br/>
       </div>
@@ -252,6 +276,11 @@ export default {
         country_counter: {},
         continent_counter: {},
         world_map_cities: [],
+
+        addr_counter: {},
+        user_counter: {},
+        referer_counter: {},
+        type_counter: {},
 
         user_agent_os_counter: {},
         user_agent_os_family_counter: {},

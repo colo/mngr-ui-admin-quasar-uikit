@@ -21,11 +21,19 @@ let country_counter = {}
 let continent_counter = {}
 let world_map_city_counter = []
 
+let addr_counter = {}
+let user_counter = {}
+let referer_counter = {}
+
+let type_counter = {}
+
+const static_types = /\.html$|\.htm$|\.shtml$|\.css$|\.xml$|\.gif$|\.jpeg$|\.jpg$|\.js$|\.atom$|\.rss$|\.mml$|\.txt$|\.jad$|\.wml$|\.htc$|\.png$|\.tif$|\.tiff$|\.wbmp$|\.ico$|\.jng$|\.bmp$|\.svg$|\.svgz$|\.webp$|\.ttf$|\.woff$|\.json$|\.hqx$|\.doc$|\.pdf$|\.ps$|\.eps$|\.ai$|\.rtf$|\.m3u8$|\.xls$|\.eot$|\.ppt$|\.wmlc$|\.kml$|\.kmz$|\.7z$|\.cco$|\.jardiff$|\.prc$|\.pdb$|\.rar$|\.rpm$|\.sea$|\.swf$|\.sit$|\.tcl$|\.tk$|\.der$|\.pem$|\.crt$|\.xpi$|\.xhtml$|\.xspf$|\.zip$|\.bin$|\.exe$|\.dll$|\.deb$|\.dmg$|\.iso$|\.img$|\.msi$|\.msp$|\.msm$|\.docx$|\.xlsx$|\.pptx$|\.mid$|\.midi$|\.kar$|\.mp3$|\.ogg$|\.m4a$|\.ra$|\.3gpp$|\.3gp$|\.ts$|\.mp4$|\.mpeg$|\.mpg$|\.mov$|\.webm$|\.flv$|\.m4v$|\.mng$|\.asx$|\.asf$|\.wmv$|\.avi$/
+
 const generic_callback = function (data, metadata, key, vm) {
   debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
 
-  const END = 1557246080000 // test data
-  // const END = Date.now() // production
+  // const END = 1557246080000 // test data
+  const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
     const START = END - MINUTE
@@ -182,6 +190,94 @@ const generic_callback = function (data, metadata, key, vm) {
     })
 
     /**
+    * address (IP)
+    **/
+    Array.each(_data[0].data.remote_addr, function (row, index) {
+      if (!addr_counter[row.timestamp]) addr_counter[row.timestamp] = {}
+      if (!addr_counter[row.timestamp][row.value]) addr_counter[row.timestamp][row.value] = 0
+      addr_counter[row.timestamp][row.value] += 1
+    })
+
+    let periodical_addr_counter = {}
+    Object.each(addr_counter, function (val, ts) {
+      if (ts < START) {
+        delete addr_counter[ts]
+      } else {
+        Object.each(val, function (data, addr) {
+          if (!periodical_addr_counter[status]) periodical_addr_counter[addr] = 0
+          periodical_addr_counter[addr] += data
+        })
+      }
+    })
+
+    /**
+    * user
+    **/
+    Array.each(_data[0].data.remote_user, function (row, index) {
+      if (!user_counter[row.timestamp]) user_counter[row.timestamp] = {}
+      if (!user_counter[row.timestamp][row.value]) user_counter[row.timestamp][row.value] = 0
+      user_counter[row.timestamp][row.value] += 1
+    })
+
+    let periodical_user_counter = {}
+    Object.each(user_counter, function (val, ts) {
+      if (ts < START) {
+        delete user_counter[ts]
+      } else {
+        Object.each(val, function (data, user) {
+          if (!periodical_user_counter[user]) periodical_user_counter[user] = 0
+          periodical_user_counter[user] += data
+        })
+      }
+    })
+
+    /**
+    * Static & Dynamic types
+    **/
+    Array.each(_data[0].data.pathname, function (row, index) {
+      let value = (static_types.test(row.value)) ? 'static' : 'dynamic'
+      // debug('TYPE %o', row.value, type)
+      if (!type_counter[row.timestamp]) type_counter[row.timestamp] = {}
+      if (!type_counter[row.timestamp][value]) type_counter[row.timestamp][value] = 0
+      type_counter[row.timestamp][value] += 1
+    })
+
+    let periodical_type_counter = {}
+    Object.each(type_counter, function (val, ts) {
+      if (ts < START) {
+        delete type_counter[ts]
+      } else {
+        Object.each(val, function (data, type) {
+          if (!periodical_type_counter[type]) periodical_type_counter[type] = 0
+          periodical_type_counter[type] += data
+        })
+      }
+    })
+
+    /**
+    * referer
+    **/
+    Array.each(_data[0].data.referer, function (row, index) {
+      // debug('REFERER %o', row.value)
+      let value = (row.value.referer) ? row.value.referer + ' - ' + row.value.medium : row.value.medium
+      if (!referer_counter[row.timestamp]) referer_counter[row.timestamp] = {}
+      if (!referer_counter[row.timestamp][value]) referer_counter[row.timestamp][value] = 0
+      referer_counter[row.timestamp][value] += 1
+    })
+
+    let periodical_referer_counter = {}
+    Object.each(referer_counter, function (val, ts) {
+      if (ts < START) {
+        delete referer_counter[ts]
+      } else {
+        Object.each(val, function (data, referer) {
+          if (!periodical_referer_counter[referer]) periodical_referer_counter[referer] = 0
+          periodical_referer_counter[referer] += data
+        })
+      }
+    })
+
+    /**
     * User Agent
     **/
     Array.each(_data[0].data.user_agent, function (row, index) {
@@ -271,6 +367,11 @@ const generic_callback = function (data, metadata, key, vm) {
     vm.$set(vm.periodical, 'country_counter', periodical_country_counter)
     vm.$set(vm.periodical, 'continent_counter', periodical_continent_counter)
     vm.$set(vm.periodical, 'world_map_cities', periodical_world_map_city_counter)
+
+    vm.$set(vm.periodical, 'addr_counter', periodical_addr_counter)
+    vm.$set(vm.periodical, 'user_counter', periodical_user_counter)
+    vm.$set(vm.periodical, 'referer_counter', periodical_referer_counter)
+    vm.$set(vm.periodical, 'type_counter', periodical_type_counter)
 
     vm.$set(vm.periodical, 'user_agent_os_counter', periodical_user_agent_os_counter)
     vm.$set(vm.periodical, 'user_agent_os_family_counter', periodical_user_agent_os_family_counter)
@@ -505,13 +606,12 @@ const host_once_component = {
     if (
       _key
     ) {
-      // const END = 1557266400000 + MINUTE //= > home test data
-      const END = 1557246080000 //= > office test data
+      // const END = 1557246080000 //= > office test data
 
       /**
       * production
       **/
-      // const END = Date.now()
+      const END = Date.now()
 
       let START
 
