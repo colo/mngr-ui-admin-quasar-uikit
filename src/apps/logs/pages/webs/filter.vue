@@ -140,7 +140,7 @@
         title="Web Logs"
         :data="periodical.logs"
         :columns="columns"
-        :row-key="row => row.timestamp + row.domain +'.'+ row.host +'.'+ row.path"
+        :row-key="(row, index) => row.timestamp + row.domain +'.'+ row.host +'.'+ row.path + '.' + index"
         :pagination.sync="pagination"
         virtual-scroll
         :rows-per-page-options="[0]"
@@ -382,9 +382,9 @@ export default {
   //   }
   // },
   watch: {
-    // 'plugins_config': function (val) {
-    //   debug('watch plugins_config %o', val.graph)
-    // }
+    'periodical.logs': function (val) {
+      debug('periodical.logs %o', val)
+    }
 
     // 'periodical.total_bytes_sent': {
     //   handler: function(val){
