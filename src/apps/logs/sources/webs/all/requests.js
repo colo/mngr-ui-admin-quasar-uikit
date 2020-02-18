@@ -20,12 +20,12 @@ const logs_webs_paths = {
     if (
       _key
     ) {
-      const END = 1557246080000 //= > office test data
+      // const END = 1557246080000 //= > office test data
 
       /**
       * production
       **/
-      // const END = Date.now()
+      const END = Date.now()
 
       const START = END - HOUR
 
@@ -37,7 +37,8 @@ const logs_webs_paths = {
         path: 'all',
         query: {
           'from': 'logs',
-          'index': 'path',
+          // 'index': 'path',
+          'index': 'domain',
           'q': [
             // { 'config': 'graph' },
             { 'metadata': ['host', 'path', 'domain'] } // 'path' ain't needed for first view (categories)
