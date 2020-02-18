@@ -32,8 +32,8 @@ const static_types = /\.html$|\.htm$|\.shtml$|\.css$|\.xml$|\.gif$|\.jpeg$|\.jpg
 const generic_callback = function (data, metadata, key, vm) {
   debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
 
-  // const END = 1557246080000 // test data
-  const END = Date.now() // production
+  const END = 1557246080000 // test data
+  // const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
     const START = END - MINUTE
@@ -606,12 +606,12 @@ const host_once_component = {
     if (
       _key
     ) {
-      // const END = 1557246080000 //= > office test data
+      const END = 1557246080000 //= > office test data
 
       /**
       * production
       **/
-      const END = Date.now()
+      // const END = Date.now()
 
       let START
 
@@ -872,12 +872,12 @@ const host_range_component = {
     if (
       _key
     ) {
-      // const END = 1557246080000 //= > office test data
+      const END = 1557246080000 //= > office test data
 
       /**
       * production
       **/
-      const END = Date.now()
+      // const END = Date.now()
 
       let START
 
