@@ -45,79 +45,79 @@
 
       <hr>
 
-      <div v-for="(val, status) in periodical.status_counter" :key="status">
+      <div v-for="(val, status) in periodical.status_counter" :key="'status.'+status">
         periodical.status_counter: {{status}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, city) in periodical.city_counter" :key="city">
+      <div v-for="(val, city) in periodical.city_counter" :key="'city.'+city">
         periodical.city_counter: {{city}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, country) in periodical.country_counter" :key="country">
+      <div v-for="(val, country) in periodical.country_counter" :key="'country.'+country">
         periodical.country_counter: {{country}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, continent) in periodical.continent_counter" :key="continent">
+      <div v-for="(val, continent) in periodical.continent_counter" :key="'continent.'+continent">
         periodical.continent_counter: {{continent}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, addr) in periodical.addr_counter" :key="addr">
+      <div v-for="(val, addr) in periodical.addr_counter" :key="'addr.'+addr">
         periodical.addr_counter: {{addr}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, user) in periodical.user_counter" :key="user">
+      <div v-for="(val, user) in periodical.user_counter" :key="'user.'+user">
         periodical.user_counter: {{user}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, referer) in periodical.referer_counter" :key="referer">
+      <div v-for="(val, referer) in periodical.referer_counter" :key="'referer.'+referer">
         periodical.referer_counter: {{referer}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, type) in periodical.type_counter" :key="type">
+      <div v-for="(val, type) in periodical.type_counter" :key="'type.'+type">
         periodical.type_counter: {{type}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, os) in periodical.user_agent_os_counter" :key="os">
+      <div v-for="(val, os) in periodical.user_agent_os_counter" :key="'os.'+os">
         periodical.user_agent_os_counter: {{os}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, os) in periodical.user_agent_os_family_counter" :key="os+'-'+val">
+      <div v-for="(val, os) in periodical.user_agent_os_family_counter" :key="'os_family.'+os+'-'+val">
         periodical.user_agent_os_family_counter: {{os}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, engine) in periodical.user_agent_engine_counter" :key="engine+'-'+val">
+      <div v-for="(val, engine) in periodical.user_agent_engine_counter" :key="'engine.'+engine+'-'+val">
         periodical.user_agent_engine_counter: {{engine}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, browser) in periodical.user_agent_browser_counter" :key="browser+'-'+val">
+      <div v-for="(val, browser) in periodical.user_agent_browser_counter" :key="'browser.'+browser+'-'+val">
         periodical.user_agent_browser_counter: {{browser}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(val, device) in periodical.user_agent_device_counter" :key="device+'-'+val">
+      <div v-for="(val, device) in periodical.user_agent_device_counter" :key="'device.'+device+'-'+val">
         periodical.user_agent_device_counter: {{device}} - {{val}} <br/>
       </div>
     </vk-card>
