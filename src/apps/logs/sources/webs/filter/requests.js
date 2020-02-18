@@ -348,7 +348,7 @@ const generic_callback = function (data, metadata, key, vm) {
       }
     })
 
-    vm.periodical = {}
+    // vm.periodical = {}
 
     if (logs.length > 0) {
       // vm.logs = logs
