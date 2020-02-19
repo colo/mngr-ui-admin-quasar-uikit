@@ -30,7 +30,7 @@ let type_counter = {}
 import static_types from '../../../data/static_extentions'
 
 const generic_callback = function (data, metadata, key, vm) {
-  debug('PERIODICAL HOST CALLBACK data %s %o', key, data)
+  // debug('HOST CALLBACK data %s %o', key, data)
 
   const END = 1557246080000 // test data
   // const END = Date.now() // production
@@ -378,114 +378,9 @@ const generic_callback = function (data, metadata, key, vm) {
     vm.$set(vm.periodical, 'user_agent_engine_counter', periodical_user_agent_engine_counter)
     vm.$set(vm.periodical, 'user_agent_browser_counter', periodical_user_agent_browser_counter)
     vm.$set(vm.periodical, 'user_agent_device_counter', periodical_user_agent_device_counter)
+  } else if (/historical/.test(key) && (data.logs_historical || Object.getLength(data) > 0)) {
+    debug('HISTORICAL HOST CALLBACK data %s %o', key, data)
   }
-
-  // if (/periodical/.test(key) && (data.os || Object.getLength(data) > 0)) {
-  //   let _data
-  //   if (data.os) _data = data.os // comes from 'Range'
-  //   else _data = data // comes from 'register'
-  //
-  //   // let _paths = []
-  //   // let _plugins_categories = []
-  //   // let _plugins_config_sorted = []
-  //
-  //   Object.each(_data, function (plugin, name) {
-  //     // name = name.toLowerCase()
-  //     let category
-  //     if (name !== undefined) {
-  //       name = name.replace('os.', '')
-  //       category = (name.indexOf('.') > -1) ? name.substring(0, name.indexOf('.')) : name
-  //       // if (!_paths.contains(path)) _paths.push(path)
-  //       // if (!_plugins_config[category]) _plugins_config[category] = {}
-  //       if (!vm.plugins_categories.contains(category)) vm.plugins_categories.push(category)
-  //
-  //       // _plugins_config[category][name] = config
-  //     }
-  //
-  //     if (plugin && Object.getLength(plugin) > 0) {
-  //       // if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
-  //       if (!vm.plugins.contains(name)) vm.plugins.push(name)
-  //
-  //       vm.$nextTick(function () {
-  //         if (vm.$refs[name] && vm.$refs[name][0]) { // if data already exists
-  //           if (!vm.$refs[name][0].$options.plugin_data) vm.$refs[name][0].$options.plugin_data = { periodical: undefined, minute: undefined }
-  //
-  //           let _plugin = {}
-  //           // if (
-  //           //   vm.$refs[name][0].$options.plugin_data &&
-  //           //   vm.$refs[name][0].$options.plugin_data.periodical &&
-  //           //     Object.getLength(vm.$refs[name][0].$options.plugin_data.periodical) > 0
-  //           // ) {
-  //           //   _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.periodical))
-  //           //
-  //           //   Object.each(plugin, function (data, prop) {
-  //           //     if (_plugin[prop] && Array.isArray(_plugin[prop]) && _plugin[prop].length > 0) {
-  //           //       _plugin[prop].combine(data)
-  //           //
-  //           //       // sort by first column, timestamp
-  //           //       _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-  //           //
-  //           //       let filtered = []
-  //           //       Array.each(_plugin[prop], function (item, index) {
-  //           //         if (index === 0) { filtered.push(item) } else if (item[0] !== _plugin[prop][index - 1][0]) {
-  //           //           filtered.push(item)
-  //           //         }
-  //           //       })
-  //           //
-  //           //       // debug('PERIODICAL HOST CALLBACK %s %o', name, prop, filtered)
-  //           //
-  //           //       _plugin[prop] = filtered
-  //           //     } else {
-  //           //       debug('PERIODICAL HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
-  //           //       // _plugin[prop] = data
-  //           //       //
-  //           //       // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-  //           //     }
-  //           //   })
-  //           //
-  //           //   // debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
-  //           // } else {
-  //           //   _plugin = {}
-  //
-  //           // Object.each(plugin, function (data, prop) {
-  //           //   // sort by first column, timestamp
-  //           //
-  //           //   if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
-  //           //     _plugin[prop] = Array.clone(data)
-  //           //     _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-  //           //   }
-  //           // })
-  //
-  //           Object.keys(plugin)
-  //             .sort()// sort keys alphabetically
-  //             .forEach(function (prop, i) {
-  //             // console.log(v, data[v]);
-  //               let data = plugin[prop]
-  //               if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
-  //                 _plugin[prop] = Array.clone(data)
-  //                 _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-  //               }
-  //             })
-  //
-  //           // debug('PERIODICAL HOST CALLBACK no prev data %s %o %o', name, _plugin)
-  //           // }
-  //
-  //           if (Object.getLength(_plugin) > 0) {
-  //             debug('PERIODICAL HOST CALLBACK %s %o', name, _plugin)
-  //             vm.$refs[name][0].set_data({ periodical: _plugin })
-  //           }
-  //         }
-  //       })
-  //     }
-  //   })
-  //
-  //   vm.plugins_categories.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
-  //   vm.plugins.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
-  //
-  //   // if (_plugins_categories.length > 0 && _plugins_categories.length !== vm.plugins_categories.length) {
-  //   //   vm.plugins_categories = _plugins_categories
-  //   // }
-  // } else if (/minute/.test(key) && (data.os_historical || Object.getLength(data) > 0)) {
   //   let _data
   //   if (data.os_historical) _data = data.os_historical // comes from 'Range'
   //   else _data = data // comes from 'register'
@@ -599,7 +494,7 @@ const host_once_component = {
     let key
 
     if (!_key) {
-      key = ['periodical.once', 'minute.once', 'hour.once']// 'config.once',
+      key = ['periodical.once', 'historical.minute.once', 'historical.hour.once']// 'config.once',
       // key = ['periodical.once']// 'config.once',
     }
 
@@ -651,7 +546,7 @@ const host_once_component = {
           }]
           break
 
-        case 'minute.once':
+        case 'historical.minute.once':
           START = END - HOUR
 
           source = [{
@@ -692,7 +587,7 @@ const host_once_component = {
 
           break
 
-        case 'hour.once':
+        case 'historical.hour.once':
           START = END - (2 * HOUR)
 
           source = [{
@@ -864,7 +759,7 @@ const host_range_component = {
 
     if (!_key) {
       // key = ['periodical.range', 'config.range', 'minute.range']
-      key = ['periodical.range', 'minute.range', 'hour.range']
+      key = ['periodical.range', 'historical.minute.range', 'historical.hour.range']
     }
 
     // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
@@ -917,8 +812,8 @@ const host_range_component = {
           }]
           break
 
-        case 'minute.range':
-          START = END - HOUR
+        case 'historical.minute.range':
+          START = END - (HOUR + MINUTE)
 
           source = [{
             params: { id: _key },
@@ -958,7 +853,7 @@ const host_range_component = {
 
           break
 
-        case 'hour.range':
+        case 'historical.hour.range':
           START = END - (2 * HOUR)
 
           source = [{

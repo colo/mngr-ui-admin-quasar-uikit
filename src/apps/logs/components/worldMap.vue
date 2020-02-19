@@ -57,6 +57,8 @@ export default {
   colorSet: new am4core.ColorSet(),
   imageSeries: undefined,
 
+  chart: {},
+
   props: {
     // host: {
     //   type: String,
@@ -69,7 +71,7 @@ export default {
   },
   data () {
     return {
-      chart: {}
+      // chart: {}
     }
   },
   watch: {
@@ -78,7 +80,8 @@ export default {
       data = JSON.parse(JSON.stringify(data))
       let _data = []
       Array.each(data, function (city) {
-        city.color = self.$options.colorSet.next()
+        // city.color = self.$options.colorSet.next()
+        city.color = self.$options.colorSet.getIndex(16)
         // debug('cities %o', city, { 'color': self.$options.colorSet.next() })
         _data.push(city)
       })
@@ -134,34 +137,35 @@ export default {
     * @end
     **/
 
+    // removed country zoom
     // Create country specific series (but hide it for now)
-    let countrySeries = chart.series.push(new am4maps.MapPolygonSeries())
-    countrySeries.useGeodata = true
-    countrySeries.hide()
-    countrySeries.geodataSource.events.on('done', function (ev) {
-      worldSeries.hide()
-      countrySeries.show()
-    })
-
-    let countryPolygon = countrySeries.mapPolygons.template
-    countryPolygon.tooltipText = '{name}'
-    countryPolygon.nonScalingStroke = true
-    countryPolygon.strokeOpacity = 0.5
-    countryPolygon.fill = am4core.color('#eee')
-
-    let hsStates = countryPolygon.states.create('hover')
-    hsStates.properties.fill = chart.colors.getIndex(9)
-
-    // Set up click events
-    worldPolygon.events.on('hit', function (ev) {
-      ev.target.series.chart.zoomToMapObject(ev.target)
-      let map = ev.target.dataItem.dataContext.map
-      if (map) {
-        ev.target.isHover = false
-        countrySeries.geodataSource.url = 'https://www.amcharts.com/lib/4/geodata/json/' + map + '.json'
-        countrySeries.geodataSource.load()
-      }
-    })
+    // let countrySeries = chart.series.push(new am4maps.MapPolygonSeries())
+    // countrySeries.useGeodata = true
+    // countrySeries.hide()
+    // countrySeries.geodataSource.events.on('done', function (ev) {
+    //   worldSeries.hide()
+    //   countrySeries.show()
+    // })
+    //
+    // let countryPolygon = countrySeries.mapPolygons.template
+    // countryPolygon.tooltipText = '{name}'
+    // countryPolygon.nonScalingStroke = true
+    // countryPolygon.strokeOpacity = 0.5
+    // countryPolygon.fill = am4core.color('#eee')
+    //
+    // let hsStates = countryPolygon.states.create('hover')
+    // hsStates.properties.fill = chart.colors.getIndex(9)
+    //
+    // // Set up click events
+    // worldPolygon.events.on('hit', function (ev) {
+    //   ev.target.series.chart.zoomToMapObject(ev.target)
+    //   let map = ev.target.dataItem.dataContext.map
+    //   if (map) {
+    //     ev.target.isHover = false
+    //     countrySeries.geodataSource.url = 'https://www.amcharts.com/lib/4/geodata/json/' + map + '.json'
+    //     countrySeries.geodataSource.load()
+    //   }
+    // })
 
     // Set up data for countries
     let data = []
@@ -185,7 +189,7 @@ export default {
     let homeButton = new am4core.Button()
     homeButton.events.on('hit', function () {
       worldSeries.show()
-      countrySeries.hide()
+      // countrySeries.hide() //removed country zoom
       chart.goHome()
     })
 
@@ -197,19 +201,20 @@ export default {
     homeButton.parent = chart.zoomControl
     homeButton.insertBefore(chart.zoomControl.plusButton)
 
-    this.chart = chart
+    this.$options.chart = chart
   },
   methods: {
     animateBullet: function (circle) {
       let animation = circle.animate([{ property: 'scale', from: 1, to: 5 }, { property: 'opacity', from: 1, to: 0 }], 1000, am4core.ease.circleOut)
-      animation.events.on('animationended', function (event) {
-        this.animateBullet(event.target.object)
-      }.bind(this))
+      // removed constant animation
+      // animation.events.on('animationended', function (event) {
+      //   this.animateBullet(event.target.object)
+      // }.bind(this))
     }
   },
   beforeDestroy () {
-    if (this.chart) {
-      this.chart.dispose()
+    if (this.$options.chart) {
+      this.$options.chart.dispose()
     }
   }
 
