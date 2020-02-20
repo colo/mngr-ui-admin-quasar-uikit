@@ -547,7 +547,7 @@ const host_once_component = {
           break
 
         case 'historical.minute.once':
-          START = END - HOUR
+          START = END - (MINUTE * 2)
 
           source = [{
             params: { id: _key },
@@ -813,7 +813,7 @@ const host_range_component = {
           break
 
         case 'historical.minute.range':
-          START = END - (HOUR + MINUTE)
+          START = END - (MINUTE * 2)
 
           source = [{
             params: { id: _key },
