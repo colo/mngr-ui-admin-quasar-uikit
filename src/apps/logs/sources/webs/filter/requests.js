@@ -32,7 +32,7 @@ import static_types from '../../../data/static_extentions'
 const generic_callback = function (data, metadata, key, vm) {
   // debug('HOST CALLBACK data %s %o', key, data)
 
-  const END = 1557246080000 // test data
+  const END = 1582570473000 //= > test data
   // const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
@@ -501,7 +501,7 @@ const host_once_component = {
     if (
       _key
     ) {
-      const END = 1557246080000 //= > office test data
+      const END = 1582570473000 //= > test data
 
       /**
       * production
@@ -510,9 +510,24 @@ const host_once_component = {
 
       let START
 
+      let filter = ''
+
+      Object.each(vm.filter, function (value, prop) {
+        filter += "r.row('metadata')('" + prop + "').eq('" + value + "').and("
+      })
+
+      debug('FILTER STRING %s', filter)
+
       switch (_key) {
         case 'periodical.once':
           START = END - MINUTE
+
+          filter += "r.row('metadata')('type').eq('periodical')"
+          Object.each(vm.filter, function (value, prop) {
+            filter += ')'
+          })
+
+          debug('FILTER STRING %s', filter)
 
           source = [{
             params: { id: _key },
@@ -537,10 +552,13 @@ const host_once_component = {
                 }
                 // { 'limit': 10 }
               ],
-              'filter': [
-                { 'metadata': vm.filter },
-                "r.row('metadata')('type').eq('periodical')"
+              filter: [
+                filter
               ]
+              // 'filter': [
+              //   { 'metadata': vm.filter },
+              //   "r.row('metadata')('type').eq('periodical')"
+              // ]
 
             }
           }]
@@ -549,6 +567,13 @@ const host_once_component = {
         case 'historical.minute.once':
           START = END - (MINUTE * 2)
 
+          filter += "r.row('metadata')('type').eq('minute')"
+          Object.each(vm.filter, function (value, prop) {
+            filter += ')'
+          })
+
+          debug('FILTER STRING %s', filter)
+
           source = [{
             params: { id: _key },
             path: 'all',
@@ -577,10 +602,13 @@ const host_once_component = {
                   'orderBy': { 'index': 'r.desc(timestamp)' }
                 }
               ],
-              'filter': [
-                { 'metadata': vm.filter },
-                "r.row('metadata')('type').eq('minute')"
+              filter: [
+                filter
               ]
+              // 'filter': [
+              //   { 'metadata': vm.filter },
+              //   "r.row('metadata')('type').eq('minute')"
+              // ]
 
             }
           }]
@@ -589,6 +617,12 @@ const host_once_component = {
 
         case 'historical.hour.once':
           START = END - (2 * HOUR)
+          filter += "r.row('metadata')('type').eq('hour')"
+          Object.each(vm.filter, function (value, prop) {
+            filter += ')'
+          })
+
+          debug('FILTER STRING %s', filter)
 
           source = [{
             params: { id: _key },
@@ -618,10 +652,13 @@ const host_once_component = {
                   'orderBy': { 'index': 'r.desc(timestamp)' }
                 }
               ],
-              'filter': [
-                { 'metadata': vm.filter },
-                "r.row('metadata')('type').eq('hour')"
+              filter: [
+                filter
               ]
+              // 'filter': [
+              //   { 'metadata': vm.filter },
+              //   "r.row('metadata')('type').eq('hour')"
+              // ]
 
             }
           }]
@@ -767,7 +804,7 @@ const host_range_component = {
     if (
       _key
     ) {
-      const END = 1557246080000 //= > office test data
+      const END = 1582570473000 //= > test data
 
       /**
       * production

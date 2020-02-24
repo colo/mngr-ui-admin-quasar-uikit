@@ -135,24 +135,25 @@
         <template v-slot:body="props">
         <q-tr :props="props">
 
-          <q-td key="domain" :props="props">
-            {{ props.row.domain }}
+          <q-td key="View" :props="props">
+            <!-- View -->
             <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
-            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain+'&host=' + props.row.host+'&path=' + props.row.path" flat icon="open_in_browser" />
+          </q-td>
+
+          <q-td key="domain" :props="props">
+            <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
+            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain" flat icon="open_in_browser" :label="props.row.domain"/>
           </q-td>
 
           <q-td key="host" :props="props">
-            {{ props.row.host }}
-
-            <q-btn :to="'/logs/webs/filter/?host=' + props.row.host" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?host=' + props.row.host" flat icon="open_in_browser" :label="props.row.host"/>
           </q-td>
           <!-- <q-td key="timestamp" :props="props">
             {{ format_time(props.row.timestamp) }}
           </q-td> -->
           <q-td key="path" :props="props">
-            {{ props.row.path }}
-
-            <q-btn :to="'/logs/webs/filter/?path=' + props.row.path" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?path=' + props.row.path" flat icon="open_in_browser" :label="props.row.path"/>
           </q-td>
         </q-tr>
         </template>
@@ -201,14 +202,14 @@ export default {
 
       search_filter: '',
       loading: true,
-      allColumns: ['domain', 'host', 'path'],
+      allColumns: ['View', 'domain', 'host', 'path'],
       visibleColumns: ['domain'],
       pagination: {
         rowsPerPage: 50
       },
 
       columns: [
-        // { name: 'schema', label: 'Schema', field: 'schema', sortable: true, align: 'left' },
+        { name: 'View', label: 'View', field: 'View', sortable: true, align: 'left' },
         {
           name: 'domain',
           required: true,

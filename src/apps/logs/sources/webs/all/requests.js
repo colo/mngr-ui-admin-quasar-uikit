@@ -20,7 +20,7 @@ const logs_webs_paths = {
     if (
       _key
     ) {
-      const END = 1557246080000 //= > office test data
+      const END = 1582570473000 //= > test data
 
       /**
       * production
