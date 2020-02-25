@@ -36,6 +36,21 @@
     <vk-card class="uk-background-secondary">
       <world-map :cities="periodical.world_map_cities"/>
 
+      <!-- <div v-for="(val, prop) in minute" :key="'minute.'+prop">
+        minute: {{prop}} - {{val}} <br/>
+      </div>
+      <hr>
+
+      <div v-for="(val, prop) in hour" :key="'hour.'+prop">
+        hour: {{prop}} - {{val}} <br/>
+      </div>
+      <hr>
+
+      <div v-for="(val, prop) in day" :key="'day.'+prop">
+        day: {{prop}} - {{val}} <br/>
+      </div>
+      <hr> -->
+
       periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
       periodical.hits: {{ periodical.hits }} <br/>
 
@@ -261,6 +276,55 @@ export default {
     return {
       id: 'logs.webs.filter',
       path: 'all',
+
+      day: {
+        body_bytes_sent: {},
+        geoip: {},
+        qs: {},
+        referer: {},
+        pathname: {},
+        method: {},
+        remote_addr: {},
+        remote_user: {},
+        status: {},
+        unique_visitors: 0,
+        unique_visitors_by_ip: {},
+        user_agent: {},
+
+        type_counter: {}
+      },
+      hour: {
+        body_bytes_sent: {},
+        geoip: {},
+        qs: {},
+        referer: {},
+        pathname: {},
+        method: {},
+        remote_addr: {},
+        remote_user: {},
+        status: {},
+        unique_visitors: 0,
+        unique_visitors_by_ip: {},
+        user_agent: {},
+
+        type_counter: {}
+      },
+      minute: {
+        body_bytes_sent: {},
+        geoip: {},
+        qs: {},
+        referer: {},
+        pathname: {},
+        method: {},
+        remote_addr: {},
+        remote_user: {},
+        status: {},
+        unique_visitors: 0,
+        unique_visitors_by_ip: {},
+        user_agent: {},
+
+        type_counter: {}
+      },
 
       periodical: {
         logs: [],

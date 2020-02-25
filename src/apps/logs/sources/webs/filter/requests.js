@@ -4,6 +4,7 @@ const debug = Debug('apps:logs:sources:webs:filter:requests')
 const SECOND = 1000
 const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
+const DAY = HOUR * 24
 
 let total_bytes_sent = {}
 let hits = {}
@@ -28,12 +29,111 @@ let referer_counter = {}
 let type_counter = {}
 
 import static_types from '../../../data/static_extentions'
+const ss = require('simple-statistics')
+
+const _merge = function (prop, val1, val2) {
+  // debug('HISTORICAL HOST CALLBACK data row merge %s %o %o', prop, val1, val2)
+  let merged
+
+  if (!isNaN(val1)) { // && !isNaN(val2)
+    if (val2 === undefined) val2 = 0
+    merged = val1 + val2 * 1
+  } else if (isNaN(val1) && val1.max !== undefined && val1.min !== undefined) {
+    // debug('HISTORICAL HOST CALLBACK data row %s %o', val1, val2)
+    merged = {}
+
+    merged.max = ss.max([val1.max * 1, val2.max * 1])
+    merged.min = ss.min([val1.min * 1, val2.min * 1])
+    merged.sum = ss.sumSimple([val1.sum * 1, val2.sum * 1])
+    merged.range = val1.max - val1.min
+    merged.mean = ss.mean([val1.mean * 1, val2.mean * 1])
+    merged.median = ss.median([val1.median * 1, val2.median * 1])
+    // delete val1.mode
+  } else if (
+    (prop !== 'geoip') &&
+    isNaN(val1) &&
+    isNaN(val2)
+  ) {
+    // debug('HISTORICAL HOST CALLBACK data row merge %s %o %o', prop, val1, val2)
+    // if (Array.isArray(val1)) {
+    //   merged = []
+    //   Array.each(val1, function (val1_data, val1_index) {
+    //     merged.push(_merge(prop, val1_data, val2[val1_index]))
+    //   })
+    // } else {
+    merged = {}
+    merged = _merge_objects(prop, val1, val2)
+    // }
+  } else if (prop === 'geoip') {
+    // debug('HISTORICAL HOST CALLBACK data row merge %s %o %o', prop, val1, val2)
+    merged = {}
+    merged.city = _merge('city', val1.city, val2.city)
+    merged.country = _merge('country', val1.country, val2.country)
+    merged.continent = _merge('continent', val1.continent, val2.continent)
+    merged.registeredCountry = _merge('registeredCountry', val1.registeredCountry, val2.registeredCountry)
+
+    merged.location = {}
+
+    Object.each(val1.location, function (val1_data, val1_prop) {
+      if (!merged.location[val1_prop]) merged.location[val1_prop] = Object.merge(Object.clone(val1_data), { count: 0 })
+
+      merged.location[val1_prop].count += val1_data.count
+    })
+
+    Object.each(val2.location, function (val2_data, val2_prop) {
+      if (!merged.location[val2_prop]) merged.location[val2_prop] = Object.merge(Object.clone(val2_data), { count: 0 })
+
+      merged.location[val2_prop].count += val2_data.count
+    })
+
+    merged.ip = {}
+
+    Object.each(val1.ip, function (val1_data, val1_prop) {
+      if (!merged.ip[val1_prop]) merged.ip[val1_prop] = Object.merge(Object.clone(val1_data), { count: 0 })
+
+      merged.ip[val1_prop].count += val1_data.count
+    })
+
+    Object.each(val2.ip, function (val2_data, val2_prop) {
+      if (!merged.ip[val2_prop]) merged.ip[val2_prop] = Object.merge(Object.clone(val2_data), { count: 0 })
+
+      merged.ip[val2_prop].count += val2_data.count
+    })
+  } else {
+    debug('HISTORICAL HOST CALLBACK data row merge %s %o %o', prop, val1, val2)
+  }
+  return merged
+}
+
+const _merge_objects = function (prop, val1, val2) {
+  let merged = {}
+  let _used_props = []
+  Object.each(val1, function (val1_data, val1_prop) {
+    if (val2 && val2[val1_prop]) {
+      merged[val1_prop] = _merge(prop, val1_data, val2[val1_prop])
+    } else {
+      merged[val1_prop] = val1_data
+    }
+    _used_props.push(val1_prop)
+  })
+
+  Object.each(val2, function (val2_data, val2_prop) {
+    if (!_used_props.contains(val2_prop)) {
+      if (val1 && val1[val2_prop]) {
+        merged[val2_prop] = _merge(prop, val2_data, val1[val2_prop])
+      } else {
+        merged[val2_prop] = val2_data
+      }
+    }
+  })
+  return merged
+}
 
 const generic_callback = function (data, metadata, key, vm) {
   // debug('HOST CALLBACK data %s %o', key, data)
 
-  const END = 1582570473000 //= > test data
-  // const END = Date.now() // production
+  // const END = 1582570473000 //= > test data
+  const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
     const START = END - MINUTE
@@ -378,112 +478,38 @@ const generic_callback = function (data, metadata, key, vm) {
     vm.$set(vm.periodical, 'user_agent_engine_counter', periodical_user_agent_engine_counter)
     vm.$set(vm.periodical, 'user_agent_browser_counter', periodical_user_agent_browser_counter)
     vm.$set(vm.periodical, 'user_agent_device_counter', periodical_user_agent_device_counter)
-  } else if (/historical/.test(key) && (data.logs_historical || Object.getLength(data) > 0)) {
-    debug('HISTORICAL HOST CALLBACK data %s %o', key, data)
+  } else if (/historical/.test(key) && data.logs_historical && Object.getLength(data.logs_historical) > 0) {
+    // debug('HISTORICAL HOST CALLBACK data %s %o', key, data)
+    let type
+    let vm_data = {}
+    Object.each(data.logs_historical, function (row) {
+      if (!type) type = row.metadata.type
+      Object.each(row.data, function (row_data, prop) {
+        if (!vm_data[prop]) {
+          vm_data[prop] = JSON.parse(JSON.stringify(row_data[0].value))
+        } else if (row_data[0] && row_data[0].value) {
+          // if (prop === 'user_agent') {
+          //   // debug('HISTORICAL HOST CALLBACK data %s %s %o %o', key, type, prop, vm_data[prop], row_data)
+          //   debug('HISTORICAL HOST CALLBACK data %s %s %o %o', key, type, prop)
+          //   vm_data[prop] = _merge(prop, vm_data[prop], JSON.parse(JSON.stringify(row_data[0].value)))
+          // }
+          vm_data[prop] = _merge(prop, vm_data[prop], JSON.parse(JSON.stringify(row_data[0].value)))
+          // debug('HISTORICAL HOST CALLBACK data %s %s %o', key, type, prop, row_data)
+        }
+      })
+
+      if (Object.getLength(vm_data) > 0) {
+        vm[type] = vm_data
+      }
+    })
+
+    debug('HISTORICAL HOST CALLBACK data %s %s %o', key, type, vm_data)
+    // data = data.logs_historical[0]
+
+    // if (/minute/.test(key)){
+    //   const START = END - MINUTE
+    // }
   }
-  //   let _data
-  //   if (data.os_historical) _data = data.os_historical // comes from 'Range'
-  //   else _data = data // comes from 'register'
-  //
-  //   debug('MINUTE HOST CALLBACK data %s %o', key, _data)
-  //
-  //   Object.each(data.os_historical, function (plugin, name) {
-  //     if (plugin && Object.getLength(plugin) > 0) {
-  //       // if (!vm.plugins[name]) vm.$set(vm.plugins, name, { periodical: undefined, minute: undefined })
-  //       if (!vm.plugins.contains(name)) vm.plugins.push(name)
-  //
-  //       vm.$nextTick(function () {
-  //         if (vm.$refs[name] && vm.$refs[name][0]) { // if data already exists
-  //           if (!vm.$refs[name][0].$options.plugin_data) vm.$refs[name][0].$options.plugin_data = { periodical: undefined, minute: undefined }
-  //
-  //           let _plugin = {}
-  //           if (
-  //             vm.$refs[name][0].$options.plugin_data &&
-  //             vm.$refs[name][0].$options.plugin_data.minute &&
-  //             Object.getLength(vm.$refs[name][0].$options.plugin_data.minute) > 0
-  //           ) {
-  //             _plugin = JSON.parse(JSON.stringify(vm.$refs[name][0].$options.plugin_data.minute))
-  //
-  //             Object.each(plugin, function (data, prop) {
-  //               if (_plugin[prop] && Array.isArray(_plugin[prop])) {
-  //                 _plugin[prop].combine(data)
-  //
-  //                 // sort by first column, timestamp
-  //                 _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-  //
-  //                 // filter based on not repeated timestamp
-  //                 // let filtered = _plugin[prop].filter(function (item, index) {
-  //                 //   if (!_plugin[prop][index - 1] || !_plugin[prop][index + 1]) {
-  //                 //     return true
-  //                 //   } else {
-  //                 //     return item[0] !== _plugin[prop][index - 1][0] && item[0] !== _plugin[prop][index + 1][0]
-  //                 //   }
-  //                 // })
-  //                 //
-  //                 let filtered = []
-  //                 Array.each(_plugin[prop], function (item, index) {
-  //                   if (index === 0) { filtered.push(item) } else if (item[0] !== _plugin[prop][index - 1][0]) {
-  //                     filtered.push(item)
-  //                   }
-  //                 })
-  //                 // debug('MINUTE HOST CALLBACK %s %o', name, filtered)
-  //
-  //                 _plugin[prop] = filtered
-  //               } else {
-  //                 debug('MINUTE HOST CALLBACK BUG %s %s %o %o', name, prop, _plugin[prop], data)
-  //                 // _plugin[prop] = Array.clone(data)
-  //                 // _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-  //               }
-  //             })
-  //           } else {
-  //             // debug('MINUTE HOST CALLBACK no prev data %o ', plugin)
-  //             _plugin = plugin
-  //             Object.each(_plugin, function (data, prop) {
-  //               // sort by first column, timestamp
-  //               if (Array.isArray(data) && data.length > 0) { // on 'register' data may be empty
-  //                 _plugin[prop] = Array.clone(data)
-  //                 _plugin[prop].sort(function (a, b) { return (a[0] < b[0]) ? 1 : ((a[0] > b[0]) ? -1 : 0) })
-  //               }
-  //             })
-  //           }
-  //
-  //           if (Object.getLength(_plugin) > 0) {
-  //             debug('MINUTE HOST CALLBACK %s %o', name, _plugin)
-  //
-  //             vm.$refs[name][0].set_data({ minute: _plugin })
-  //           }
-  //         }
-  //       })
-  //     }
-  //   })
-  // }
-  // // else if (key === 'config.once' && data.os) {
-  // //   debug('PERIODICAL HOST CALLBACK CONFIG %o', data)
-  // //   let _plugins_config = {}
-  // //   let _plugins_config_sorted = []
-  // //   Array.each(data.os, function (group_path) {
-  // //     // debug('PERIODICAL HOST CALLBACK %o %o %s', group_path)
-  // //     let config = group_path[0].config // only one per path
-  // //     let category = (config && config.graph && config.graph.category) ? config.graph.category.toLowerCase() : 'uncategorized'
-  // //     let path = group_path[0].metadata.path
-  // //
-  // //     if (!_plugins_config[category]) _plugins_config[category] = {}
-  // //     if (!_plugins_config_sorted.contains(category)) _plugins_config_sorted.push(category)
-  // //
-  // //     _plugins_config[category][path] = config
-  // //   })
-  // //
-  // //   _plugins_config_sorted.sort(function (a, b) { return (a > b) ? 1 : ((b > a) ? -1 : 0) })
-  // //   let plugins_config = {}
-  // //   for (let i = 0; i < _plugins_config_sorted.length; i++) {
-  // //     let category = _plugins_config_sorted[i]
-  // //     plugins_config[category] = _plugins_config[category]
-  // //   }
-  // //
-  // //   if (Object.getLength(plugins_config) > 0) {
-  // //     vm.plugins_config = plugins_config
-  // //   }
-  // // }
 }
 
 const host_once_component = {
@@ -494,26 +520,26 @@ const host_once_component = {
     let key
 
     if (!_key) {
-      key = ['periodical.once', 'historical.minute.once', 'historical.hour.once']// 'config.once',
+      key = ['periodical.once', 'historical.minute.once', 'historical.hour.once', 'historical.day.once']// 'config.once',
       // key = ['periodical.once']// 'config.once',
     }
 
     if (
       _key
     ) {
-      const END = 1582570473000 //= > test data
+      // const END = 1582570473000 //= > test data
 
       /**
       * production
       **/
-      // const END = Date.now()
+      const END = Date.now()
 
       let START
 
       let filter = ''
 
       Object.each(vm.filter, function (value, prop) {
-        filter += "r.row('metadata')('" + prop + "').eq('" + value + "').and("
+        filter += "this.r.row('metadata')('" + prop + "').eq('" + value + "').and("
       })
 
       debug('FILTER STRING %s', filter)
@@ -522,7 +548,7 @@ const host_once_component = {
         case 'periodical.once':
           START = END - MINUTE
 
-          filter += "r.row('metadata')('type').eq('periodical')"
+          filter += "this.r.row('metadata')('type').eq('periodical')"
           Object.each(vm.filter, function (value, prop) {
             filter += ')'
           })
@@ -552,9 +578,7 @@ const host_once_component = {
                 }
                 // { 'limit': 10 }
               ],
-              filter: [
-                filter
-              ]
+              filter: filter
               // 'filter': [
               //   { 'metadata': vm.filter },
               //   "r.row('metadata')('type').eq('periodical')"
@@ -565,9 +589,9 @@ const host_once_component = {
           break
 
         case 'historical.minute.once':
-          START = END - (MINUTE * 2)
+          START = END - MINUTE
 
-          filter += "r.row('metadata')('type').eq('minute')"
+          filter += "this.r.row('metadata')('type').eq('minute')"
           Object.each(vm.filter, function (value, prop) {
             filter += ')'
           })
@@ -602,9 +626,7 @@ const host_once_component = {
                   'orderBy': { 'index': 'r.desc(timestamp)' }
                 }
               ],
-              filter: [
-                filter
-              ]
+              filter: filter
               // 'filter': [
               //   { 'metadata': vm.filter },
               //   "r.row('metadata')('type').eq('minute')"
@@ -616,8 +638,8 @@ const host_once_component = {
           break
 
         case 'historical.hour.once':
-          START = END - (2 * HOUR)
-          filter += "r.row('metadata')('type').eq('hour')"
+          START = END - HOUR
+          filter += "this.r.row('metadata')('type').eq('hour')"
           Object.each(vm.filter, function (value, prop) {
             filter += ')'
           })
@@ -652,9 +674,7 @@ const host_once_component = {
                   'orderBy': { 'index': 'r.desc(timestamp)' }
                 }
               ],
-              filter: [
-                filter
-              ]
+              filter: filter
               // 'filter': [
               //   { 'metadata': vm.filter },
               //   "r.row('metadata')('type').eq('hour')"
@@ -664,193 +684,15 @@ const host_once_component = {
           }]
 
           break
-      }
-    }
 
-    // debug('MyChart periodical KEY ', key, source)
+        case 'historical.day.once':
+          START = END - DAY
+          filter += "this.r.row('metadata')('type').eq('day')"
+          Object.each(vm.filter, function (value, prop) {
+            filter += ')'
+          })
 
-    return { key, source }
-  },
-  callback: generic_callback
-
-}
-
-// const host_once_register = {
-//   params: function (_key, vm) {
-//     // debug('REGISTER host_once_register %o %o', _key, vm)
-//
-//     let source
-//     let key
-//
-//     if (!_key) {
-//       key = ['periodical.register', 'minute.register']// , 'config.once'
-//       // key = ['config.once']
-//     }
-//
-//     // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
-//
-//     if (
-//       _key
-//     ) {
-//       switch (_key) {
-//         case 'periodical.register':
-//           source = [{
-//             params: { id: _key },
-//             path: 'all',
-//             // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
-//             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
-//             query: {
-//               'from': 'os',
-//               'register': 'changes',
-//               'format': 'tabular',
-//               'index': false,
-//               'opts': { includeTypes: true, squash: false },
-//               /**
-//               * right now needed to match OUTPUT 'id' with this query (need to @fix)
-//               **/
-//               'q': [
-//                 // {
-//                 //   'metadata': [
-//                 //     'timestamp',
-//                 //     'path'
-//                 //   ]
-//                 // },
-//                 // 'metadata',
-//                 'id',
-//                 'data'
-//                 // { 'metadata': ['host'] }
-//               ],
-//               // 'transformation': [
-//               //   {
-//               //     'orderBy': { 'index': 'r.desc(timestamp)' }
-//               //   }
-//               // ],
-//               'filter': [
-//                 { 'metadata': { 'host': vm.host } },
-//                 "r.row('metadata')('path').ne('os.procs')"
-//               ]
-//
-//             }
-//           }]
-//           break
-//
-//         case 'minute.register':
-//           source = [{
-//             params: { id: _key },
-//             path: 'all',
-//             // range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
-//             query: {
-//               'from': 'os_historical',
-//               'register': 'changes',
-//               'format': 'tabular',
-//               'index': false,
-//               /**
-//               * right now needed to match OUTPUT 'id' with this query (need to @fix)
-//               **/
-//               'q': [
-//                 // {
-//                 //   'metadata': [
-//                 //     'timestamp',
-//                 //     'path'
-//                 //   ]
-//                 // },
-//                 // 'metadata',
-//                 'id',
-//                 'data'
-//                 // { 'metadata': ['host', 'type'] }
-//               ],
-//               // 'transformation': [
-//               //   {
-//               //     'orderBy': { 'index': 'r.desc(timestamp)' }
-//               //   }
-//               // ],
-//               'filter': [
-//                 { 'metadata': { 'host': vm.host } },
-//                 { 'metadata': { 'type': 'minute' } },
-//                 "r.row('metadata')('path').ne('os.procs')"
-//               ]
-//
-//             }
-//           }]
-//
-//           break
-//       }
-//     }
-//
-//     // debug('MyChart periodical KEY ', key, source)
-//
-//     return { key, source }
-//   },
-//   callback: generic_callback
-//
-// }
-
-const host_range_component = {
-  params: function (_key, vm) {
-    // debug('PERIODICAL host_range_component %o %o', _key, vm)
-
-    // const MINUTE = 60000
-
-    let source
-    let key
-
-    if (!_key) {
-      // key = ['periodical.range', 'config.range', 'minute.range']
-      key = ['periodical.range', 'historical.minute.range', 'historical.hour.range']
-    }
-
-    // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
-
-    if (
-      _key
-    ) {
-      const END = 1582570473000 //= > test data
-
-      /**
-      * production
-      **/
-      // const END = Date.now()
-
-      let START
-
-      switch (_key) {
-        case 'periodical.range':
-          START = END - MINUTE
-
-          source = [{
-            params: { id: _key },
-            path: 'all',
-            // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
-            range: 'posix ' + START + '-' + END + '/*',
-            query: {
-              'from': 'logs',
-              // 'register': 'changes',
-              'format': 'stat',
-              'index': false,
-              /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
-              'q': [
-                'data',
-                'metadata'
-              ],
-              'transformation': [
-                {
-                  'orderBy': { 'index': 'r.desc(timestamp)' }
-                }
-                // { 'limit': 10 }
-              ],
-              'filter': [
-                { 'metadata': vm.filter },
-                "r.row('metadata')('type').eq('periodical')"
-              ]
-
-            }
-          }]
-          break
-
-        case 'historical.minute.range':
-          START = END - (MINUTE * 2)
+          debug('FILTER STRING %s', filter)
 
           source = [{
             params: { id: _key },
@@ -863,8 +705,8 @@ const host_range_component = {
               'format': 'stat',
               'index': false,
               /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
+                * right now needed to match OUTPUT 'id' with this query (need to @fix)
+                **/
               'q': [
                 // {
                 //   'metadata': [
@@ -880,51 +722,11 @@ const host_range_component = {
                   'orderBy': { 'index': 'r.desc(timestamp)' }
                 }
               ],
-              'filter': [
-                { 'metadata': vm.filter },
-                "r.row('metadata')('type').eq('minute')"
-              ]
-
-            }
-          }]
-
-          break
-
-        case 'historical.hour.range':
-          START = END - (2 * HOUR)
-
-          source = [{
-            params: { id: _key },
-            path: 'all',
-            // range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
-            range: 'posix ' + START + '-' + END + '/*',
-            query: {
-              'from': 'logs_historical',
-              // 'register': 'changes',
-              'format': 'stat',
-              'index': false,
-              /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
-              'q': [
-                // {
-                //   'metadata': [
-                //     'timestamp',
-                //     'path'
-                //   ]
-                // },
-                'data',
-                'metadata'
-              ],
-              'transformation': [
-                {
-                  'orderBy': { 'index': 'r.desc(timestamp)' }
-                }
-              ],
-              'filter': [
-                { 'metadata': vm.filter },
-                "r.row('metadata')('type').eq('hour')"
-              ]
+              filter: filter
+              // 'filter': [
+              //   { 'metadata': vm.filter },
+              //   "r.row('metadata')('type').eq('hour')"
+              // ]
 
             }
           }]
@@ -947,7 +749,8 @@ const once = [
 ]
 
 const periodical = [
-  host_range_component
+  // host_range_component
+  host_once_component
 ]
 
 const requests = {
