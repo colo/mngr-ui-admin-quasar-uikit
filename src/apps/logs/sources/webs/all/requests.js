@@ -20,14 +20,14 @@ const logs_webs_paths = {
     if (
       _key
     ) {
-      const END = 1582570473000 //= > test data
+      // const END = 1582570473000 //= > test data
 
       /**
       * production
       **/
-      // const END = Date.now()
+      const END = Date.now()
 
-      const START = END - HOUR
+      const START = END - MINUTE // HOUR
 
       source = [{
         params: { id: _key },
