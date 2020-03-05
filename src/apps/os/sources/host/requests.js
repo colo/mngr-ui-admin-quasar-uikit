@@ -361,7 +361,7 @@ const host_once_register = {
             params: { id: _key },
             path: 'all',
             // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
-            // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (SECOND * 2)) + '-' + Date.now() + '/*',
             query: {
               'from': 'os',
               // 'register': 'changes',
@@ -402,7 +402,7 @@ const host_once_register = {
           source = [{
             params: { id: _key },
             path: 'all',
-            // range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'os_historical',
               // 'register': 'changes',

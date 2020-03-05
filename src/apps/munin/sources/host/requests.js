@@ -344,7 +344,7 @@ const host_once_register = {
             params: { id: _key },
             path: 'all',
             // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
-            // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - (SECOND * 10)) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin',
               // 'register': 'changes',
@@ -382,7 +382,7 @@ const host_once_register = {
           source = [{
             params: { id: _key },
             path: 'all',
-            // range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin_historical',
               // 'register': 'changes',
