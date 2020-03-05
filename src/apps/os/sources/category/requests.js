@@ -535,23 +535,16 @@ const category_range_component = {
             params: { id: _key },
             path: 'all',
             range: 'posix ' + (Date.now() - (2 * SECOND)) + '-' + Date.now() + '/*',
+
             query: {
               'from': 'os',
               // 'register': 'changes',
               'format': 'tabular',
-              'index': false,
+              'index': 'host',
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/
               'q': [
-                // {
-                //   'metadata': [
-                //     'timestamp',
-                //     'path'
-                //   ]
-                // },
-                // 'metadata',
-                'id',
                 'data',
                 { 'metadata': ['host'] }
               ],
@@ -561,10 +554,44 @@ const category_range_component = {
                 }
               ],
               'filter': [
-                "r.row('config')('graph')('category').eq('" + vm.category + "')"
+                "r.row('metadata')('path').ge('os." + vm.category + "')",
+                "r.row('metadata')('path').lt('os." + vm.category + "\uFFFF')"
+                // { 'metadata': { 'host': vm.host } },
+                // "r.row('metadata')('path').ne('os.procs')"
               ]
 
             }
+
+            // query: {
+            //   'from': 'os',
+            //   // 'register': 'changes',
+            //   'format': 'tabular',
+            //   'index': false,
+            //   /**
+            //   * right now needed to match OUTPUT 'id' with this query (need to @fix)
+            //   **/
+            //   'q': [
+            //     // {
+            //     //   'metadata': [
+            //     //     'timestamp',
+            //     //     'path'
+            //     //   ]
+            //     // },
+            //     // 'metadata',
+            //     'id',
+            //     'data',
+            //     { 'metadata': ['host'] }
+            //   ],
+            //   'transformation': [
+            //     {
+            //       'orderBy': { 'index': 'r.desc(timestamp)' }
+            //     }
+            //   ],
+            //   'filter': [
+            //     "r.row('config')('graph')('category').eq('" + vm.category + "')"
+            //   ]
+            //
+            // }
           }]
           break
 
