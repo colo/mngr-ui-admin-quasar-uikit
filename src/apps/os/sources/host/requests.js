@@ -338,130 +338,19 @@ const host_once_component = {
 
 }
 
-const host_once_register = {
-  params: function (_key, vm) {
-    // debug('REGISTER host_once_register %o %o', _key, vm)
-
-    let source
-    let key
-
-    if (!_key) {
-      key = ['periodical.register', 'minute.register']// , 'config.once'
-      // key = ['config.once']
-    }
-
-    // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
-
-    if (
-      _key
-    ) {
-      switch (_key) {
-        case 'periodical.register':
-          source = [{
-            params: { id: _key },
-            path: 'all',
-            // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
-            range: 'posix ' + (Date.now() - SECOND) + '-' + Date.now() + '/*',
-            query: {
-              'from': 'os',
-              // 'register': 'changes',
-              'register': 'periodical',
-              'format': 'tabular',
-              'index': false,
-              // 'opts': { includeTypes: true, squash: false },
-              /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
-              'q': [
-                // {
-                //   'metadata': [
-                //     'timestamp',
-                //     'path'
-                //   ]
-                // },
-                // 'metadata',
-                'id',
-                'data'
-                // { 'metadata': ['host'] }
-              ],
-              // 'transformation': [
-              //   {
-              //     'orderBy': { 'index': 'r.desc(timestamp)' }
-              //   }
-              // ],
-              'filter': [
-                { 'metadata': { 'host': vm.host } },
-                "r.row('metadata')('path').ne('os.procs')"
-              ]
-
-            }
-          }]
-          break
-
-        case 'minute.register':
-          source = [{
-            params: { id: _key },
-            path: 'all',
-            range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
-            query: {
-              'from': 'os_historical',
-              // 'register': 'changes',
-              'register': 'periodical',
-              'format': 'tabular',
-              'index': false,
-              /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
-              'q': [
-                // {
-                //   'metadata': [
-                //     'timestamp',
-                //     'path'
-                //   ]
-                // },
-                // 'metadata',
-                'id',
-                'data'
-                // { 'metadata': ['host', 'type'] }
-              ],
-              // 'transformation': [
-              //   {
-              //     'orderBy': { 'index': 'r.desc(timestamp)' }
-              //   }
-              // ],
-              'filter': [
-                { 'metadata': { 'host': vm.host } },
-                { 'metadata': { 'type': 'minute' } },
-                "r.row('metadata')('path').ne('os.procs')"
-              ]
-
-            }
-          }]
-
-          break
-      }
-    }
-
-    // debug('MyChart periodical KEY ', key, source)
-
-    return { key, source }
-  },
-  callback: generic_callback
-
-}
-
-// const host_range_component = {
+/**
+* change feed not working with lot of data
+**/
+// const host_once_register = {
 //   params: function (_key, vm) {
-//     // debug('PERIODICAL host_range_component %o %o', _key, vm)
-//
-//     // const MINUTE = 60000
+//     // debug('REGISTER host_once_register %o %o', _key, vm)
 //
 //     let source
 //     let key
 //
 //     if (!_key) {
-//       // key = ['periodical.range', 'config.range', 'minute.range']
-//       key = ['periodical.range', 'minute.range']
+//       key = ['periodical.register', 'minute.register']// , 'config.once'
+//       // key = ['config.once']
 //     }
 //
 //     // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
@@ -470,16 +359,18 @@ const host_once_register = {
 //       _key
 //     ) {
 //       switch (_key) {
-//         case 'periodical.range':
+//         case 'periodical.register':
 //           source = [{
 //             params: { id: _key },
 //             path: 'all',
-//             range: 'posix ' + (Date.now() - (15 * SECOND)) + '-' + Date.now() + '/*',
+//             // range: 'posix ' + (Date.now() - (10 * MINUTE)) + '-' + Date.now() + '/*',
+//             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
 //             query: {
 //               'from': 'os',
-//               // 'register': 'changes',
+//               'register': 'changes',
 //               'format': 'tabular',
 //               'index': false,
+//               'opts': { includeTypes: true, squash: false },
 //               /**
 //               * right now needed to match OUTPUT 'id' with this query (need to @fix)
 //               **/
@@ -491,27 +382,32 @@ const host_once_register = {
 //                 //   ]
 //                 // },
 //                 // 'metadata',
+//                 'id',
 //                 'data'
+//                 // { 'metadata': ['host'] }
 //               ],
-//               'transformation': [
-//                 {
-//                   'orderBy': { 'index': 'r.desc(timestamp)' }
-//                 }
-//               ],
-//               'filter': { 'metadata': { 'host': vm.host } }
+//               // 'transformation': [
+//               //   {
+//               //     'orderBy': { 'index': 'r.desc(timestamp)' }
+//               //   }
+//               // ],
+//               'filter': [
+//                 { 'metadata': { 'host': vm.host } },
+//                 "r.row('metadata')('path').ne('os.procs')"
+//               ]
 //
 //             }
 //           }]
 //           break
 //
-//         case 'minute.range':
+//         case 'minute.register':
 //           source = [{
 //             params: { id: _key },
 //             path: 'all',
-//             range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+//             // range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
 //             query: {
 //               'from': 'os_historical',
-//               // 'register': 'changes',
+//               'register': 'changes',
 //               'format': 'tabular',
 //               'index': false,
 //               /**
@@ -525,16 +421,19 @@ const host_once_register = {
 //                 //   ]
 //                 // },
 //                 // 'metadata',
+//                 'id',
 //                 'data'
+//                 // { 'metadata': ['host', 'type'] }
 //               ],
-//               'transformation': [
-//                 {
-//                   'orderBy': { 'index': 'r.desc(timestamp)' }
-//                 }
-//               ],
+//               // 'transformation': [
+//               //   {
+//               //     'orderBy': { 'index': 'r.desc(timestamp)' }
+//               //   }
+//               // ],
 //               'filter': [
 //                 { 'metadata': { 'host': vm.host } },
-//                 { 'metadata': { 'type': 'minute' } }
+//                 { 'metadata': { 'type': 'minute' } },
+//                 "r.row('metadata')('path').ne('os.procs')"
 //               ]
 //
 //             }
@@ -552,13 +451,115 @@ const host_once_register = {
 //
 // }
 
+const host_range_component = {
+  params: function (_key, vm) {
+    // debug('PERIODICAL host_range_component %o %o', _key, vm)
+
+    // const MINUTE = 60000
+
+    let source
+    let key
+
+    if (!_key) {
+      // key = ['periodical.range', 'config.range', 'minute.range']
+      key = ['periodical.range', 'minute.range']
+    }
+
+    // debug('MyChart periodical CURRENT', this.prev.range[1], this.current.keys)
+
+    if (
+      _key
+    ) {
+      switch (_key) {
+        case 'periodical.range':
+          source = [{
+            params: { id: _key },
+            path: 'all',
+            range: 'posix ' + (Date.now() - (2 * SECOND)) + '-' + Date.now() + '/*',
+            query: {
+              'from': 'os',
+              // 'register': 'changes',
+              'format': 'tabular',
+              'index': false,
+              /**
+              * right now needed to match OUTPUT 'id' with this query (need to @fix)
+              **/
+              'q': [
+                // {
+                //   'metadata': [
+                //     'timestamp',
+                //     'path'
+                //   ]
+                // },
+                // 'metadata',
+                'data'
+              ],
+              'transformation': [
+                {
+                  'orderBy': { 'index': 'r.desc(timestamp)' }
+                }
+              ],
+              'filter': { 'metadata': { 'host': vm.host } }
+
+            }
+          }]
+          break
+
+        case 'minute.range':
+          source = [{
+            params: { id: _key },
+            path: 'all',
+            range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+            query: {
+              'from': 'os_historical',
+              // 'register': 'changes',
+              'format': 'tabular',
+              'index': false,
+              /**
+              * right now needed to match OUTPUT 'id' with this query (need to @fix)
+              **/
+              'q': [
+                // {
+                //   'metadata': [
+                //     'timestamp',
+                //     'path'
+                //   ]
+                // },
+                // 'metadata',
+                'data'
+              ],
+              'transformation': [
+                {
+                  'orderBy': { 'index': 'r.desc(timestamp)' }
+                }
+              ],
+              'filter': [
+                { 'metadata': { 'host': vm.host } },
+                { 'metadata': { 'type': 'minute' } }
+              ]
+
+            }
+          }]
+
+          break
+      }
+    }
+
+    // debug('MyChart periodical KEY ', key, source)
+
+    return { key, source }
+  },
+  callback: generic_callback
+
+}
+
 const once = [
-  host_once_register,
+  // host_once_register,
   host_once_component
 ]
 
 const periodical = [
-  // host_range_component
+  host_range_component
 ]
 
 const requests = {
