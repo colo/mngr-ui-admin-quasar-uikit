@@ -364,10 +364,11 @@ const host_once_register = {
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'os',
-              'register': 'changes',
+              // 'register': 'changes',
+              'register': 'periodical',
               'format': 'tabular',
               'index': false,
-              'opts': { includeTypes: true, squash: false },
+              // 'opts': { includeTypes: true, squash: false },
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/
@@ -404,7 +405,8 @@ const host_once_register = {
             // range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
             query: {
               'from': 'os_historical',
-              'register': 'changes',
+              // 'register': 'changes',
+              'register': 'periodical',
               'format': 'tabular',
               'index': false,
               /**

@@ -347,10 +347,11 @@ const host_once_register = {
             // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin',
-              'register': 'changes',
+              // 'register': 'changes',
+              'register': 'periodical',
               'format': 'tabular',
               'index': false,
-              'opts': { includeTypes: true, squash: 4.9 },
+              // 'opts': { includeTypes: true, squash: 4.9 },
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
               **/
@@ -384,7 +385,8 @@ const host_once_register = {
             // range: 'posix ' + (Date.now() - (12 * MINUTE)) + '-' + Date.now() + '/*',
             query: {
               'from': 'munin_historical',
-              'register': 'changes',
+              // 'register': 'changes',
+              'register': 'periodical',
               'format': 'tabular',
               'index': false,
               /**
