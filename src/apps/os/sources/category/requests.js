@@ -562,7 +562,6 @@ const category_range_component = {
 
             }
 
-
           }]
           break
 
