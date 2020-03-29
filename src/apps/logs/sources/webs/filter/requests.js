@@ -132,11 +132,12 @@ const _merge_objects = function (prop, val1, val2) {
 const generic_callback = function (data, metadata, key, vm) {
   // debug('HOST CALLBACK data %s %o', key, data)
 
-  const END = 1582570473000 //= > test data
-  // const END = Date.now() // production
+  // const END = 1582570473000 //= > test data
+  const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
-    const START = END - MINUTE
+    // const START = END - MINUTE
+    CONST START = END - (15 * SECOND)
 
     let _data
     if (data.logs) _data = data.logs // comes from 'Range'
@@ -527,12 +528,12 @@ const host_once_component = {
     if (
       _key
     ) {
-      const END = 1582570473000 //= > test data
+      // const END = 1582570473000 //= > test data
 
       /**
       * production
       **/
-      // const END = Date.now()
+      const END = Date.now()
 
       let START
 
@@ -546,7 +547,8 @@ const host_once_component = {
 
       switch (_key) {
         case 'periodical.once':
-          START = END - MINUTE
+          // START = END - MINUTE
+          START = END - (15 * SECOND)
 
           filter += "this.r.row('metadata')('type').eq('periodical')"
           Object.each(vm.filter, function (value, prop) {
