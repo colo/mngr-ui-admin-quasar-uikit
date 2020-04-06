@@ -4,7 +4,7 @@
     <vk-card class="uk-background-secondary">
 
       <router-link
-        to="/logs/webs"
+        to="/logs/educativa"
         v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
 
@@ -30,12 +30,12 @@
           <vk-breadcrumb-item :href="href" @click="navigate">Logs</vk-breadcrumb-item>
         </router-link>
 
-        <router-link to="/logs/webs" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <router-link to="/logs/educativa" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
           <vk-breadcrumb-item :href="href" @click="navigate">Webs</vk-breadcrumb-item>
         </router-link>
 
-        <!-- <router-link :to="'/logs/webs/filter/'+type" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <!-- <router-link :to="'/logs/educativa/filter/'+type" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
           <vk-breadcrumb-item v-bind="(!type) ? {'disabled' : true} : ''" :href="href" @click="navigate">{{type}}</vk-breadcrumb-item>
         </router-link> -->
@@ -234,19 +234,19 @@
           <q-td key="domain" :props="props">
             {{ props.row.domain }}
             <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
-            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain" flat icon="open_in_new" />
+            <q-btn :to="'/logs/educativa/filter/?domain=' + props.row.domain" flat icon="open_in_new" />
           </q-td>
 
           <q-td key="host" :props="props">
             {{ props.row.host }}
 
-            <q-btn :to="'/logs/webs/filter/?host=' + props.row.host" flat icon="open_in_new" />
+            <q-btn :to="'/logs/educativa/filter/?host=' + props.row.host" flat icon="open_in_new" />
           </q-td>
 
           <q-td key="path" :props="props">
             {{ props.row.path }}
 
-            <q-btn :to="'/logs/webs/filter/?path=' + props.row.path" flat icon="open_in_new" />
+            <q-btn :to="'/logs/educativa/filter/?path=' + props.row.path" flat icon="open_in_new" />
           </q-td>
         </q-tr>
         </template>
@@ -262,7 +262,7 @@
 
 <script>
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:pages:webs:filter')
+const debug = Debug('apps:logs:pages:educativa:filter')
 
 //
 
@@ -275,9 +275,9 @@ import WorldMap from '@apps/logs/components/worldMap'
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/logs/pipelines/webs/filter'
+import Pipeline from '@apps/logs/pipelines/educativa/filter'
 
-import { requests, store } from '@apps/logs/sources/webs/filter/index'
+import { requests, store } from '@apps/logs/sources/educativa/filter/index'
 
 // const MAX_FEED_DATA = 10
 import moment from 'moment'
@@ -291,7 +291,7 @@ export default {
 
   data () {
     return {
-      id: 'logs.webs.filter',
+      id: 'logs.educativa.filter',
       path: 'all',
 
       day: {
@@ -372,7 +372,7 @@ export default {
       },
 
       store: false,
-      pipeline_id: 'input.logs.webs.filter',
+      pipeline_id: 'input.logs.educativa.filter',
 
       // logs: [],
 
@@ -488,22 +488,22 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.logs.webs.filter'] && this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os')) {
+      if (this.$options.pipelines['input.logs.educativa.filter'] && this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)
 
         let pipeline_id = template.input[0].poll.id
-        // let pipeline_id = 'input.logs.webs.filter'
+        // let pipeline_id = 'input.logs.educativa.filter'
 
         template.input[0].poll.conn[0].requests = this.__components_sources_to_requests(this.components)
 
@@ -550,7 +550,7 @@ export default {
   // //   }
   // },
   // mounted: function () {
-  //   this.pipeline_id = 'input.logs.webs.filter'
+  //   this.pipeline_id = 'input.logs.educativa.filter'
   // },
   // create: function () {
   //   debug('created HOST %s %o %o', this.web, this.$options.range_component, this.$options.__pipelines_cfg)

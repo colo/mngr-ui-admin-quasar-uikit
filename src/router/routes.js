@@ -197,7 +197,7 @@ const routes = [
       {
         path: 'logs',
         name: 'logs',
-        redirect: { name: 'logs_webs' },
+        redirect: { name: 'logs_all' },
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -207,6 +207,60 @@ const routes = [
         },
 
         children: [
+          {
+            path: '',
+            name: 'logs_all',
+            // redirect: { name: 'logs_all' },
+            component: () => import(/* webpackChunkName: "logs.webs" */ '@apps/logs/pages/all.vue'),
+            meta: {
+              breadcrumb: { label: 'Logs All', icon: 'widgets', app: 'logs' }
+            }
+            // children: [
+            //   {
+            //     path: '',
+            //     name: 'logs_webs_all',
+            //     component: () => import(/* webpackChunkName: "logs.webs.all" */ '@apps/logs/pages/webs/all.vue'),
+            //     meta: {
+            //       breadcrumb: { label: 'Logs Webs All', icon: 'widgets', app: 'logs' }
+            //     }
+            //   },
+            //   {
+            //     path: 'filter',
+            //     name: 'logs_webs_filter',
+            //     component: () => import(/* webpackChunkName: "logs.webs.filter" */ '@apps/logs/pages/webs/filter.vue'),
+            //     meta: {
+            //       breadcrumb: { label: 'Logs Webs Filter', icon: 'widgets', app: 'logs' }
+            //     }
+            //   }
+            // ]
+          },
+          {
+            path: 'educativa',
+            name: 'logs_educativa',
+            redirect: { name: 'logs_educativa_all' },
+            component: () => import(/* webpackChunkName: "logs.educativa" */ '@apps/logs/pages/educativa.vue'),
+            meta: {
+              breadcrumb: { label: 'Logs Webs', icon: 'widgets', app: 'logs' }
+            },
+            children: [
+              {
+                path: '',
+                name: 'logs_educativa_all',
+                component: () => import(/* webpackChunkName: "logs.educativa.all" */ '@apps/logs/pages/educativa/all.vue'),
+                meta: {
+                  breadcrumb: { label: 'Logs Webs All', icon: 'widgets', app: 'logs' }
+                }
+              },
+              {
+                path: 'filter',
+                name: 'logs_educativa_filter',
+                component: () => import(/* webpackChunkName: "logs.educativa.filter" */ '@apps/logs/pages/educativa/filter.vue'),
+                meta: {
+                  breadcrumb: { label: 'Logs Webs Filter', icon: 'widgets', app: 'logs' }
+                }
+              }
+            ]
+          },
           {
             path: 'webs',
             name: 'logs_webs',

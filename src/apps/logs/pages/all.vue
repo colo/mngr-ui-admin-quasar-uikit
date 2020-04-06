@@ -29,6 +29,7 @@
 
         <vk-button-link :href="href" @click="navigate" class="uk-button uk-button-secondary">Educativa</vk-button-link>
       </router-link>
+
       <vk-breadcrumb>
         <router-link to="/" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
@@ -45,51 +46,19 @@
           <vk-breadcrumb-item v-bind="(!web) ? {'disabled' : true} : ''" :href="href" @click="navigate">Webs</vk-breadcrumb-item>
         </router-link> -->
 
-        <vk-breadcrumb-item >Webs</vk-breadcrumb-item>
+        <vk-breadcrumb-item >All</vk-breadcrumb-item>
 
       </vk-breadcrumb>
 
     </vk-card>
 
-    <!-- <template v-for="(web_paths, web_name) in webs_paths">
-      <os-web-card
-        :key="web_name"
-        v-if="!web || web_name === web"
-        :categories="web_paths"
-        :web="web_name"
-      />
-    </template>
-
-    <router-view :key="$route.path"></router-view>
-
-    <template v-for="(web_paths, web_name) in webs_paths">
-      <os-web-card
-        :key="web_name+'.bottom'"
-        v-if="web_name === web"
-        :categories="web_paths"
-        :web="web_name"
-      />
-    </template> -->
-
-    <!-- <router-view :key="$route.path"></router-view> -->
-
     <vk-card class="uk-background-secondary">
-      <!-- <div class="uk-overflow-auto">
-      <vk-table :data="vhosts" hoverable narrowed  :divided="false" :sorted-by.sync="sortedBy">
-        <vk-table-column-sort title="URI" cell="uri" linked></vk-table-column-sort>
-        <vk-table-column title="Prot" cell="port"></vk-table-column>
-        <vk-table-column title="Schema" cell="schema"></vk-table-column>
-        <vk-table-column title="Host" cell="host"></vk-table-column>
-        <vk-table-column title="Last Update" cell="timestamp"></vk-table-column>
-        <vk-table-column title="Type" cell="path"></vk-table-column>
-      </vk-table>
-      </div> -->
 
       <!-- v-if="!web" -->
       <q-table
         class="my-sticky-header-table"
-        title="Web Logs"
-        :data="webs"
+        title="Logs"
+        :data="logs"
         :columns="columns"
         :row-key="row => row.domain +'.'+ row.host +'.'+ row.path"
         :pagination.sync="pagination"
@@ -145,22 +114,31 @@
           <q-td key="View" :props="props">
             <!-- View -->
             <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
-            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain+'&host=' + props.row.host+'&path=' + props.row.path" flat icon="open_in_browser" />
+            <q-btn :to="'/logs/'+((props.row.path === 'logs.apache2' || props.row.path === 'logs.nginx') ? 'webs' : props.row.path.replace('logs.', '')) +'/filter/?domain=' + props.row.domain+'&host=' + props.row.host+'&path=' + props.row.path" flat icon="open_in_browser" />
           </q-td>
 
           <q-td key="domain" :props="props">
             <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
-            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain" flat icon="open_in_browser" :label="props.row.domain"/>
+            <q-btn :to="'/logs/'+((props.row.path === 'logs.apache2' || props.row.path === 'logs.nginx') ? 'webs' : props.row.path.replace('logs.', '')) +'/filter/?domain=' + props.row.domain" flat icon="open_in_browser" :label="props.row.domain"/>
           </q-td>
 
+          <!-- <q-td key="host" :props="props">
+            <q-btn :to="'/logs/'+((props.row.path === 'logs.apache2' || props.row.path === 'logs.nginx') ? 'webs' : props.row.path.replace('logs.', '')) +'/filter/?host=' + props.row.host" flat icon="open_in_browser" :label="props.row.host"/>
+          </q-td> -->
           <q-td key="host" :props="props">
-            <q-btn :to="'/logs/webs/filter/?host=' + props.row.host" flat icon="open_in_browser" :label="props.row.host"/>
+            <q-btn :to="'/logs/filter/?host=' + props.row.host" flat icon="open_in_browser" :label="props.row.host"/>
           </q-td>
+
           <!-- <q-td key="timestamp" :props="props">
             {{ format_time(props.row.timestamp) }}
           </q-td> -->
           <q-td key="path" :props="props">
-            <q-btn :to="'/logs/webs/filter/?path=' + props.row.path" flat icon="open_in_browser" :label="props.row.path"/>
+            <q-btn
+            :to="'/logs/'+((props.row.path === 'logs.apache2' || props.row.path === 'logs.nginx') ? 'webs' : props.row.path.replace('logs.', '')) +'/filter/?path=' + props.row.path"
+            flat
+            icon="open_in_browser"
+            :label="props.row.path"
+            />
           </q-td>
         </q-tr>
         </template>
@@ -179,16 +157,16 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pages:webs:all')
+const debug = Debug('apps:logs:pages:all')
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/logs/pipelines/webs/all'
+import Pipeline from '@apps/logs/pipelines//all'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 // import LogsWebCard from '@apps/logs/components/webCard.vue'
 
-import { requests, store } from '@apps/logs/sources/webs/all/index'
+import { requests, store } from '@apps/logs/sources/all/index'
 
 export default {
   mixins: [DataSourcesMixin],
@@ -205,7 +183,7 @@ export default {
     return {
       height: '0px',
 
-      webs: [],
+      logs: [],
 
       search_filter: '',
       loading: true,
@@ -237,15 +215,15 @@ export default {
       ],
 
       // web: undefined,
-      // webs_paths: {},
+      // logs_paths: {},
       // paths: [],
       /**
       * dataSources
       **/
       store: false,
-      pipeline_id: 'input.logs.webs.all',
+      pipeline_id: 'input.logs.all',
 
-      id: 'logs.webs.all',
+      id: 'logs.all',
       path: 'all',
 
       components: {
@@ -282,16 +260,16 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.logs.webs.all'] && this.$options.pipelines['input.logs.webs.all'].get_input_by_id('input.logs.webs.all')) {
+      if (this.$options.pipelines['input.logs.all'] && this.$options.pipelines['input.logs.all'].get_input_by_id('input.logs.all')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.logs.webs.all'].get_input_by_id('input.logs.webs.all').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.logs.webs.all'].get_input_by_id('input.logs.webs.all').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.logs.all'].get_input_by_id('input.logs.all').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.logs.all'].get_input_by_id('input.logs.all').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.logs.webs.all'].get_input_by_id('input.logs.webs.all').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.logs.webs.all'].get_input_by_id('input.logs.webs.all').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.logs.all'].get_input_by_id('input.logs.all').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.logs.all'].get_input_by_id('input.logs.all').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)

@@ -3,7 +3,7 @@
 // import InputIOApp from '@libs/input/poller/io.app'
 import { EventBus } from '@libs/eventbus'
 
-import InputIO from './input/io'
+import InputIO from '../input/io'
 
 // import DefaultConn from '@etc/default.io'
 
@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pipelines:category')
+const debug = Debug('apps:logs:pipelines:educativa:filter')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         suspended: true,
-        id: 'input.os.category',
+        id: 'input.logs.educativa.filter',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.os.category',
+              id: 'input.logs.educativa.filter',
               module: InputIO
 
             }
@@ -90,15 +90,15 @@ export default {
     // function (payload) {
     //   debug('OUTPUT', payload)
     //
-    //   if (!payload.err) { EventBus.$emit('input.os.category.' + payload.metadata.input, payload) }
+    //   if (!payload.err) { EventBus.$emit('input.logs.educativa.filter.' + payload.metadata.input, payload) }
     //
     //   // if (!payload.err) { EventBus.$emit('log', payload) }
     // }
     function (payload) {
-      if (!payload.err && /^input\.os\.category\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.os.category[', '').slice(0, -1)
+      if (!payload.err && /^input\.logs\.educativa\.filter\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.logs.educativa.filter[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.os.category.' + payload.metadata.input, payload)
+        EventBus.$emit('input.logs.educativa.filter.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }

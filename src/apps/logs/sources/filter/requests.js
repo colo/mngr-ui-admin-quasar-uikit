@@ -1,5 +1,5 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:sources:webs:filter:requests')
+const debug = Debug('apps:logs:sources:filter:requests')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -509,7 +509,7 @@ const generic_callback = function (data, metadata, key, vm) {
     // data = data.logs_historical[0]
 
     // if (/minute/.test(key)){
-    //   const START = END - MINUTE
+    //   START = END - MINUTE
     // }
   }
 }
@@ -538,7 +538,7 @@ const host_once_component = {
 
       let START
 
-      let filter = "this.r.row('metadata')('tag').contains('web').and("
+      let filter = ''
 
       Object.each(vm.filter, function (value, prop) {
         filter += "this.r.row('metadata')('" + prop + "').eq('" + value + "').and("
@@ -549,15 +549,12 @@ const host_once_component = {
       switch (_key) {
         case 'periodical.once':
           // START = END - MINUTE
-          // START = END - (15 * SECOND)
           START = (END - (15 * SECOND) >= 0) ? END - (15 * SECOND) : 0
 
           filter += "this.r.row('metadata')('type').eq('periodical')"
           Object.each(vm.filter, function (value, prop) {
             filter += ')'
           })
-
-          filter += ')' // -> this.r.row('metadata')('tag').contains('web').and(
 
           debug('FILTER STRING %s', filter)
 
@@ -603,8 +600,6 @@ const host_once_component = {
             filter += ')'
           })
 
-          filter += ')' // -> this.r.row('metadata')('tag').contains('web').and(
-
           debug('FILTER STRING %s', filter)
 
           source = [{
@@ -648,14 +643,12 @@ const host_once_component = {
 
         case 'historical.hour.once':
           // START = END - HOUR
-          START = START(END - HOUR >= 0) ? END - HOUR : 0
+          START = (END - HOUR >= 0) ? END - HOUR : 0
 
           filter += "this.r.row('metadata')('type').eq('hour')"
           Object.each(vm.filter, function (value, prop) {
             filter += ')'
           })
-
-          filter += ')' // -> this.r.row('metadata')('tag').contains('web').and(
 
           debug('FILTER STRING %s', filter)
 
@@ -700,7 +693,7 @@ const host_once_component = {
 
         case 'historical.day.once':
           // START = END - DAY
-          START = START(END - DAY >= 0) ? END - DAY : 0
+          START = (END - DAY >= 0) ? END - DAY : 0
 
           filter += "this.r.row('metadata')('type').eq('day')"
           Object.each(vm.filter, function (value, prop) {

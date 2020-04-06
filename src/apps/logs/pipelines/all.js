@@ -13,7 +13,7 @@ import InputIO from './input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('libs:pipelines:os')
+const debug = Debug('apps:logs:pipelines:all')
 
 let qs = require('qs')
 
@@ -21,14 +21,14 @@ export default {
   input: [
     {
       poll: {
-        // suspended: true,
-        id: 'input.os',
+        suspended: true,
+        id: 'input.logs.all',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.os',
+              id: 'input.logs.all',
               module: InputIO
 
             }
@@ -88,10 +88,10 @@ export default {
   ],
   output: [
     function (payload) {
-      if (!payload.err && /^input\.os\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.os[', '').slice(0, -1)
+      if (!payload.err && /^input\.logs\.all\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.logs.all[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.os.' + payload.metadata.input, payload)
+        EventBus.$emit('input.logs.all.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }
