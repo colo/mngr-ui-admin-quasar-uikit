@@ -707,6 +707,8 @@ const host_once_component = {
             filter += ')'
           })
 
+          filter += ')' // -> this.r.row('metadata')('tag').contains('web').and(
+
           debug('FILTER STRING %s', filter)
 
           source = [{

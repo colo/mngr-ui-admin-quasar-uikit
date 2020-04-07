@@ -32,7 +32,7 @@
 
         <router-link to="/logs/educativa" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
-          <vk-breadcrumb-item :href="href" @click="navigate">Webs</vk-breadcrumb-item>
+          <vk-breadcrumb-item :href="href" @click="navigate">Educativa</vk-breadcrumb-item>
         </router-link>
 
         <!-- <router-link :to="'/logs/educativa/filter/'+type" v-slot="{ href, route, navigate, isActive, isExactActive }"
@@ -51,7 +51,7 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
-      <world-map :cities="periodical.world_map_cities"/>
+      <!-- <world-map :cities="periodical.world_map_cities"/> -->
 
       <!-- <div v-for="(val, prop) in minute" :key="'minute.'+prop">
         minute: {{prop}} - {{val}} <br/>
@@ -270,7 +270,7 @@ const debug = Debug('apps:logs:pages:educativa:filter')
 
 // import OsPluginDygraph from '@apps/logs/components/pluginDygraph'
 
-import WorldMap from '@apps/logs/components/worldMap'
+// import WorldMap from '@apps/logs/components/worldMap'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
@@ -285,7 +285,7 @@ import moment from 'moment'
 export default {
   mixins: [DataSourcesMixin],
 
-  components: { WorldMap },
+  // components: { WorldMap },
 
   name: 'LogsWebFilter',
 
@@ -295,79 +295,79 @@ export default {
       path: 'all',
 
       day: {
-        body_bytes_sent: {},
-        geoip: {},
-        qs: {},
-        referer: {},
-        pathname: {},
-        method: {},
-        remote_addr: {},
-        remote_user: {},
-        status: {},
-        unique_visitors: 0,
-        unique_visitors_by_ip: {},
-        user_agent: {},
-
-        type_counter: {}
+        // body_bytes_sent: {},
+        // geoip: {},
+        // qs: {},
+        // referer: {},
+        // pathname: {},
+        // method: {},
+        // remote_addr: {},
+        // remote_user: {},
+        // status: {},
+        // unique_visitors: 0,
+        // unique_visitors_by_ip: {},
+        // user_agent: {},
+        //
+        // type_counter: {}
       },
       hour: {
-        body_bytes_sent: {},
-        geoip: {},
-        qs: {},
-        referer: {},
-        pathname: {},
-        method: {},
-        remote_addr: {},
-        remote_user: {},
-        status: {},
-        unique_visitors: 0,
-        unique_visitors_by_ip: {},
-        user_agent: {},
-
-        type_counter: {}
+        // body_bytes_sent: {},
+        // geoip: {},
+        // qs: {},
+        // referer: {},
+        // pathname: {},
+        // method: {},
+        // remote_addr: {},
+        // remote_user: {},
+        // status: {},
+        // unique_visitors: 0,
+        // unique_visitors_by_ip: {},
+        // user_agent: {},
+        //
+        // type_counter: {}
       },
       minute: {
-        body_bytes_sent: {},
-        geoip: {},
-        qs: {},
-        referer: {},
-        pathname: {},
-        method: {},
-        remote_addr: {},
-        remote_user: {},
-        status: {},
-        unique_visitors: 0,
-        unique_visitors_by_ip: {},
-        user_agent: {},
-
-        type_counter: {}
+        // body_bytes_sent: {},
+        // geoip: {},
+        // qs: {},
+        // referer: {},
+        // pathname: {},
+        // method: {},
+        // remote_addr: {},
+        // remote_user: {},
+        // status: {},
+        // unique_visitors: 0,
+        // unique_visitors_by_ip: {},
+        // user_agent: {},
+        //
+        // type_counter: {}
       },
 
       periodical: {
-        logs: [],
+        logs: []
 
-        total_bytes_sent: 0,
-        hits: 0,
-
-        current_bytes_sent: 0,
-
-        status_counter: {},
-
-        city_counter: {},
-        country_counter: {},
-        continent_counter: {},
-        world_map_cities: [],
-
-        addr_counter: {},
-        user_counter: {},
-        referer_counter: {},
-        type_counter: {},
-
-        user_agent_os_counter: {},
-        user_agent_os_family_counter: {},
-        user_agent_engine_counter: {},
-        user_agent_browser_counter: {},
-        user_agent_device_counter: {}
+        // total_bytes_sent: 0,
+        // hits: 0,
+        //
+        // current_bytes_sent: 0,
+        //
+        // status_counter: {},
+        //
+        // city_counter: {},
+        // country_counter: {},
+        // continent_counter: {},
+        // world_map_cities: [],
+        //
+        // addr_counter: {},
+        // user_counter: {},
+        // referer_counter: {},
+        // type_counter: {},
+        //
+        // user_agent_os_counter: {},
+        // user_agent_os_family_counter: {},
+        // user_agent_engine_counter: {},
+        // user_agent_browser_counter: {},
+        // user_agent_device_counter: {}
 
       },
 
