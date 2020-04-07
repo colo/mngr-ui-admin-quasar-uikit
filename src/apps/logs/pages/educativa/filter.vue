@@ -68,21 +68,34 @@
       </div>
       <hr> -->
 
-      periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
+      <!-- periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
       periodical.hits: {{ periodical.hits }} <br/>
 
       <hr>
 
       periodical.current_bytes_sent: {{ periodical.current_bytes_sent }}
 
-      <hr>
+      <hr> -->
 
-      <div v-for="(val, status) in periodical.status_counter" :key="'status.'+status">
-        periodical.status_counter: {{status}} - {{val}} <br/>
+      <div v-for="(count, cgi) in periodical.cgi_count" :key="'cgi_count.'+cgi">
+        periodical.cgi_count: {{cgi}} - {{count}} <br/>
       </div>
 
       <hr>
 
+      <div v-for="(count, domain) in periodical.domain_count" :key="'domain_count.'+domain">
+        periodical.domain_count: {{domain}} - {{count}} <br/>
+      </div>
+
+      <hr>
+
+      <div v-for="(val, stat) in periodical.duration_stats" :key="'duration_stats.'+stat">
+        periodical.duration_stats: {{stat}} - {{val}} <br/>
+      </div>
+
+      <hr>
+
+      <!--
       <div v-for="(val, city) in periodical.city_counter" :key="'city.'+city">
         periodical.city_counter: {{city}} - {{val}} <br/>
       </div>
@@ -151,7 +164,7 @@
 
       <div v-for="(val, device) in periodical.user_agent_device_counter" :key="'device.'+device+'-'+val">
         periodical.user_agent_device_counter: {{device}} - {{val}} <br/>
-      </div>
+      </div> -->
     </vk-card>
 
     <vk-card class="uk-background-secondary">
@@ -344,8 +357,10 @@ export default {
       },
 
       periodical: {
-        logs: []
+        logs: [],
 
+        cgi_count: {},
+        domain_count: {}
         // total_bytes_sent: 0,
         // hits: 0,
         //

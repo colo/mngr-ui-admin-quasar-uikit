@@ -1,6 +1,7 @@
 import * as Debug from 'debug'
 const debug = Debug('apps:logs:sources:educativa:filter:requests')
 
+const NANOSECOND = 1000000
 const SECOND = 1000
 const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
@@ -146,7 +147,7 @@ const generic_callback = function (data, metadata, key, vm) {
 
     if (!_data.data) _data.data = {}
 
-    debug('PERIODICAL HOST CALLBACK _data %o', _data)
+    // debug('PERIODICAL HOST CALLBACK _data %o', _data)
 
     /**
     * logs - format: stat
@@ -160,11 +161,53 @@ const generic_callback = function (data, metadata, key, vm) {
     * logs
     **/
     let logs = []
+    let cgi_count = {}
+    let domain_count = {}
+
+    let duration = []
+    let duration_stats = { max: { domain: undefined, cgi: undefined, seconds: undefined }, min: { domain: undefined, cgi: undefined, seconds: undefined } }
     // let log_template = _data[0].metadata
+    let err_count = 0
+
     Array.each(_data, function (row) {
       logs.push(Object.merge(Object.clone(row.metadata), { log: row.data.log }))
+      if (!cgi_count[row.data.cgi]) cgi_count[row.data.cgi] = 0
+      cgi_count[row.data.cgi]++
+
+      if (!domain_count[row.metadata.domain]) domain_count[row.metadata.domain] = 0
+      domain_count[row.metadata.domain]++
+
+      let cgi_duration = ((row.data.duration / NANOSECOND).toFixed(2)) * 1
+      duration.push(cgi_duration)
+
+      if (cgi_duration < 0) { // ERROR
+        // debug('NEGATIVE DURATION ERR %O', row)
+        // err_count++
+        cgi_duration *= -1
+      }
+
+      if (duration_stats.max.seconds === undefined || duration_stats.max.seconds < cgi_duration) {
+        duration_stats.max.seconds = cgi_duration
+        duration_stats.max.cgi = row.data.cgi
+        duration_stats.max.domain = row.metadata.domain
+      }
+
+      if (duration_stats.min.seconds === undefined || duration_stats.min.seconds > cgi_duration) {
+        duration_stats.min.seconds = cgi_duration
+        duration_stats.min.cgi = row.data.cgi
+        duration_stats.min.domain = row.metadata.domain
+      }
     })
 
+    duration_stats = Object.merge(duration_stats, {
+      sum: ss.sum(duration),
+      avg: ss.mean(duration).toFixed(2) * 1,
+      median: ss.median(duration).toFixed(2) * 1
+    })
+
+    // debug('TOTAL %d', _data.length)
+    // debug('TOTAL ERR %d', err_count)
+    debug('DURATION %o', duration_stats)
     //   /**
     //   * bytes & hits
     //   **/
@@ -465,6 +508,10 @@ const generic_callback = function (data, metadata, key, vm) {
       vm.$set(vm.periodical, 'logs', logs)
       vm.loading_logs = false
     }
+
+    vm.$set(vm.periodical, 'cgi_count', cgi_count)
+    vm.$set(vm.periodical, 'domain_count', domain_count)
+    vm.$set(vm.periodical, 'duration_stats', duration_stats)
 
   //   vm.$set(vm.periodical, 'total_bytes_sent', periodical_total_bytes_sent)
   //   vm.$set(vm.periodical, 'hits', periodical_hits)
