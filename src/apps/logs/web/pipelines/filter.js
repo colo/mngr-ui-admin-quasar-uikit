@@ -3,7 +3,7 @@
 // import InputIOApp from '@libs/input/poller/io.app'
 import { EventBus } from '@libs/eventbus'
 
-import InputIO from '../input/io'
+import InputIO from '../../pipelines/input/io'
 
 // import DefaultConn from '@etc/default.io'
 
@@ -13,7 +13,7 @@ import InputIO from '../input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:pipelines:educativa:filter')
+const debug = Debug('apps:logs:web:pipelines:filter')
 
 let qs = require('qs')
 
@@ -22,13 +22,13 @@ export default {
     {
       poll: {
         suspended: true,
-        id: 'input.logs.educativa.filter',
+        id: 'input.logs.webs.filter',
         conn: [
 
           Object.merge(
             // Object.clone(DefaultConn),
             {
-              id: 'input.logs.educativa.filter',
+              id: 'input.logs.webs.filter',
               module: InputIO
 
             }
@@ -38,8 +38,7 @@ export default {
         connect_retry_count: -1,
         connect_retry_periodical: 1000,
         requests: {
-          // periodical: 5000
-          periodical: 60000 // devel
+          periodical: 5000
         }
       }
     }
@@ -91,15 +90,15 @@ export default {
     // function (payload) {
     //   debug('OUTPUT', payload)
     //
-    //   if (!payload.err) { EventBus.$emit('input.logs.educativa.filter.' + payload.metadata.input, payload) }
+    //   if (!payload.err) { EventBus.$emit('input.logs.webs.filter.' + payload.metadata.input, payload) }
     //
     //   // if (!payload.err) { EventBus.$emit('log', payload) }
     // }
     function (payload) {
-      if (!payload.err && /^input\.logs\.educativa\.filter\[.*\]$/.test(payload.id)) {
-        payload.id = payload.id.replace('input.logs.educativa.filter[', '').slice(0, -1)
+      if (!payload.err && /^input\.logs\.webs\.filter\[.*\]$/.test(payload.id)) {
+        payload.id = payload.id.replace('input.logs.webs.filter[', '').slice(0, -1)
         debug('OUTPUT', payload)
-        EventBus.$emit('input.logs.educativa.filter.' + payload.metadata.input, payload)
+        EventBus.$emit('input.logs.webs.filter.' + payload.metadata.input, payload)
       }
 
       // if (!payload.err) { EventBus.$emit('log', payload) }

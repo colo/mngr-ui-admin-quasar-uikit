@@ -36,7 +36,7 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:components:worldMap')
+const debug = Debug('apps:logs:web:components:worldMap')
 
 import * as am4core from '@amcharts/amcharts4/core'
 import * as am4maps from '@amcharts/amcharts4/maps'
@@ -48,7 +48,7 @@ import am4themes_animated from '@amcharts/amcharts4/themes/animated'
 am4core.useTheme(am4themes_animated)
 // Themes end
 
-import { countries, continents } from '@apps/logs/data/world'
+import { countries, continents } from '@apps/logs/web/data/world'
 
 export default {
 

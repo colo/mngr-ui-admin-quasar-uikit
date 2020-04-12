@@ -1,5 +1,5 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:sources:webs:filter:requests')
+const debug = Debug('apps:logs:web:sources:filter:requests')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -28,7 +28,7 @@ let referer_counter = {}
 
 let type_counter = {}
 
-import static_types from '../../../data/static_extentions'
+import static_types from '../../data/static_extentions'
 const ss = require('simple-statistics')
 
 const _merge = function (prop, val1, val2) {

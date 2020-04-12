@@ -3,7 +3,7 @@
 // import InputIOApp from '@libs/input/poller/io.app'
 import { EventBus } from '@libs/eventbus'
 
-import InputIO from '../input/io'
+import InputIO from '../../pipelines/input/io'
 
 // import DefaultConn from '@etc/default.io'
 
@@ -13,7 +13,7 @@ import InputIO from '../input/io'
 let buffer = {}
 
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:pipelines:webs:all')
+const debug = Debug('apps:logs:web:pipelines:all')
 
 let qs = require('qs')
 

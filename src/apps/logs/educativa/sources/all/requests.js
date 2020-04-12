@@ -1,5 +1,5 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:sources:educativa:all:requests')
+const debug = Debug('apps:logs:educativa:sources:all:requests')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -20,7 +20,7 @@ const logs_paths = {
     if (
       _key
     ) {
-      const END = 15000 //= > test data
+      const END = 1586055600972 //= > test data
 
       /**
       * production

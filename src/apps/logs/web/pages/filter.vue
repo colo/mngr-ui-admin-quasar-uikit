@@ -4,7 +4,7 @@
     <vk-card class="uk-background-secondary">
 
       <router-link
-        to="/logs/educativa"
+        to="/logs/webs"
         v-slot="{ href, route, navigate, isActive, isExactActive }"
       >
 
@@ -30,12 +30,12 @@
           <vk-breadcrumb-item :href="href" @click="navigate">Logs</vk-breadcrumb-item>
         </router-link>
 
-        <router-link to="/logs/educativa" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <router-link to="/logs/webs" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
-          <vk-breadcrumb-item :href="href" @click="navigate">Educativa</vk-breadcrumb-item>
+          <vk-breadcrumb-item :href="href" @click="navigate">Webs</vk-breadcrumb-item>
         </router-link>
 
-        <!-- <router-link :to="'/logs/educativa/filter/'+type" v-slot="{ href, route, navigate, isActive, isExactActive }"
+        <!-- <router-link :to="'/logs/webs/filter/'+type" v-slot="{ href, route, navigate, isActive, isExactActive }"
         >
           <vk-breadcrumb-item v-bind="(!type) ? {'disabled' : true} : ''" :href="href" @click="navigate">{{type}}</vk-breadcrumb-item>
         </router-link> -->
@@ -51,7 +51,7 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
-      <!-- <world-map :cities="periodical.world_map_cities"/> -->
+      <world-map :cities="periodical.world_map_cities"/>
 
       <!-- <div v-for="(val, prop) in minute" :key="'minute.'+prop">
         minute: {{prop}} - {{val}} <br/>
@@ -68,34 +68,21 @@
       </div>
       <hr> -->
 
-      <!-- periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
+      periodical.total_bytes_sent: {{ periodical.total_bytes_sent }} <br/>
       periodical.hits: {{ periodical.hits }} <br/>
 
       <hr>
 
       periodical.current_bytes_sent: {{ periodical.current_bytes_sent }}
 
-      <hr> -->
+      <hr>
 
-      <div v-for="(count, cgi) in periodical.cgi_count" :key="'cgi_count.'+cgi">
-        periodical.cgi_count: {{cgi}} - {{count}} <br/>
+      <div v-for="(val, status) in periodical.status_counter" :key="'status.'+status">
+        periodical.status_counter: {{status}} - {{val}} <br/>
       </div>
 
       <hr>
 
-      <div v-for="(count, domain) in periodical.domain_count" :key="'domain_count.'+domain">
-        periodical.domain_count: {{domain}} - {{count}} <br/>
-      </div>
-
-      <hr>
-
-      <div v-for="(val, stat) in periodical.duration_stats" :key="'duration_stats.'+stat">
-        periodical.duration_stats: {{stat}} - {{val}} <br/>
-      </div>
-
-      <hr>
-
-      <!--
       <div v-for="(val, city) in periodical.city_counter" :key="'city.'+city">
         periodical.city_counter: {{city}} - {{val}} <br/>
       </div>
@@ -164,7 +151,7 @@
 
       <div v-for="(val, device) in periodical.user_agent_device_counter" :key="'device.'+device+'-'+val">
         periodical.user_agent_device_counter: {{device}} - {{val}} <br/>
-      </div> -->
+      </div>
     </vk-card>
 
     <vk-card class="uk-background-secondary">
@@ -247,19 +234,19 @@
           <q-td key="domain" :props="props">
             {{ props.row.domain }}
             <!-- <q-btn type="a" :href="props.row.schema+'://'+props.row.uri+':'+props.row.port" target="_blank" flat icon="open_in_new" /> -->
-            <q-btn :to="'/logs/educativa/filter/?domain=' + props.row.domain" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?domain=' + props.row.domain" flat icon="open_in_new" />
           </q-td>
 
           <q-td key="host" :props="props">
             {{ props.row.host }}
 
-            <q-btn :to="'/logs/educativa/filter/?host=' + props.row.host" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?host=' + props.row.host" flat icon="open_in_new" />
           </q-td>
 
           <q-td key="path" :props="props">
             {{ props.row.path }}
 
-            <q-btn :to="'/logs/educativa/filter/?path=' + props.row.path" flat icon="open_in_new" />
+            <q-btn :to="'/logs/webs/filter/?path=' + props.row.path" flat icon="open_in_new" />
           </q-td>
         </q-tr>
         </template>
@@ -275,7 +262,7 @@
 
 <script>
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:pages:educativa:filter')
+const debug = Debug('apps:logs:web:pages:filter')
 
 //
 
@@ -283,14 +270,14 @@ const debug = Debug('apps:logs:pages:educativa:filter')
 
 // import OsPluginDygraph from '@apps/logs/components/pluginDygraph'
 
-// import WorldMap from '@apps/logs/components/worldMap'
+import WorldMap from '@apps/logs/web/components/worldMap'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/logs/pipelines/educativa/filter'
+import Pipeline from '@apps/logs/web/pipelines/filter'
 
-import { requests, store } from '@apps/logs/sources/educativa/filter/index'
+import { requests, store } from '@apps/logs/web/sources/filter/index'
 
 // const MAX_FEED_DATA = 10
 import moment from 'moment'
@@ -298,96 +285,94 @@ import moment from 'moment'
 export default {
   mixins: [DataSourcesMixin],
 
-  // components: { WorldMap },
+  components: { WorldMap },
 
   name: 'LogsWebFilter',
 
   data () {
     return {
-      id: 'logs.educativa.filter',
+      id: 'logs.webs.filter',
       path: 'all',
 
       day: {
-        // body_bytes_sent: {},
-        // geoip: {},
-        // qs: {},
-        // referer: {},
-        // pathname: {},
-        // method: {},
-        // remote_addr: {},
-        // remote_user: {},
-        // status: {},
-        // unique_visitors: 0,
-        // unique_visitors_by_ip: {},
-        // user_agent: {},
-        //
-        // type_counter: {}
+        body_bytes_sent: {},
+        geoip: {},
+        qs: {},
+        referer: {},
+        pathname: {},
+        method: {},
+        remote_addr: {},
+        remote_user: {},
+        status: {},
+        unique_visitors: 0,
+        unique_visitors_by_ip: {},
+        user_agent: {},
+
+        type_counter: {}
       },
       hour: {
-        // body_bytes_sent: {},
-        // geoip: {},
-        // qs: {},
-        // referer: {},
-        // pathname: {},
-        // method: {},
-        // remote_addr: {},
-        // remote_user: {},
-        // status: {},
-        // unique_visitors: 0,
-        // unique_visitors_by_ip: {},
-        // user_agent: {},
-        //
-        // type_counter: {}
+        body_bytes_sent: {},
+        geoip: {},
+        qs: {},
+        referer: {},
+        pathname: {},
+        method: {},
+        remote_addr: {},
+        remote_user: {},
+        status: {},
+        unique_visitors: 0,
+        unique_visitors_by_ip: {},
+        user_agent: {},
+
+        type_counter: {}
       },
       minute: {
-        // body_bytes_sent: {},
-        // geoip: {},
-        // qs: {},
-        // referer: {},
-        // pathname: {},
-        // method: {},
-        // remote_addr: {},
-        // remote_user: {},
-        // status: {},
-        // unique_visitors: 0,
-        // unique_visitors_by_ip: {},
-        // user_agent: {},
-        //
-        // type_counter: {}
+        body_bytes_sent: {},
+        geoip: {},
+        qs: {},
+        referer: {},
+        pathname: {},
+        method: {},
+        remote_addr: {},
+        remote_user: {},
+        status: {},
+        unique_visitors: 0,
+        unique_visitors_by_ip: {},
+        user_agent: {},
+
+        type_counter: {}
       },
 
       periodical: {
         logs: [],
 
-        cgi_count: {},
-        domain_count: {}
-        // total_bytes_sent: 0,
-        // hits: 0,
-        //
-        // current_bytes_sent: 0,
-        //
-        // status_counter: {},
-        //
-        // city_counter: {},
-        // country_counter: {},
-        // continent_counter: {},
-        // world_map_cities: [],
-        //
-        // addr_counter: {},
-        // user_counter: {},
-        // referer_counter: {},
-        // type_counter: {},
-        //
-        // user_agent_os_counter: {},
-        // user_agent_os_family_counter: {},
-        // user_agent_engine_counter: {},
-        // user_agent_browser_counter: {},
-        // user_agent_device_counter: {}
+        total_bytes_sent: 0,
+        hits: 0,
+
+        current_bytes_sent: 0,
+
+        status_counter: {},
+
+        city_counter: {},
+        country_counter: {},
+        continent_counter: {},
+        world_map_cities: [],
+
+        addr_counter: {},
+        user_counter: {},
+        referer_counter: {},
+        type_counter: {},
+
+        user_agent_os_counter: {},
+        user_agent_os_family_counter: {},
+        user_agent_engine_counter: {},
+        user_agent_browser_counter: {},
+        user_agent_device_counter: {}
 
       },
 
       store: false,
-      pipeline_id: 'input.logs.educativa.filter',
+      pipeline_id: 'input.logs.webs.filter',
 
       // logs: [],
 
@@ -503,22 +488,22 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.logs.educativa.filter'] && this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os')) {
+      if (this.$options.pipelines['input.logs.webs.filter'] && this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os')) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
-        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.once.combine(requests.once)
-        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
+        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.once.combine(requests.once)
+        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onOnceRequestsUpdated')
         // }
         //
         // if (requests.periodical) {
-        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
-        //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
+        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.periodical.combine(requests.periodical)
+        //   this.$options.pipelines['input.logs.webs.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
         let template = Object.clone(Pipeline)
 
         let pipeline_id = template.input[0].poll.id
-        // let pipeline_id = 'input.logs.educativa.filter'
+        // let pipeline_id = 'input.logs.webs.filter'
 
         template.input[0].poll.conn[0].requests = this.__components_sources_to_requests(this.components)
 
@@ -565,7 +550,7 @@ export default {
   // //   }
   // },
   // mounted: function () {
-  //   this.pipeline_id = 'input.logs.educativa.filter'
+  //   this.pipeline_id = 'input.logs.webs.filter'
   // },
   // create: function () {
   //   debug('created HOST %s %o %o', this.web, this.$options.range_component, this.$options.__pipelines_cfg)

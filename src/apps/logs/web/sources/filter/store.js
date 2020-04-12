@@ -1,5 +1,5 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:sources:webs:filter:store')
+const debug = Debug('apps:logs:web:sources:filter:store')
 
 // const nginx_os_enabled = {
 //   params: {

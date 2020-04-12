@@ -45,7 +45,7 @@
           <vk-breadcrumb-item v-bind="(!web) ? {'disabled' : true} : ''" :href="href" @click="navigate">Webs</vk-breadcrumb-item>
         </router-link> -->
 
-        <vk-breadcrumb-item >Webs</vk-breadcrumb-item>
+        <vk-breadcrumb-item >Educativa</vk-breadcrumb-item>
 
       </vk-breadcrumb>
 
@@ -179,16 +179,16 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 import * as Debug from 'debug'
-const debug = Debug('apps:os:pages:educativa:all')
+const debug = Debug('apps:logs:educativa:pages:all')
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/logs/pipelines/educativa/all'
+import Pipeline from '@apps/logs/educativa/pipelines/all'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 // import LogsWebCard from '@apps/logs/components/webCard.vue'
 
-import { requests, store } from '@apps/logs/sources/educativa/all/index'
+import { requests, store } from '@apps/logs/educativa/sources/all/index'
 
 export default {
   mixins: [DataSourcesMixin],

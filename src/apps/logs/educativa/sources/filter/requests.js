@@ -1,5 +1,5 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:sources:educativa:filter:requests')
+const debug = Debug('apps:logs:educativa:sources:filter:requests')
 
 const NANOSECOND = 1000000
 const SECOND = 1000
@@ -133,7 +133,7 @@ const ss = require('simple-statistics')
 const generic_callback = function (data, metadata, key, vm) {
   // debug('HOST CALLBACK data %s %o', key, data)
 
-  const END = 15000 //= > test data
+  const END = 1586055600972 //= > test data
   // const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
@@ -167,6 +167,8 @@ const generic_callback = function (data, metadata, key, vm) {
     let duration = []
     let duration_stats = { max: { domain: undefined, cgi: undefined, seconds: undefined }, min: { domain: undefined, cgi: undefined, seconds: undefined } }
     // let log_template = _data[0].metadata
+    let per_domain = {}
+
     let err_count = 0
 
     Array.each(_data, function (row) {
@@ -174,17 +176,21 @@ const generic_callback = function (data, metadata, key, vm) {
       if (!cgi_count[row.data.cgi]) cgi_count[row.data.cgi] = 0
       cgi_count[row.data.cgi]++
 
-      if (!domain_count[row.metadata.domain]) domain_count[row.metadata.domain] = 0
-      domain_count[row.metadata.domain]++
+      // if (!domain_count[row.metadata.domain]) domain_count[row.metadata.domain] = 0
+      // domain_count[row.metadata.domain]++
+
+      if (!per_domain[row.metadata.domain]) per_domain[row.metadata.domain] = Object.merge(Object.clone(duration_stats), { count: 0, duration: [] })
 
       let cgi_duration = ((row.data.duration / NANOSECOND).toFixed(2)) * 1
       duration.push(cgi_duration)
 
-      if (cgi_duration < 0) { // ERROR
-        // debug('NEGATIVE DURATION ERR %O', row)
-        // err_count++
-        cgi_duration *= -1
-      }
+      per_domain[row.metadata.domain].duration.push(cgi_duration)
+      per_domain[row.metadata.domain].count++
+      // if (cgi_duration < 0) { // ERROR
+      //   // debug('NEGATIVE DURATION ERR %O', row)
+      //   // err_count++
+      //   cgi_duration *= -1
+      // }
 
       if (duration_stats.max.seconds === undefined || duration_stats.max.seconds < cgi_duration) {
         duration_stats.max.seconds = cgi_duration
@@ -197,6 +203,18 @@ const generic_callback = function (data, metadata, key, vm) {
         duration_stats.min.cgi = row.data.cgi
         duration_stats.min.domain = row.metadata.domain
       }
+
+      if (per_domain[row.metadata.domain].max.seconds === undefined || per_domain[row.metadata.domain].max.seconds < cgi_duration) {
+        per_domain[row.metadata.domain].max.seconds = cgi_duration
+        per_domain[row.metadata.domain].max.cgi = row.data.cgi
+        per_domain[row.metadata.domain].max.domain = row.metadata.domain
+      }
+
+      if (per_domain[row.metadata.domain].min.seconds === undefined || per_domain[row.metadata.domain].min.seconds > cgi_duration) {
+        per_domain[row.metadata.domain].min.seconds = cgi_duration
+        per_domain[row.metadata.domain].min.cgi = row.data.cgi
+        per_domain[row.metadata.domain].min.domain = row.metadata.domain
+      }
     })
 
     duration_stats = Object.merge(duration_stats, {
@@ -205,6 +223,13 @@ const generic_callback = function (data, metadata, key, vm) {
       median: ss.median(duration).toFixed(2) * 1
     })
 
+    Object.each(per_domain, function (val, domain) {
+      per_domain[domain] = Object.merge(val, {
+        sum: ss.sum(val.duration),
+        avg: ss.mean(val.duration).toFixed(2) * 1,
+        median: ss.median(val.duration).toFixed(2) * 1
+      })
+    })
     // debug('TOTAL %d', _data.length)
     // debug('TOTAL ERR %d', err_count)
     debug('DURATION %o', duration_stats)
@@ -512,6 +537,7 @@ const generic_callback = function (data, metadata, key, vm) {
     vm.$set(vm.periodical, 'cgi_count', cgi_count)
     vm.$set(vm.periodical, 'domain_count', domain_count)
     vm.$set(vm.periodical, 'duration_stats', duration_stats)
+    vm.$set(vm.periodical, 'per_domain', per_domain)
 
   //   vm.$set(vm.periodical, 'total_bytes_sent', periodical_total_bytes_sent)
   //   vm.$set(vm.periodical, 'hits', periodical_hits)
@@ -584,7 +610,7 @@ const host_once_component = {
     if (
       _key
     ) {
-      const END = 15000 //= > test data
+      const END = 1586055600972 //= > test data
 
       /**
       * production

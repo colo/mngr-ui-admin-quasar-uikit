@@ -238,7 +238,7 @@ const routes = [
             path: 'educativa',
             name: 'logs_educativa',
             redirect: { name: 'logs_educativa_all' },
-            component: () => import(/* webpackChunkName: "logs.educativa" */ '@apps/logs/pages/educativa.vue'),
+            component: () => import(/* webpackChunkName: "logs.educativa" */ '@apps/logs/index.vue'),
             meta: {
               breadcrumb: { label: 'Logs Webs', icon: 'widgets', app: 'logs' }
             },
@@ -246,7 +246,7 @@ const routes = [
               {
                 path: '',
                 name: 'logs_educativa_all',
-                component: () => import(/* webpackChunkName: "logs.educativa.all" */ '@apps/logs/pages/educativa/all.vue'),
+                component: () => import(/* webpackChunkName: "logs.educativa.all" */ '@apps/logs/educativa/pages/all.vue'),
                 meta: {
                   breadcrumb: { label: 'Logs Webs All', icon: 'widgets', app: 'logs' }
                 }
@@ -254,7 +254,7 @@ const routes = [
               {
                 path: 'filter',
                 name: 'logs_educativa_filter',
-                component: () => import(/* webpackChunkName: "logs.educativa.filter" */ '@apps/logs/pages/educativa/filter.vue'),
+                component: () => import(/* webpackChunkName: "logs.educativa.filter" */ '@apps/logs/educativa/pages/filter.vue'),
                 meta: {
                   breadcrumb: { label: 'Logs Webs Filter', icon: 'widgets', app: 'logs' }
                 }
@@ -265,7 +265,7 @@ const routes = [
             path: 'webs',
             name: 'logs_webs',
             redirect: { name: 'logs_webs_all' },
-            component: () => import(/* webpackChunkName: "logs.webs" */ '@apps/logs/pages/webs.vue'),
+            component: () => import(/* webpackChunkName: "logs.webs" */ '@apps/logs/web/index.vue'),
             meta: {
               breadcrumb: { label: 'Logs Webs', icon: 'widgets', app: 'logs' }
             },
@@ -273,7 +273,7 @@ const routes = [
               {
                 path: '',
                 name: 'logs_webs_all',
-                component: () => import(/* webpackChunkName: "logs.webs.all" */ '@apps/logs/pages/webs/all.vue'),
+                component: () => import(/* webpackChunkName: "logs.webs.all" */ '@apps/logs/web/pages/all.vue'),
                 meta: {
                   breadcrumb: { label: 'Logs Webs All', icon: 'widgets', app: 'logs' }
                 }
@@ -281,7 +281,7 @@ const routes = [
               {
                 path: 'filter',
                 name: 'logs_webs_filter',
-                component: () => import(/* webpackChunkName: "logs.webs.filter" */ '@apps/logs/pages/webs/filter.vue'),
+                component: () => import(/* webpackChunkName: "logs.webs.filter" */ '@apps/logs/web/pages/filter.vue'),
                 meta: {
                   breadcrumb: { label: 'Logs Webs Filter', icon: 'widgets', app: 'logs' }
                 }

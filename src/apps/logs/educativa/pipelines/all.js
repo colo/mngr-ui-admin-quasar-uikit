@@ -3,7 +3,7 @@
 // import InputIOApp from '@libs/input/poller/io.app'
 import { EventBus } from '@libs/eventbus'
 
-import InputIO from '../input/io'
+import InputIO from '../../pipelines/input/io'
 
 // import DefaultConn from '@etc/default.io'
 
