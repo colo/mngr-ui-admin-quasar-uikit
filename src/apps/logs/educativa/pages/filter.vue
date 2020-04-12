@@ -51,7 +51,7 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
-      <!-- <world-map :cities="periodical.world_map_cities"/> -->
+      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="format_time(periodical.timestamp)"/>
 
       <!-- <div v-for="(val, prop) in minute" :key="'minute.'+prop">
         minute: {{prop}} - {{val}} <br/>
@@ -288,7 +288,7 @@ const debug = Debug('apps:logs:educativa:pages:filter')
 
 // import OsPluginDygraph from '@apps/logs/components/pluginDygraph'
 
-// import WorldMap from '@apps/logs/components/worldMap'
+import BarRace from '@apps/logs/educativa/components/barRace'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 
@@ -303,7 +303,7 @@ import moment from 'moment'
 export default {
   mixins: [DataSourcesMixin],
 
-  // components: { WorldMap },
+  components: { BarRace },
 
   name: 'LogsWebFilter',
 
@@ -362,6 +362,8 @@ export default {
       },
 
       periodical: {
+        // date: undefined,
+        timestamp: 0,
         logs: [],
 
         cgi_count: {},

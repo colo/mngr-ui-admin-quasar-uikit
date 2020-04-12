@@ -147,7 +147,7 @@ const generic_callback = function (data, metadata, key, vm) {
 
     if (!_data.data) _data.data = {}
 
-    // debug('PERIODICAL HOST CALLBACK _data %o', _data)
+    debug('PERIODICAL HOST CALLBACK _data %o', _data)
 
     /**
     * logs - format: stat
@@ -157,6 +157,8 @@ const generic_callback = function (data, metadata, key, vm) {
       logs.push(Object.merge(Object.clone(log_template), { log: row.value, timestamp: row.timestamp }))
     })
     **/
+
+    let timestamp = _data[0].metadata.timestamp
     /**
     * logs
     **/
@@ -538,6 +540,7 @@ const generic_callback = function (data, metadata, key, vm) {
     vm.$set(vm.periodical, 'domain_count', domain_count)
     vm.$set(vm.periodical, 'duration_stats', duration_stats)
     vm.$set(vm.periodical, 'per_domain', per_domain)
+    vm.$set(vm.periodical, 'timestamp', timestamp)
 
   //   vm.$set(vm.periodical, 'total_bytes_sent', periodical_total_bytes_sent)
   //   vm.$set(vm.periodical, 'hits', periodical_hits)
