@@ -96,42 +96,45 @@ export default {
     }
   },
   watch: {
-    values: function (newData) {
-      newData = this.format_values(newData)
+    values: {
+      handler: function (newData) {
+        newData = this.format_values(newData)
 
-      if (newData.length > 0 && this.$options.chart === undefined) {
-        this.init_chart(newData)
-      } else if (newData.length > 0 && this.$options.chart !== undefined) {
-        let itemsWithNonZero = 0
+        if (newData.length > 0 && this.$options.chart === undefined) {
+          this.init_chart(newData)
+        } else if (newData.length > 0 && this.$options.chart !== undefined) {
+          let itemsWithNonZero = 0
 
-        // if (this.$options.chart.data.length === 0) {
-        //   this.$options.chart.data = newData
-        //   this.$options.categoryAxis.zoom({ start: 0, end: 1 / newData.length })
-        // } else {
-        for (let i = 0; i < newData.length; i++) {
-          this.$options.chart.data[i] = newData[i]
-          if (this.$options.chart.data[i][this.valueX] > 0) {
-            itemsWithNonZero++
+          // if (this.$options.chart.data.length === 0) {
+          //   this.$options.chart.data = newData
+          //   this.$options.categoryAxis.zoom({ start: 0, end: 1 / newData.length })
+          // } else {
+          for (let i = 0; i < newData.length; i++) {
+            this.$options.chart.data[i] = newData[i]
+            if (this.$options.chart.data[i][this.valueX] > 0) {
+              itemsWithNonZero++
+            }
           }
+
+          // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
+
+          // if (year == 2003) {
+          //   series.interpolationDuration = stepDuration / 4;
+          //   valueAxis.rangeChangeDuration = stepDuration / 4;
+          // }
+          // else {
+          // series.interpolationDuration = stepDuration
+          // valueAxis.rangeChangeDuration = stepDuration
+          // }
+
+          this.$options.chart.invalidateRawData()
+          // label.text = year.toString()
+
+          this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / newData.length })
+          // }
         }
-
-        // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
-
-        // if (year == 2003) {
-        //   series.interpolationDuration = stepDuration / 4;
-        //   valueAxis.rangeChangeDuration = stepDuration / 4;
-        // }
-        // else {
-        // series.interpolationDuration = stepDuration
-        // valueAxis.rangeChangeDuration = stepDuration
-        // }
-
-        this.$options.chart.invalidateRawData()
-        // label.text = year.toString()
-
-        this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / newData.length })
-        // }
-      }
+      },
+      deep: true
     }
     // 'cities': function (data) {
     //   let self = this
