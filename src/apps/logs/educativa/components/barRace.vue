@@ -103,7 +103,7 @@ export default {
         if (newData.length > 0 && this.$options.chart === undefined) {
           this.init_chart(newData)
         } else if (newData.length > 0 && this.$options.chart !== undefined) {
-          let itemsWithNonZero = 0
+          // let itemsWithNonZero = 0
 
           // if (this.$options.chart.data.length === 0) {
           //   this.$options.chart.data = newData
@@ -138,7 +138,7 @@ export default {
           // valueAxis.rangeChangeDuration = stepDuration
           // }
 
-          // this.$options.chart.invalidateRawData()
+          this.$options.chart.invalidateRawData()
           // label.text = year.toString()
 
           // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
