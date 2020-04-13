@@ -103,7 +103,7 @@ export default {
         if (newData.length > 0 && this.$options.chart === undefined) {
           this.init_chart(newData)
         } else if (newData.length > 0 && this.$options.chart !== undefined) {
-          // let itemsWithNonZero = 0
+          let itemsWithNonZero = 0
 
           // if (this.$options.chart.data.length === 0) {
           //   this.$options.chart.data = newData
@@ -127,6 +127,11 @@ export default {
             // }
           }
 
+          for (let i = 0; i < this.$options.chart.data.length; i++) {
+            if (this.$options.chart.data[this.valueX] > 0) {
+              itemsWithNonZero++
+            }
+          }
           // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
 
           // if (year == 2003) {
@@ -138,10 +143,12 @@ export default {
           // valueAxis.rangeChangeDuration = stepDuration
           // }
 
+          debug('this.$options.chart.data', this.$options.chart.data)
           this.$options.chart.invalidateRawData()
           // label.text = year.toString()
+          this.$options.label.text = this.label
 
-          // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
+          this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
           // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
           // }
         }
