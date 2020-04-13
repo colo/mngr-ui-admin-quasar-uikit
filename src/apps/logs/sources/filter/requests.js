@@ -1,6 +1,10 @@
 import * as Debug from 'debug'
 const debug = Debug('apps:logs:sources:filter:requests')
 
+import END from '../../etc/range'
+
+
+
 const SECOND = 1000
 const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
@@ -132,7 +136,7 @@ const _merge_objects = function (prop, val1, val2) {
 const generic_callback = function (data, metadata, key, vm) {
   // debug('HOST CALLBACK data %s %o', key, data)
 
-  const END = 1586055600972 //= > test data
+  // const END = 1586055600972 //= > test data
   // const END = Date.now() // production
 
   if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
@@ -529,7 +533,7 @@ const host_once_component = {
     if (
       _key
     ) {
-      const END = 1586055600972 //= > test data
+      // const END = 1586055600972 //= > test data
 
       /**
       * production

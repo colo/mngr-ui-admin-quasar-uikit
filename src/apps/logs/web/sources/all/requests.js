@@ -1,6 +1,8 @@
 import * as Debug from 'debug'
 const debug = Debug('apps:logs:web:sources:all:requests')
 
+import END from '../../../etc/range'
+
 const SECOND = 1000
 const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
@@ -20,7 +22,7 @@ const logs_webs_paths = {
     if (
       _key
     ) {
-      const END = 15000 //= > test data
+      // const END = 15000 //= > test data
 
       /**
       * production
