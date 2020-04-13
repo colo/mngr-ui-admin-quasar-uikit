@@ -110,10 +110,21 @@ export default {
           //   this.$options.categoryAxis.zoom({ start: 0, end: 1 / newData.length })
           // } else {
           for (let i = 0; i < newData.length; i++) {
-            this.$options.chart.data[i] = newData[i]
-            // if (this.$options.chart.data[i][this.valueX] > 0) {
-            //   itemsWithNonZero++
-            // }
+            let val = newData[i]
+            let found = false
+            for (let j = 0; j < this.$options.chart.data.length; j++) {
+              if(val[this.categoryY] === this.$options.chart.data[j][this.categoryY]){
+                this.$options.chart.data[j] = val
+                found = true
+              }
+            }
+            if(found === false){
+              this.$options.chart.data.push(val)
+            }
+            // this.$options.chart.data[i] = newData[i]
+            if (val[this.valueX] > 0) {
+              itemsWithNonZero++
+            }
           }
 
           // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
@@ -130,12 +141,8 @@ export default {
           this.$options.chart.invalidateRawData()
           // label.text = year.toString()
 
-          // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / newData.length })
-          this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
+          this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
           // }
-          // this.$options.chart.data = JSON.parse(JSON.stringify(newData))
-          // this.$options.chart.invalidateRawData()
-          // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
         }
       },
       deep: true
