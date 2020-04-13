@@ -142,7 +142,7 @@ export default {
           // label.text = year.toString()
 
           // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
-          this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
+          // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
           // }
         }
       },
@@ -239,7 +239,7 @@ export default {
       let series = this.$options.chart.series.push(new am4charts.ColumnSeries())
       series.dataFields.categoryY = this.categoryY
       series.dataFields.valueX = this.valueX
-      // series.tooltipText = '{valueX.value}'
+      series.tooltipText = '{valueX.value}'
       // series.tooltipText = '{valueX.workingValue}'
       series.columns.template.strokeOpacity = 0
       series.columns.template.column.cornerRadiusBottomRight = 5
@@ -250,7 +250,7 @@ export default {
       let labelBullet = series.bullets.push(new am4charts.LabelBullet())
       labelBullet.label.horizontalCenter = 'right'
       // labelBullet.label.text = "{values.valueX.workingValue.formatNumber('#.0as')}"
-      // labelBullet.label.text = '{values.valueX.workingValue}'
+      labelBullet.label.text = '{values.valueX.workingValue}'
       labelBullet.label.textAlign = 'end'
       labelBullet.label.dx = -10
 
@@ -271,7 +271,7 @@ export default {
       this.$options.categoryAxis.sortBySeries = series
 
       this.$options.chart.data = JSON.parse(JSON.stringify(newData))
-      this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
+      // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
 
       series.events.on('inited', function () {
         debug('series init')
