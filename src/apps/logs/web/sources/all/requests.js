@@ -1,7 +1,8 @@
 import * as Debug from 'debug'
 const debug = Debug('apps:logs:web:sources:all:requests')
 
-import END from '../../../etc/range'
+// import END from '../../../etc/range'
+const end = require('../../../etc/end')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -23,6 +24,7 @@ const logs_webs_paths = {
       _key
     ) {
       // const END = 15000 //= > test data
+      const END = end()
 
       /**
       * production

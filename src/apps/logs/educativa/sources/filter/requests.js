@@ -1,7 +1,8 @@
 import * as Debug from 'debug'
 const debug = Debug('apps:logs:educativa:sources:filter:requests')
 
-import END from '../../../etc/range'
+// import END from '../../../etc/range'
+const end = require('../../../etc/end')
 
 const NANOSECOND = 1000000
 const SECOND = 1000
@@ -135,6 +136,7 @@ const ss = require('simple-statistics')
 const generic_callback = function (data, metadata, key, vm) {
   // debug('HOST CALLBACK data %s %o', key, data)
 
+  const END = end()
   // const END = 1586055600972 //= > test data
   // const END = Date.now() // production
 
@@ -616,6 +618,7 @@ const host_once_component = {
       _key
     ) {
       // const END = 1586055600972 //= > test data
+      const END = end()
 
       /**
       * production
