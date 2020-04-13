@@ -114,7 +114,7 @@ export default {
             let found = false
             for (let j = 0; j < this.$options.chart.data.length; j++) {
               if(val[this.categoryY] === this.$options.chart.data[j][this.categoryY]){
-                this.$options.chart.data[j] = val
+                this.$options.chart.data[j] += val
                 found = true
               }
             }
