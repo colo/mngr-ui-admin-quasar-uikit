@@ -128,7 +128,7 @@ export default {
           }
 
           for (let i = 0; i < this.$options.chart.data.length; i++) {
-            if (this.$options.chart.data[this.valueX] > 0) {
+            if (this.$options.chart.data[i][this.valueX] > 0) {
               itemsWithNonZero++
             }
           }
