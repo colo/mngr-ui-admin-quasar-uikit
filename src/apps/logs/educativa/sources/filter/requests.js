@@ -171,7 +171,8 @@ const generic_callback = function (data, metadata, key, vm) {
     let domain_count = {}
 
     let duration = []
-    let duration_stats = { max: { domain: undefined, cgi: undefined, seconds: undefined }, min: { domain: undefined, cgi: undefined, seconds: undefined } }
+    let duration_stats_template = { max: { domain: undefined, cgi: undefined, seconds: undefined }, min: { domain: undefined, cgi: undefined, seconds: undefined } }
+    let duration_stats = Object.clone(duration_stats_template)
     // let log_template = _data[0].metadata
     let per_domain = {}
 
@@ -185,13 +186,14 @@ const generic_callback = function (data, metadata, key, vm) {
       // if (!domain_count[row.metadata.domain]) domain_count[row.metadata.domain] = 0
       // domain_count[row.metadata.domain]++
 
-      if (!per_domain[row.metadata.domain]) per_domain[row.metadata.domain] = Object.merge(Object.clone(duration_stats), { count: 0, duration: [] })
+      if (!per_domain[row.metadata.domain]) per_domain[row.metadata.domain] = Object.merge(Object.clone(duration_stats_template), { count: 0, duration: [] })
 
       let cgi_duration = ((row.data.duration / NANOSECOND).toFixed(2)) * 1
       duration.push(cgi_duration)
 
       per_domain[row.metadata.domain].duration.push(cgi_duration)
       per_domain[row.metadata.domain].count++
+      // per_domain[row.metadata.domain].domain = row.metadata.domain
       // if (cgi_duration < 0) { // ERROR
       //   // debug('NEGATIVE DURATION ERR %O', row)
       //   // err_count++
@@ -213,13 +215,13 @@ const generic_callback = function (data, metadata, key, vm) {
       if (per_domain[row.metadata.domain].max.seconds === undefined || per_domain[row.metadata.domain].max.seconds < cgi_duration) {
         per_domain[row.metadata.domain].max.seconds = cgi_duration
         per_domain[row.metadata.domain].max.cgi = row.data.cgi
-        per_domain[row.metadata.domain].max.domain = row.metadata.domain
+        // per_domain[row.metadata.domain].max.domain = row.metadata.domain
       }
 
       if (per_domain[row.metadata.domain].min.seconds === undefined || per_domain[row.metadata.domain].min.seconds > cgi_duration) {
         per_domain[row.metadata.domain].min.seconds = cgi_duration
         per_domain[row.metadata.domain].min.cgi = row.data.cgi
-        per_domain[row.metadata.domain].min.domain = row.metadata.domain
+        // per_domain[row.metadata.domain].min.domain = row.metadata.domain
       }
     })
 

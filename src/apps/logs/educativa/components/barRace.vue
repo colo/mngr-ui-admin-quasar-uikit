@@ -1,6 +1,6 @@
 <template>
 
-  <div id="chartdiv" ref="chartdiv"></div>
+  <div :id="id" class="chartdiv" ref="chartdiv"></div>
   <!-- <vk-card class="uk-background-secondary uk-light">
 
     <vk-card-title>
@@ -61,6 +61,10 @@ export default {
   categoryAxis: undefined,
 
   props: {
+    id: {
+      type: String,
+      default: 'chartdiv'
+    },
     stepDuration: {
       type: Number,
       default: 2000
@@ -113,12 +117,12 @@ export default {
             let val = newData[i]
             let found = false
             for (let j = 0; j < this.$options.chart.data.length; j++) {
-              if(val[this.categoryY] === this.$options.chart.data[j][this.categoryY]){
+              if (val[this.categoryY] === this.$options.chart.data[j][this.categoryY]) {
                 this.$options.chart.data[j][this.valueX] += val[this.valueX]
                 found = true
               }
             }
-            if(found === false){
+            if (found === false) {
               this.$options.chart.data.push(val)
             }
             // this.$options.chart.data[i] = newData[i]
@@ -185,7 +189,11 @@ export default {
         Object.each(newData, function (val, prop) {
           let _obj = {}
           _obj[this.categoryY] = prop
-          _obj[this.valueX] = val
+          if (val[this.valueX]) {
+            _obj[this.valueX] = val[this.valueX]
+          } else {
+            _obj[this.valueX] = val
+          }
           _newData.push(_obj)
         }.bind(this))
 
@@ -197,7 +205,7 @@ export default {
     },
 
     init_chart: function (newData) {
-      this.$options.chart = am4core.create('chartdiv', am4charts.XYChart)
+      this.$options.chart = am4core.create(this.id, am4charts.XYChart)
       this.$options.chart.padding(40, 40, 40, 40)
 
       // this.$options.chart.numberFormatter.bigNumberPrefixes = [
@@ -318,7 +326,7 @@ export default {
 </script>
 
 <style scoped>
-#chartdiv {
+.chartdiv {
   width: 100%;
   height: 500px;
 }

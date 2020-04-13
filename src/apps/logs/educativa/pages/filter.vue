@@ -51,7 +51,13 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
-      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="format_time(periodical.timestamp)"/>
+      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="'Per CGI count'" :id="'cgi_count'"/>
+      <!-- :label="format_time(periodical.timestamp)" -->
+
+      <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'"/>
+
+      <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'"/>
+      <!-- :label="format_time(periodical.timestamp) -->
 
       <!-- <div v-for="(val, prop) in minute" :key="'minute.'+prop">
         minute: {{prop}} - {{val}} <br/>
@@ -367,7 +373,7 @@ export default {
         logs: [],
 
         cgi_count: {},
-        // domain_count: {}
+        // domain_count: {},
         per_domain: {}
         // total_bytes_sent: 0,
         // hits: 0,
