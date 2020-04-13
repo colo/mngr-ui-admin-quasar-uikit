@@ -103,35 +103,38 @@ export default {
         if (newData.length > 0 && this.$options.chart === undefined) {
           this.init_chart(newData)
         } else if (newData.length > 0 && this.$options.chart !== undefined) {
-          let itemsWithNonZero = 0
-
-          // if (this.$options.chart.data.length === 0) {
-          //   this.$options.chart.data = newData
-          //   this.$options.categoryAxis.zoom({ start: 0, end: 1 / newData.length })
-          // } else {
-          for (let i = 0; i < newData.length; i++) {
-            this.$options.chart.data[i] = newData[i]
-            if (this.$options.chart.data[i][this.valueX] > 0) {
-              itemsWithNonZero++
-            }
-          }
-
-          // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
-
-          // if (year == 2003) {
-          //   series.interpolationDuration = stepDuration / 4;
-          //   valueAxis.rangeChangeDuration = stepDuration / 4;
+          // let itemsWithNonZero = 0
+          //
+          // // if (this.$options.chart.data.length === 0) {
+          // //   this.$options.chart.data = newData
+          // //   this.$options.categoryAxis.zoom({ start: 0, end: 1 / newData.length })
+          // // } else {
+          // for (let i = 0; i < newData.length; i++) {
+          //   this.$options.chart.data[i] = newData[i]
+          //   if (this.$options.chart.data[i][this.valueX] > 0) {
+          //     itemsWithNonZero++
+          //   }
           // }
-          // else {
-          // series.interpolationDuration = stepDuration
-          // valueAxis.rangeChangeDuration = stepDuration
-          // }
-
+          //
+          // // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
+          //
+          // // if (year == 2003) {
+          // //   series.interpolationDuration = stepDuration / 4;
+          // //   valueAxis.rangeChangeDuration = stepDuration / 4;
+          // // }
+          // // else {
+          // // series.interpolationDuration = stepDuration
+          // // valueAxis.rangeChangeDuration = stepDuration
+          // // }
+          //
+          // this.$options.chart.invalidateRawData()
+          // // label.text = year.toString()
+          //
+          // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / newData.length })
+          // // }
+          this.$options.chart.data = JSON.parse(JSON.stringify(newData))
           this.$options.chart.invalidateRawData()
-          // label.text = year.toString()
-
-          this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / newData.length })
-          // }
+          this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
         }
       },
       deep: true
