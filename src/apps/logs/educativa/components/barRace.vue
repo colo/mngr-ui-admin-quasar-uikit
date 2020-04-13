@@ -122,9 +122,9 @@ export default {
               this.$options.chart.data.push(val)
             }
             // this.$options.chart.data[i] = newData[i]
-            if (val[this.valueX] > 0) {
-              itemsWithNonZero++
-            }
+            // if (val[this.valueX] > 0) {
+            //   itemsWithNonZero++
+            // }
           }
 
           // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
@@ -138,10 +138,11 @@ export default {
           // valueAxis.rangeChangeDuration = stepDuration
           // }
 
-          this.$options.chart.invalidateRawData()
+          // this.$options.chart.invalidateRawData()
           // label.text = year.toString()
 
-          this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
+          // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
+          this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
           // }
         }
       },
