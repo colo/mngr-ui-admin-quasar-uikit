@@ -61,6 +61,10 @@ export default {
   categoryAxis: undefined,
 
   props: {
+    zoom: {
+      type: Number,
+      default: 0.5
+    },
     id: {
       type: String,
       default: 'chartdiv'
@@ -152,8 +156,9 @@ export default {
           // label.text = year.toString()
           this.$options.label.text = this.label
 
-          this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
+          // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
           // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
+          this.$options.categoryAxis.zoom({ start: 0, end: (this.zoom > 0) ? this.zoom : itemsWithNonZero / this.$options.chart.data.length })
           // }
         }
       },
@@ -287,34 +292,13 @@ export default {
 
       this.$options.chart.data = JSON.parse(JSON.stringify(newData))
       // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
+      this.$options.categoryAxis.zoom({ start: 0, end: (this.zoom > 0) ? this.zoom : 1 / this.$options.chart.data.length })
 
       series.events.on('inited', function () {
         debug('series init')
       })
     }
-    // new_data: function (newData) {
-    //   let itemsWithNonZero = 0
-    //   for (let i = 0; i < newData.length; i++) {
-    //     this.$options.chart.data[i] = newData[i]
-    //     if (this.$options.chart.data[i][this.valueX] > 0) {
-    //       itemsWithNonZero++
-    //     }
-    //   }
-    //
-    //   // if (year == 2003) {
-    //   //   series.interpolationDuration = stepDuration / 4;
-    //   //   valueAxis.rangeChangeDuration = stepDuration / 4;
-    //   // }
-    //   // else {
-    //   // series.interpolationDuration = stepDuration
-    //   // valueAxis.rangeChangeDuration = stepDuration
-    //   // }
-    //
-    //   this.$options.chart.invalidateRawData()
-    //   // label.text = year.toString()
-    //
-    //   this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.categoryAxis.dataItems.length })
-    // }
+
   },
   beforeDestroy () {
     if (this.$options.chart) {
@@ -328,6 +312,6 @@ export default {
 <style scoped>
 .chartdiv {
   width: 100%;
-  height: 800px;
+  height: 450px;
 }
 </style>
