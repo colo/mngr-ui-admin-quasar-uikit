@@ -63,7 +63,7 @@ export default {
   props: {
     zoom: {
       type: Number,
-      default: 0.5
+      default: 0.4
     },
     id: {
       type: String,
@@ -312,6 +312,6 @@ export default {
 <style scoped>
 .chartdiv {
   width: 100%;
-  height: 450px;
+  height: 500px;
 }
 </style>
