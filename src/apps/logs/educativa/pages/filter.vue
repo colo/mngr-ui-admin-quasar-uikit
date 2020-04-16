@@ -523,14 +523,14 @@ export default {
       if (data.length <= max_length) {
         return max_zoom
       } else {
-        let itemsWithNonZero = max_length
-        for (let i = max_length; i < data.length; i++) {
-          if (data[i][valueX] > 0) {
-            itemsWithNonZero++
-          }
-        }
+        // let itemsWithNonZero = 0
+        // for (let i = 0; i < max_length; i++) {
+        //   if (data[i][valueX] > 0) {
+        //     itemsWithNonZero++
+        //   }
+        // }
 
-        let zoom = itemsWithNonZero / data.length
+        let zoom = max_length / data.length
         return (zoom > min_zoom) ? zoom : min_zoom
       }
     },
