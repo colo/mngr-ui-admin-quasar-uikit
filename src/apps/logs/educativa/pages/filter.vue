@@ -51,16 +51,16 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
-      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="'Per CGI count'" :id="'cgi_count'" :zoom="this.zoom"/>
+      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="'Per CGI count'" :id="'cgi_count'" :zoom="apply_zoom"/>
       <!-- :label="format_time(periodical.timestamp)" -->
 
-      <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'" :zoom="this.zoom"/>
+      <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'" :zoom="apply_zoom"/>
 
-      <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'" :zoom="this.zoom"/>
+      <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'" :zoom="apply_zoom"/>
 
-      <bar-race :categoryY="'host'" :valueX="'count'" :values="periodical.per_host" :label="'Per HOST - CGI count'" :id="'per_host_count'" :zoom="this.zoom"/>
+      <bar-race :categoryY="'host'" :valueX="'count'" :values="periodical.per_host" :label="'Per HOST - CGI count'" :id="'per_host_count'" :zoom="apply_zoom"/>
 
-      <bar-race :categoryY="'host'" :valueX="'sum'" :values="periodical.per_host" :label="'Per HOST - total duration'" :id="'per_host_sum'" :zoom="this.zoom"/>
+      <bar-race :categoryY="'host'" :valueX="'sum'" :values="periodical.per_host" :label="'Per HOST - total duration'" :id="'per_host_sum'" :zoom="apply_zoom"/>
 
       <!-- :label="format_time(periodical.timestamp) -->
 
@@ -512,7 +512,7 @@ export default {
 
   },
   methods: {
-    zoom: function (data) {
+    apply_zoom: function (data) {
       const min_zoom = 0.3
       const max_zoom = 1
       /* const min_length = 8 */
