@@ -159,8 +159,8 @@ export default {
 
           // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
           // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
-          debug('ZOOM %s ', this.id, this.$options.chart.data.length, (typeof this.zoom === 'function') ? this.zoom(this.$options.chart.data) : this.zoom)
-          this.$options.categoryAxis.zoom({ start: 0, end: (typeof this.zoom === 'function') ? this.zoom(this.$options.chart.data) : (this.zoom > 0) ? this.zoom : 1 })
+          debug('ZOOM %s ', this.id, this.$options.chart.data.length, (typeof this.zoom === 'function') ? this.zoom(this.$options.chart.data, this.categoryY, this.valueX) : this.zoom)
+          this.$options.categoryAxis.zoom({ start: 0, end: (typeof this.zoom === 'function') ? this.zoom(this.$options.chart.data, this.categoryY, this.valueX) : (this.zoom > 0) ? this.zoom : 1 })
           // }
         }
       },

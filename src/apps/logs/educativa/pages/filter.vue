@@ -512,7 +512,7 @@ export default {
 
   },
   methods: {
-    apply_zoom: function (data) {
+    apply_zoom: function (data, categoryY, valueX) {
       const min_zoom = 0.3
       const max_zoom = 1
       /* const min_length = 8 */
@@ -525,7 +525,7 @@ export default {
       } else {
         let itemsWithNonZero = max_length
         for (let i = max_length; i < data.length; i++) {
-          if (data[i]['count'] > 0) {
+          if (data[i][valueX] > 0) {
             itemsWithNonZero++
           }
         }
