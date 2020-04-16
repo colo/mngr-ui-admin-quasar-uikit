@@ -3,6 +3,6 @@
 //
 // export { END }
 module.exports = function () {
-  return 1586055600972 //= > test data
-  // return Date.now() // production
+  // return 1586055600972 //= > test data
+  return Date.now() // production
 }
