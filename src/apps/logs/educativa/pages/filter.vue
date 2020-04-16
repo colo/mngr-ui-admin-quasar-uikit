@@ -57,6 +57,11 @@
       <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'"/>
 
       <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'"/>
+
+      <bar-race :categoryY="'host'" :valueX="'count'" :values="periodical.per_host" :label="'Per HOST - CGI count'" :id="'per_host_count'"/>
+
+      <bar-race :categoryY="'host'" :valueX="'sum'" :values="periodical.per_host" :label="'Per HOST - total duration'" :id="'per_host_sum'"/>
+
       <!-- :label="format_time(periodical.timestamp) -->
 
       <!-- <div v-for="(val, prop) in minute" :key="'minute.'+prop">
@@ -374,7 +379,9 @@ export default {
 
         cgi_count: {},
         // domain_count: {},
-        per_domain: {}
+        per_domain: {},
+
+        per_host: {}
         // total_bytes_sent: 0,
         // hits: 0,
         //

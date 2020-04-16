@@ -168,13 +168,15 @@ const generic_callback = function (data, metadata, key, vm) {
     **/
     let logs = []
     let cgi_count = {}
-    let domain_count = {}
+    // let domain_count = {}
+    // let host_count = {}
 
     let duration = []
     let duration_stats_template = { max: { domain: undefined, cgi: undefined, seconds: undefined }, min: { domain: undefined, cgi: undefined, seconds: undefined } }
     let duration_stats = Object.clone(duration_stats_template)
     // let log_template = _data[0].metadata
     let per_domain = {}
+    let per_host = {}
 
     let err_count = 0
 
@@ -187,12 +189,17 @@ const generic_callback = function (data, metadata, key, vm) {
       // domain_count[row.metadata.domain]++
 
       if (!per_domain[row.metadata.domain]) per_domain[row.metadata.domain] = Object.merge(Object.clone(duration_stats_template), { count: 0, duration: [] })
+      if (!per_host[row.metadata.host]) per_host[row.metadata.host] = Object.merge(Object.clone(duration_stats_template), { count: 0, duration: [] })
 
       let cgi_duration = ((row.data.duration / NANOSECOND).toFixed(2)) * 1
       duration.push(cgi_duration)
 
       per_domain[row.metadata.domain].duration.push(cgi_duration)
       per_domain[row.metadata.domain].count++
+
+      per_host[row.metadata.host].duration.push(cgi_duration)
+      per_host[row.metadata.host].count++
+
       // per_domain[row.metadata.domain].domain = row.metadata.domain
       // if (cgi_duration < 0) { // ERROR
       //   // debug('NEGATIVE DURATION ERR %O', row)
@@ -223,6 +230,18 @@ const generic_callback = function (data, metadata, key, vm) {
         per_domain[row.metadata.domain].min.cgi = row.data.cgi
         // per_domain[row.metadata.domain].min.domain = row.metadata.domain
       }
+
+      if (per_host[row.metadata.host].max.seconds === undefined || per_host[row.metadata.host].max.seconds < cgi_duration) {
+        per_host[row.metadata.host].max.seconds = cgi_duration
+        per_host[row.metadata.host].max.cgi = row.data.cgi
+        // per_host[row.metadata.host].max.host = row.metadata.host
+      }
+
+      if (per_host[row.metadata.host].min.seconds === undefined || per_host[row.metadata.host].min.seconds > cgi_duration) {
+        per_host[row.metadata.host].min.seconds = cgi_duration
+        per_host[row.metadata.host].min.cgi = row.data.cgi
+        // per_host[row.metadata.host].min.host = row.metadata.host
+      }
     })
 
     duration_stats = Object.merge(duration_stats, {
@@ -238,6 +257,15 @@ const generic_callback = function (data, metadata, key, vm) {
         median: ss.median(val.duration).toFixed(2) * 1
       })
     })
+
+    Object.each(per_host, function (val, host) {
+      per_host[host] = Object.merge(val, {
+        sum: ss.sum(val.duration),
+        avg: ss.mean(val.duration).toFixed(2) * 1,
+        median: ss.median(val.duration).toFixed(2) * 1
+      })
+    })
+
     // debug('TOTAL %d', _data.length)
     // debug('TOTAL ERR %d', err_count)
     debug('DURATION %o', duration_stats)
@@ -543,9 +571,11 @@ const generic_callback = function (data, metadata, key, vm) {
     }
 
     vm.$set(vm.periodical, 'cgi_count', cgi_count)
-    vm.$set(vm.periodical, 'domain_count', domain_count)
+    // vm.$set(vm.periodical, 'domain_count', domain_count)
+    // vm.$set(vm.periodical, 'host_count', host_count)
     vm.$set(vm.periodical, 'duration_stats', duration_stats)
     vm.$set(vm.periodical, 'per_domain', per_domain)
+    vm.$set(vm.periodical, 'per_host', per_host)
     vm.$set(vm.periodical, 'timestamp', timestamp)
 
   //   vm.$set(vm.periodical, 'total_bytes_sent', periodical_total_bytes_sent)
