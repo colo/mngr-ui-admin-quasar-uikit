@@ -523,8 +523,8 @@ export default {
       if (data.length <= max_length) {
         return max_zoom
       } else {
-        let itemsWithNonZero = 0
-        for (let i = 0; i < data.length; i++) {
+        let itemsWithNonZero = max_length
+        for (let i = max_length; i < data.length; i++) {
           if (data[i]['count'] > 0) {
             itemsWithNonZero++
           }
