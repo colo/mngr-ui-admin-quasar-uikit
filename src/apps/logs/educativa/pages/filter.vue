@@ -51,16 +51,16 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
-      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="'Per CGI count'" :id="'cgi_count'"/>
+      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="'Per CGI count'" :id="'cgi_count'" :zoom="this.zoom"/>
       <!-- :label="format_time(periodical.timestamp)" -->
 
-      <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'"/>
+      <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'" :zoom="this.zoom"/>
 
-      <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'"/>
+      <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'" :zoom="this.zoom"/>
 
-      <bar-race :categoryY="'host'" :valueX="'count'" :values="periodical.per_host" :label="'Per HOST - CGI count'" :id="'per_host_count'"/>
+      <bar-race :categoryY="'host'" :valueX="'count'" :values="periodical.per_host" :label="'Per HOST - CGI count'" :id="'per_host_count'" :zoom="this.zoom"/>
 
-      <bar-race :categoryY="'host'" :valueX="'sum'" :values="periodical.per_host" :label="'Per HOST - total duration'" :id="'per_host_sum'"/>
+      <bar-race :categoryY="'host'" :valueX="'sum'" :values="periodical.per_host" :label="'Per HOST - total duration'" :id="'per_host_sum'" :zoom="this.zoom"/>
 
       <!-- :label="format_time(periodical.timestamp) -->
 
@@ -512,6 +512,28 @@ export default {
 
   },
   methods: {
+    zoom: function (data) {
+      const min_zoom = 0.3
+      const max_zoom = 1
+      /* const min_length = 8 */
+      const max_length = 15
+      let length = data.length
+      /* let zoom = 1 */
+
+      if (data.length <= max_length) {
+        return max_zoom
+      } else {
+        let itemsWithNonZero = 0
+        for (let i = 0; i < data.length; i++) {
+          if (data[i]['count'] > 0) {
+            itemsWithNonZero++
+          }
+        }
+
+        let zoom = itemsWithNonZero / data.length
+        return (zoom > min_zoom) ? zoom : min_zoom
+      }
+    },
     format_time: function (timestamp) {
       return moment(timestamp).format('dddd, MMMM Do YYYY, h:mm:ss a')
     },

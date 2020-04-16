@@ -62,7 +62,7 @@ export default {
 
   props: {
     zoom: {
-      type: Number,
+      type: [Number, Function],
       default: 0.3
     },
     id: {
@@ -135,11 +135,12 @@ export default {
             // }
           }
 
-          for (let i = 0; i < this.$options.chart.data.length; i++) {
-            if (this.$options.chart.data[i][this.valueX] > 0) {
-              itemsWithNonZero++
-            }
-          }
+          // for (let i = 0; i < this.$options.chart.data.length; i++) {
+          //   if (this.$options.chart.data[i][this.valueX] > 0) {
+          //     itemsWithNonZero++
+          //   }
+          // }
+
           // debug('values %o', this.$options.chart.data, this.$options.categoryAxis.dataItems)
 
           // if (year == 2003) {
@@ -158,7 +159,8 @@ export default {
 
           // this.$options.categoryAxis.zoom({ start: 0, end: itemsWithNonZero / this.$options.chart.data.length })
           // this.$options.categoryAxis.zoom({ start: 0, end: 1 / this.$options.chart.data.length })
-          this.$options.categoryAxis.zoom({ start: 0, end: (this.zoom > 0) ? this.zoom : itemsWithNonZero / this.$options.chart.data.length })
+          debug('ZOOM %s ', this.id, this.$options.chart.data.length, (typeof (this.zoom) === 'function') ? this.zoom(this.$options.chart.data) : this.zoom)
+          this.$options.categoryAxis.zoom({ start: 0, end: (typeof (this.zoom) === 'function') ? this.zoom(this.$options.chart.data) : (this.zoom > 0) ? this.zoom : 1 })
           // }
         }
       },
