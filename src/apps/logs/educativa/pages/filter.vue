@@ -299,7 +299,7 @@ const debug = Debug('apps:logs:educativa:pages:filter')
 
 // import OsPluginDygraph from '@apps/logs/components/pluginDygraph'
 
-import BarRace from '@apps/logs/educativa/components/barRace'
+import BarRace from '@apps/logs/components/barRace'
 
 import DataSourcesMixin from '@components/mixins/dataSources'
 

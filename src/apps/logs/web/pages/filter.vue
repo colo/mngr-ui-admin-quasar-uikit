@@ -53,6 +53,10 @@
     <vk-card class="uk-background-secondary">
       <world-map :cities="periodical.world_map_cities"/>
 
+      <bar-race :categoryY="'country'" :values="periodical.country_counter" :label="'Per COUNTRY count'" :id="'country_counter'" :zoom="apply_zoom"/>
+
+      <bar-race :categoryY="'city'" :values="periodical.city_counter" :label="'Per CITY count'" :id="'city_counter'" :zoom="apply_zoom"/>
+
       <!-- <div v-for="(val, prop) in minute" :key="'minute.'+prop">
         minute: {{prop}} - {{val}} <br/>
       </div>
@@ -269,6 +273,7 @@ const debug = Debug('apps:logs:web:pages:filter')
 // let moment = require('moment')
 
 // import OsPluginDygraph from '@apps/logs/components/pluginDygraph'
+import BarRace from '@apps/logs/components/barRace'
 
 import WorldMap from '@apps/logs/web/components/worldMap'
 
@@ -285,7 +290,7 @@ import moment from 'moment'
 export default {
   mixins: [DataSourcesMixin],
 
-  components: { WorldMap },
+  components: { WorldMap, BarRace },
 
   name: 'LogsWebFilter',
 
@@ -476,6 +481,28 @@ export default {
 
   },
   methods: {
+    apply_zoom: function (data, categoryY, valueX) {
+      const min_zoom = 0.3
+      const max_zoom = 1
+      /* const min_length = 8 */
+      const max_length = 15
+      let length = data.length
+      /* let zoom = 1 */
+
+      if (data.length <= max_length) {
+        return max_zoom
+      } else {
+        // let itemsWithNonZero = 0
+        // for (let i = 0; i < max_length; i++) {
+        //   if (data[i][valueX] > 0) {
+        //     itemsWithNonZero++
+        //   }
+        // }
+
+        let zoom = max_length / data.length
+        return (zoom > min_zoom) ? zoom : min_zoom
+      }
+    },
     format_time: function (timestamp) {
       return moment(timestamp).format('dddd, MMMM Do YYYY, h:mm:ss a')
     },
