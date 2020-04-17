@@ -482,7 +482,7 @@ export default {
   },
   methods: {
     apply_zoom: function (data, categoryY, valueX) {
-      const min_zoom = 0.3
+      const min_zoom = 0.01
       const max_zoom = 1
       /* const min_length = 8 */
       const max_length = 15
