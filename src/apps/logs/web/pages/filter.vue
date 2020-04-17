@@ -482,7 +482,7 @@ export default {
   },
   methods: {
     apply_zoom: function (data, categoryY, valueX) {
-      const min_zoom = 0.01
+      // const min_zoom = 0.01
       const max_zoom = 1
       /* const min_length = 8 */
       const max_length = 15
@@ -500,7 +500,8 @@ export default {
         // }
 
         let zoom = max_length / data.length
-        return (zoom > min_zoom) ? zoom : min_zoom
+        // return (zoom > min_zoom) ? zoom : min_zoom
+        return zoom
       }
     },
     format_time: function (timestamp) {
