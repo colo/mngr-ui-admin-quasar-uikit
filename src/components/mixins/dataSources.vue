@@ -23,6 +23,8 @@ export default {
   __pipelines_cfg: {},
   unwatch_store: undefined,
 
+  _components_req: {},
+
   ON_PIPELINE_READY: 'onPipelineReady',
 
   // sources: {
@@ -47,10 +49,22 @@ export default {
   },
   created: function () {
     debug('lifecycle created')
-    EventBus.$on(this.pipeline_id + '.' + this.path, this.__process_input_data)
+    let pipeline_id = []
+    if (!Array.isArray(this.pipeline_id)) {
+      pipeline_id = [this.pipeline_id]
+    } else {
+      pipeline_id = this.pipeline_id
+    }
+    Array.each(pipeline_id, function (id) {
+      EventBus.$on(id + '.' + this.path, this.__process_input_data)
+    }.bind(this))
 
     if (this.store) this.__register_store_module(this.id, sourceStore)
-    this.__bind_components_to_sources(this.components)
+    // this.__bind_components_to_sources(this.components)
+    Object.each(this.$options._components_req, function (_components_req, pipeline_id) {
+      this.__bind_components_to_sources(_components_req)
+    }.bind(this))
+
     this.create_pipelines()
   },
 
@@ -63,7 +77,16 @@ export default {
   destroy: function () {
     debug('lifecycle destroy')
     this.destroy_pipelines()
-    EventBus.$off(this.pipeline_id + '.' + this.path, this.__process_input_data)
+    // EventBus.$off(this.pipeline_id + '.' + this.path, this.__process_input_data)
+    let pipeline_id = []
+    if (!Array.isArray(this.pipeline_id)) {
+      pipeline_id = [this.pipeline_id]
+    } else {
+      pipeline_id = this.pipeline_id
+    }
+    Array.each(pipeline_id, function (id) {
+      EventBus.$off(id + '.' + this.path, this.__process_input_data)
+    }.bind(this))
     this.__unregister_store_module(this.id)
   },
 
@@ -73,7 +96,17 @@ export default {
     // be navigated away from.
     // has access to `this` component instance.
     this.suspend_pipelines()
-    EventBus.$off(this.pipeline_id + '.' + this.path, this.__process_input_data)
+    // EventBus.$off(this.pipeline_id + '.' + this.path, this.__process_input_data)
+    let pipeline_id = []
+    if (!Array.isArray(this.pipeline_id)) {
+      pipeline_id = [this.pipeline_id]
+    } else {
+      pipeline_id = this.pipeline_id
+    }
+    Array.each(pipeline_id, function (id) {
+      EventBus.$off(id + '.' + this.path, this.__process_input_data)
+    }.bind(this))
+
     // this.__unregister_store_module(this.id)
     next()
   },
@@ -346,31 +379,34 @@ export default {
       let key = payload.id
       // convert to array of array so it can be pass as parameter
       // if (Array.isArray(payload.data)) payload.data = [payload.data]
+      Object.each(this.$options._components_req, function (_components_req, pipeline_id) {
+        for (const prop in _components_req) {
+          let components = _components_req[prop]
+          // if (!Array.isArray(components)) components = [components]
 
-      for (const prop in this.components) {
-        let components = this.components[prop]
-        // if (!Array.isArray(components)) components = [components]
-
-        if (Array.isArray(components)) {
-          for (let index = 0; index < components.length; index++) {
-            if (
-              components[index].source &&
-              this.__source_to_keys(components[index].source, type).contains(key)
-            ) {
-              this.__update_component_data(components[index], key, type, payload)
+          if (Array.isArray(components)) {
+            for (let index = 0; index < components.length; index++) {
+              if (
+                components[index].source &&
+                this.__source_to_keys(components[index].source, type).contains(key)
+              ) {
+                this.__update_component_data(components[index], key, type, payload)
+              }
+            }
+          } else {
+            if (components.source && this.__source_to_keys(components.source, type).contains(key)) {
+              this.__update_component_data(components, key, type, payload)
             }
           }
-        } else {
-          if (components.source && this.__source_to_keys(components.source, type).contains(key)) {
-            this.__update_component_data(components, key, type, payload)
-          }
         }
-      }
+      }.bind(this))
     },
-    __components_sources_to_requests: function (_components) {
+    __components_sources_to_requests: function (_components, pipeline_id) {
+      pipeline_id = pipeline_id || this.pipeline_id
       let requests = {}
       let sources = {}
 
+      this.$options._components_req[pipeline_id] = _components
       // let _components = JSON.parse(JSON.stringify(this.components))
       // debug('__components_sources_to_requests', _components)
       for (const prop in _components) {
@@ -460,7 +496,7 @@ export default {
                   stringified = emit_query.path + '?' + stringified
 
                   if (!emit_query.params) emit_query.params = {}
-                  emit_query.params.id = (emit_query.params.id) ? self.pipeline_id + '[' + emit_query.params.id + ']' : self.pipeline_id + '[' + stringified + ']'
+                  emit_query.params.id = (emit_query.params.id) ? pipeline_id + '[' + emit_query.params.id + ']' : pipeline_id + '[' + stringified + ']'
 
                   debug('io EMIT', _query[i], emit_query)
                   app.io.emit('/', emit_query)
@@ -521,7 +557,7 @@ export default {
       debug('suspend_pipelines %s', this.pipeline_id)
 
       Object.each(this.$options.pipelines, function (pipe, id) { // destroy old ones
-        if (id === this.pipeline_id) {
+        if ((Array.isArray(this.pipeline_id) && this.pipeline_id.contains(id)) || id === this.pipeline_id) {
           pipe.fireEvent('onSuspend')
           // pipe.fireEvent('onExit')
           // pipe.removeEvents()
@@ -536,7 +572,7 @@ export default {
       debug('resume_pipelines %s', this.pipeline_id)
 
       Object.each(this.$options.pipelines, function (pipe, id) { // destroy old ones
-        if (id === this.pipeline_id) {
+        if ((Array.isArray(this.pipeline_id) && this.pipeline_id.contains(id)) || id === this.pipeline_id) {
           pipe.fireEvent('onResume')
           pipe.fireEvent('onOnce')
           // pipe.fireEvent('onExit')

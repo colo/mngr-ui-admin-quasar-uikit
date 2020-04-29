@@ -304,9 +304,12 @@ import BarRace from '@apps/logs/components/barRace'
 import DataSourcesMixin from '@components/mixins/dataSources'
 
 import JSPipeline from 'js-pipeline'
-import Pipeline from '@apps/logs/educativa/pipelines/filter'
 
-import { requests, store } from '@apps/logs/educativa/sources/filter/index'
+import PeriodicalPipeline from '@apps/logs/educativa/pipelines/filter/periodical'
+import MinutePipeline from '@apps/logs/educativa/pipelines/filter/minute'
+
+import * as PeriodicalSources from '@apps/logs/educativa/sources/filter/periodical/index'
+import * as MinuteSources from '@apps/logs/educativa/sources/filter/minute/index'
 
 // const MAX_FEED_DATA = 10
 import moment from 'moment'
@@ -408,7 +411,7 @@ export default {
       },
 
       store: false,
-      pipeline_id: 'input.logs.educativa.filter',
+      pipeline_id: ['input.logs.educativa.filter.periodical', 'input.logs.educativa.filter.minute'], // 'input.logs.educativa.filter.minute'
 
       // logs: [],
 
@@ -458,17 +461,34 @@ export default {
       ],
 
       components: {
-        range: {
-          // source: {
-          //   requests: {
-          //     once: [],
-          //     periodical: []
-          //   }
-          // }
-          source: {
-            requests: requests
+        'input.logs.educativa.filter.periodical': {
+          range: {
+            // source: {
+            //   requests: {
+            //     once: [],
+            //     periodical: []
+            //   }
+            // }
+            source: {
+              requests: PeriodicalSources.requests
 
-            // store: store
+              // store: store
+            }
+          }
+        },
+        'input.logs.educativa.filter.minute': {
+          range: {
+            // source: {
+            //   requests: {
+            //     once: [],
+            //     periodical: []
+            //   }
+            // }
+            source: {
+              requests: MinuteSources.requests
+
+              // store: store
+            }
           }
         }
 
@@ -546,7 +566,10 @@ export default {
     create_pipelines: function (next) {
       debug('create_pipelines %o', this.$options.pipelines)
 
-      if (this.$options.pipelines['input.logs.educativa.filter'] && this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os')) {
+      if (
+        this.$options.pipelines['input.logs.educativa.filter.periodical'] &&
+        this.$options.pipelines['input.logs.educativa.filter.periodical'].get_input_by_id('input.logs.educativa.filter.periodical')
+      ) {
         // let requests = this.__components_sources_to_requests(this.components)
         // if (requests.once) {
         //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].options.requests.once.combine(requests.once)
@@ -558,31 +581,35 @@ export default {
         //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
-        let template = Object.clone(Pipeline)
+        const pipelines = [PeriodicalPipeline, MinutePipeline]
+        Array.each(pipelines, function (Pipeline) {
+          let template = Object.clone(Pipeline)
 
-        let pipeline_id = template.input[0].poll.id
-        // let pipeline_id = 'input.logs.educativa.filter'
+          debug('create_pipelines template %o', template)
 
-        template.input[0].poll.conn[0].requests = this.__components_sources_to_requests(this.components)
+          let pipeline_id = template.input[0].poll.id
 
-        let pipe = new JSPipeline(template)
+          template.input[0].poll.conn[0].requests = this.__components_sources_to_requests(this.components[pipeline_id], pipeline_id)
 
-        this.$options.__pipelines_cfg[pipeline_id] = {
-          ids: [],
-          connected: [],
-          suspended: pipe.inputs.every(function (input) { return input.options.suspended }, this)
-        }
+          let pipe = new JSPipeline(template)
 
-        // this.__after_connect_inputs(
-        //   pipe,
-        //   this.$options.__pipelines_cfg[pipeline_id],
-        //   this.__resume_pipeline.pass([pipe, this.$options.__pipelines_cfg[pipeline_id], this.id, function () {
-        //     debug('__resume_pipeline CALLBACK')
-        //     pipe.fireEvent('onOnce')
-        //   }], this)
-        // )
+          this.$options.__pipelines_cfg[pipeline_id] = {
+            ids: [],
+            connected: [],
+            suspended: pipe.inputs.every(function (input) { return input.options.suspended }, this)
+          }
 
-        this.$options.pipelines[pipeline_id] = pipe
+          // this.__after_connect_inputs(
+          //   pipe,
+          //   this.$options.__pipelines_cfg[pipeline_id],
+          //   this.__resume_pipeline.pass([pipe, this.$options.__pipelines_cfg[pipeline_id], this.id, function () {
+          //     debug('__resume_pipeline CALLBACK')
+          //     pipe.fireEvent('onOnce')
+          //   }], this)
+          // )
+
+          this.$options.pipelines[pipeline_id] = pipe
+        }.bind(this))
 
         debug('create_pipelines %o', this.$options.pipelines)
 

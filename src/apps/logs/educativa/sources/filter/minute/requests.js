@@ -1,8 +1,8 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:educativa:sources:filter:requests')
+const debug = Debug('apps:logs:educativa:sources:filter:minute:requests')
 
 // import END from '../../../etc/range'
-const end = require('../../../etc/end')
+const end = require('../../../../etc/end')
 
 const NANOSECOND = 1000000
 const SECOND = 1000
@@ -601,7 +601,7 @@ const generic_callback = function (data, metadata, key, vm) {
   //   vm.$set(vm.periodical, 'user_agent_browser_counter', periodical_user_agent_browser_counter)
   //   vm.$set(vm.periodical, 'user_agent_device_counter', periodical_user_agent_device_counter)
   } else if (/historical/.test(key) && data.logs_historical && Object.getLength(data.logs_historical) > 0) {
-    // debug('HISTORICAL HOST CALLBACK data %s %o', key, data)
+    debug('HISTORICAL HOST CALLBACK data %s %o', key, data)
     // let type
     // let vm_data = {}
     // Object.each(data.logs_historical, function (row) {
@@ -642,8 +642,8 @@ const host_once_component = {
     let key
 
     if (!_key) {
-      key = ['periodical.once', 'historical.minute.once', 'historical.hour.once', 'historical.day.once']// 'config.once',
-      // key = ['periodical.once']// 'config.once',
+      // key = ['periodical.once', 'historical.minute.once', 'historical.hour.once', 'historical.day.once']// 'config.once',
+      key = ['historical.minute.once']// 'config.once',
     }
 
     if (
@@ -717,7 +717,7 @@ const host_once_component = {
 
         case 'historical.minute.once':
           // START = END - MINUTE
-          START = (END - MINUTE >= 0) ? END - MINUTE : 0
+          START = (END - (2 * MINUTE) >= 0) ? END - (2 * MINUTE) : 0
 
           filter += "this.r.row('metadata')('type').eq('minute')"
           Object.each(vm.filter, function (value, prop) {
@@ -736,7 +736,7 @@ const host_once_component = {
             query: {
               'from': 'logs_historical',
               // 'register': 'changes',
-              'format': 'stat',
+              // 'format': 'stat',
               'index': false,
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
@@ -769,7 +769,7 @@ const host_once_component = {
 
         case 'historical.hour.once':
           // START = END - HOUR
-          START = START(END - HOUR >= 0) ? END - HOUR : 0
+          START = (END - (2 * HOUR) >= 0) ? END - (2 * HOUR) : 0
 
           filter += "this.r.row('metadata')('type').eq('hour')"
           Object.each(vm.filter, function (value, prop) {
@@ -778,7 +778,7 @@ const host_once_component = {
 
           filter += ')' // -> "this.r.row('metadata')('path').eq('logs.educativa').and("
 
-          debug('FILTER STRING %s', filter)
+          debug('FILTER STRING HOUR %s', filter)
 
           source = [{
             params: { id: _key },
@@ -788,7 +788,7 @@ const host_once_component = {
             query: {
               'from': 'logs_historical',
               // 'register': 'changes',
-              'format': 'stat',
+              // 'format': 'stat',
               'index': false,
               /**
               * right now needed to match OUTPUT 'id' with this query (need to @fix)
@@ -821,7 +821,7 @@ const host_once_component = {
 
         case 'historical.day.once':
           // START = END - DAY
-          START = START(END - DAY >= 0) ? END - DAY : 0
+          START = (END - DAY >= 0) ? END - DAY : 0
 
           filter += "this.r.row('metadata')('type').eq('day')"
           Object.each(vm.filter, function (value, prop) {
@@ -873,7 +873,7 @@ const host_once_component = {
       }
     }
 
-    // debug('MyChart periodical KEY ', key, source)
+    debug('MyChart periodical KEY ', key, source)
 
     return { key, source }
   },
