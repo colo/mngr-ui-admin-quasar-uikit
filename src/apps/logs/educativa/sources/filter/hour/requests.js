@@ -1,5 +1,5 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:educativa:sources:filter:minute:periodical')
+const debug = Debug('apps:logs:educativa:sources:filter:hour:requests')
 
 // import END from '../../../etc/range'
 const end = require('../../../../etc/end')
@@ -114,155 +114,51 @@ const generic_callback = function (data, metadata, key, vm) {
   // debug('HOST CALLBACK data %s %o', key, data)
 
   const END = end()
-  // const END = 1586055600972 //= > test data
-  // const END = Date.now() // production
 
-  if (/periodical/.test(key) && data) { // (data.logs || Object.getLength(data) > 0)
-    // const START = END - MINUTE
-    // const START = END - (15 * SECOND)
-    const START = (END - (15 * SECOND) >= 0) ? END - (15 * SECOND) : 0
-
-    let _data
-    if (data.logs) _data = data.logs // comes from 'Range'
-    else _data = data // comes from 'register'
-
-    if (!_data.data) _data.data = {}
-
-    debug('PERIODICAL HOST CALLBACK _data %o', _data)
-
-    /**
-    * logs - format: stat
-    let logs = []
-    let log_template = _data[0].metadata
-    Array.each(_data[0].data.log, function (row) {
-      logs.push(Object.merge(Object.clone(log_template), { log: row.value, timestamp: row.timestamp }))
-    })
-    **/
-
-    let timestamp = _data[0].metadata.timestamp
-    /**
-    * logs
-    **/
-    let logs = []
-    let cgi_count = {}
-    // let domain_count = {}
-    // let host_count = {}
-
-    let duration = []
-    let duration_stats_template = { max: { domain: undefined, cgi: undefined, seconds: undefined }, min: { domain: undefined, cgi: undefined, seconds: undefined } }
-    let duration_stats = Object.clone(duration_stats_template)
-    // let log_template = _data[0].metadata
+  if (/historical/.test(key) && data.logs_historical && Object.getLength(data.logs_historical) > 0) {
+    // debug('HISTORICAL HOST CALLBACK data %s %o', key, data)
+    // let type
+    // let vm_data = {}
     let per_domain = {}
     let per_host = {}
 
-    let err_count = 0
-
-    Array.each(_data, function (row) {
-      logs.push(Object.merge(Object.clone(row.metadata), { log: row.data.log }))
-      if (!cgi_count[row.data.cgi]) cgi_count[row.data.cgi] = 0
-      cgi_count[row.data.cgi]++
-
-      // if (!domain_count[row.metadata.domain]) domain_count[row.metadata.domain] = 0
-      // domain_count[row.metadata.domain]++
-
-      if (!per_domain[row.metadata.domain]) per_domain[row.metadata.domain] = Object.merge(Object.clone(duration_stats_template), { count: 0, duration: [] })
-      if (!per_host[row.metadata.host]) per_host[row.metadata.host] = Object.merge(Object.clone(duration_stats_template), { count: 0, duration: [] })
-
-      let cgi_duration = ((row.data.duration / NANOSECOND).toFixed(2)) * 1
-      duration.push(cgi_duration)
-
-      per_domain[row.metadata.domain].duration.push(cgi_duration)
-      per_domain[row.metadata.domain].count++
-
-      per_host[row.metadata.host].duration.push(cgi_duration)
-      per_host[row.metadata.host].count++
-
-      // per_domain[row.metadata.domain].domain = row.metadata.domain
-      // if (cgi_duration < 0) { // ERROR
-      //   // debug('NEGATIVE DURATION ERR %O', row)
-      //   // err_count++
-      //   cgi_duration *= -1
+    Array.each(data.logs_historical, function (row) {
+      if (row.metadata.domain) {
+        let domain = row.metadata.domain
+        if (!per_domain[domain]) per_domain[domain] = row.data
+      } else {
+        let host = row.metadata.host
+        if (!per_host[host]) per_host[host] = row.data
+      }
+      // if (!type) type = row.metadata.type
+      // Object.each(row.data, function (row_data, prop) {
+      //   if (!vm_data[prop]) {
+      //     vm_data[prop] = JSON.parse(JSON.stringify(row_data[0].value))
+      //   } else if (row_data[0] && row_data[0].value) {
+      //     // if (prop === 'user_agent') {
+      //     //   // debug('HISTORICAL HOST CALLBACK data %s %s %o %o', key, type, prop, vm_data[prop], row_data)
+      //     //   debug('HISTORICAL HOST CALLBACK data %s %s %o %o', key, type, prop)
+      //     //   vm_data[prop] = _merge(prop, vm_data[prop], JSON.parse(JSON.stringify(row_data[0].value)))
+      //     // }
+      //     vm_data[prop] = _merge(prop, vm_data[prop], JSON.parse(JSON.stringify(row_data[0].value)))
+      //     // debug('HISTORICAL HOST CALLBACK data %s %s %o', key, type, prop, row_data)
+      //   }
+      // })
+      //
+      // if (Object.getLength(vm_data) > 0) {
+      //   vm[type] = vm_data
       // }
-
-      if (duration_stats.max.seconds === undefined || duration_stats.max.seconds < cgi_duration) {
-        duration_stats.max.seconds = cgi_duration
-        duration_stats.max.cgi = row.data.cgi
-        duration_stats.max.domain = row.metadata.domain
-      }
-
-      if (duration_stats.min.seconds === undefined || duration_stats.min.seconds > cgi_duration) {
-        duration_stats.min.seconds = cgi_duration
-        duration_stats.min.cgi = row.data.cgi
-        duration_stats.min.domain = row.metadata.domain
-      }
-
-      if (per_domain[row.metadata.domain].max.seconds === undefined || per_domain[row.metadata.domain].max.seconds < cgi_duration) {
-        per_domain[row.metadata.domain].max.seconds = cgi_duration
-        per_domain[row.metadata.domain].max.cgi = row.data.cgi
-        // per_domain[row.metadata.domain].max.domain = row.metadata.domain
-      }
-
-      if (per_domain[row.metadata.domain].min.seconds === undefined || per_domain[row.metadata.domain].min.seconds > cgi_duration) {
-        per_domain[row.metadata.domain].min.seconds = cgi_duration
-        per_domain[row.metadata.domain].min.cgi = row.data.cgi
-        // per_domain[row.metadata.domain].min.domain = row.metadata.domain
-      }
-
-      if (per_host[row.metadata.host].max.seconds === undefined || per_host[row.metadata.host].max.seconds < cgi_duration) {
-        per_host[row.metadata.host].max.seconds = cgi_duration
-        per_host[row.metadata.host].max.cgi = row.data.cgi
-        // per_host[row.metadata.host].max.host = row.metadata.host
-      }
-
-      if (per_host[row.metadata.host].min.seconds === undefined || per_host[row.metadata.host].min.seconds > cgi_duration) {
-        per_host[row.metadata.host].min.seconds = cgi_duration
-        per_host[row.metadata.host].min.cgi = row.data.cgi
-        // per_host[row.metadata.host].min.host = row.metadata.host
-      }
     })
 
-    duration_stats = Object.merge(duration_stats, {
-      sum: ss.sum(duration),
-      avg: ss.mean(duration).toFixed(2) * 1,
-      median: ss.median(duration).toFixed(2) * 1
-    })
-
-    Object.each(per_domain, function (val, domain) {
-      per_domain[domain] = Object.merge(val, {
-        sum: ss.sum(val.duration),
-        avg: ss.mean(val.duration).toFixed(2) * 1,
-        median: ss.median(val.duration).toFixed(2) * 1
-      })
-    })
-
-    Object.each(per_host, function (val, host) {
-      per_host[host] = Object.merge(val, {
-        sum: ss.sum(val.duration),
-        avg: ss.mean(val.duration).toFixed(2) * 1,
-        median: ss.median(val.duration).toFixed(2) * 1
-      })
-    })
-
-    // debug('TOTAL %d', _data.length)
-    // debug('TOTAL ERR %d', err_count)
-    debug('DURATION %o', duration_stats)
-
-    if (logs.length > 0) {
-      // vm.logs = logs
-      vm.$set(vm.periodical, 'logs', logs)
-      vm.loading_logs = false
-    }
-
-    vm.$set(vm.periodical, 'cgi_count', cgi_count)
-    vm.$set(vm.periodical, 'duration_stats', duration_stats)
-    vm.$set(vm.periodical, 'per_domain', per_domain)
-    vm.$set(vm.periodical, 'per_host', per_host)
-    vm.$set(vm.periodical, 'timestamp', timestamp)
+    debug('HISTORICAL HOST CALLBACK data %s %o %o', key, per_domain, per_host)
+    vm.$set(vm.hour, 'per_domain', per_domain)
+    vm.$set(vm.hour, 'per_host', per_host)
+    // // data = data.logs_historical[0]
+    //
+    // // if (/minute/.test(key)){
+    // //   const START = END - MINUTE
+    // // }
   }
-  // else if (/historical/.test(key) && data.logs_historical && Object.getLength(data.logs_historical) > 0) {
-  //   debug('HISTORICAL HOST CALLBACK data %s %o', key, data)
-  //
-  // }
 }
 
 const host_once_component = {
@@ -273,8 +169,8 @@ const host_once_component = {
     let key
 
     if (!_key) {
-      // key = ['periodical.once', 'historical.minute.once', 'historical.hour.once', 'historical.day.once']// 'config.once',
-      key = ['periodical.once']// 'config.once',
+      // key = ['periodical.once', 'historical.hour.once', 'historical.hour.once', 'historical.day.once']// 'config.once',
+      key = ['historical.hour.once']// 'config.once',
     }
 
     if (
@@ -299,52 +195,52 @@ const host_once_component = {
       debug('FILTER STRING %s', filter)
 
       switch (_key) {
-        case 'periodical.once':
-          // START = END - MINUTE
-          // START = END - (15 * SECOND)
-          START = (END - (15 * SECOND) >= 0) ? END - (15 * SECOND) : 0
-
-          filter += "this.r.row('metadata')('type').eq('periodical')"
-          Object.each(vm.filter, function (value, prop) {
-            filter += ')'
-          })
-
-          filter += ')' // "this.r.row('metadata')('path').eq('logs.educativa').and("
-
-          debug('FILTER STRING %s', filter)
-
-          source = [{
-            params: { id: _key },
-            path: 'all',
-            // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
-            range: 'posix ' + START + '-' + END + '/*',
-            query: {
-              'from': 'logs',
-              // 'register': 'changes',
-              // 'format': 'stat',
-              'index': false,
-              /**
-              * right now needed to match OUTPUT 'id' with this query (need to @fix)
-              **/
-              'q': [
-                'data',
-                'metadata'
-              ],
-              'transformation': [
-                {
-                  'orderBy': { 'index': 'r.desc(timestamp)' }
-                }
-                // { 'limit': 10 }
-              ],
-              filter: filter
-              // 'filter': [
-              //   { 'metadata': vm.filter },
-              //   "r.row('metadata')('type').eq('periodical')"
-              // ]
-
-            }
-          }]
-          break
+        // case 'periodical.once':
+        //   // START = END - MINUTE
+        //   // START = END - (15 * SECOND)
+        //   START = (END - (15 * SECOND) >= 0) ? END - (15 * SECOND) : 0
+        //
+        //   filter += "this.r.row('metadata')('type').eq('periodical')"
+        //   Object.each(vm.filter, function (value, prop) {
+        //     filter += ')'
+        //   })
+        //
+        //   filter += ')' // "this.r.row('metadata')('path').eq('logs.educativa').and("
+        //
+        //   debug('FILTER STRING %s', filter)
+        //
+        //   source = [{
+        //     params: { id: _key },
+        //     path: 'all',
+        //     // range: 'posix ' + (Date.now() - MINUTE) + '-' + Date.now() + '/*',
+        //     range: 'posix ' + START + '-' + END + '/*',
+        //     query: {
+        //       'from': 'logs',
+        //       // 'register': 'changes',
+        //       // 'format': 'stat',
+        //       'index': false,
+        //       /**
+        //       * right now needed to match OUTPUT 'id' with this query (need to @fix)
+        //       **/
+        //       'q': [
+        //         'data',
+        //         'metadata'
+        //       ],
+        //       'transformation': [
+        //         {
+        //           'orderBy': { 'index': 'r.desc(timestamp)' }
+        //         }
+        //         // { 'limit': 10 }
+        //       ],
+        //       filter: filter
+        //       // 'filter': [
+        //       //   { 'metadata': vm.filter },
+        //       //   "r.row('metadata')('type').eq('periodical')"
+        //       // ]
+        //
+        //     }
+        //   }]
+        //   break
 
         // case 'historical.minute.once':
         //   // START = END - MINUTE
@@ -397,59 +293,59 @@ const host_once_component = {
         //   }]
         //
         //   break
-        //
-        // case 'historical.hour.once':
-        //   // START = END - HOUR
-        //   START = (END - (2 * HOUR) >= 0) ? END - (2 * HOUR) : 0
-        //
-        //   filter += "this.r.row('metadata')('type').eq('hour')"
-        //   Object.each(vm.filter, function (value, prop) {
-        //     filter += ')'
-        //   })
-        //
-        //   filter += ')' // -> "this.r.row('metadata')('path').eq('logs.educativa').and("
-        //
-        //   debug('FILTER STRING HOUR %s', filter)
-        //
-        //   source = [{
-        //     params: { id: _key },
-        //     path: 'all',
-        //     // range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
-        //     range: 'posix ' + START + '-' + END + '/*',
-        //     query: {
-        //       'from': 'logs_historical',
-        //       // 'register': 'changes',
-        //       // 'format': 'stat',
-        //       'index': false,
-        //       /**
-        //       * right now needed to match OUTPUT 'id' with this query (need to @fix)
-        //       **/
-        //       'q': [
-        //         // {
-        //         //   'metadata': [
-        //         //     'timestamp',
-        //         //     'path'
-        //         //   ]
-        //         // },
-        //         'data',
-        //         'metadata'
-        //       ],
-        //       'transformation': [
-        //         {
-        //           'orderBy': { 'index': 'r.desc(timestamp)' }
-        //         }
-        //       ],
-        //       filter: filter
-        //       // 'filter': [
-        //       //   { 'metadata': vm.filter },
-        //       //   "r.row('metadata')('type').eq('hour')"
-        //       // ]
-        //
-        //     }
-        //   }]
-        //
-        //   break
-        //
+
+        case 'historical.hour.once':
+          // START = END - HOUR
+          START = (END - (2 * HOUR) >= 0) ? END - (2 * HOUR) : 0
+
+          filter += "this.r.row('metadata')('type').eq('hour')"
+          Object.each(vm.filter, function (value, prop) {
+            filter += ')'
+          })
+
+          filter += ')' // -> "this.r.row('metadata')('path').eq('logs.educativa').and("
+
+          debug('FILTER STRING HOUR %s', filter)
+
+          source = [{
+            params: { id: _key },
+            path: 'all',
+            // range: 'posix ' + (Date.now() - (7 * MINUTE)) + '-' + Date.now() + '/*',
+            range: 'posix ' + START + '-' + END + '/*',
+            query: {
+              'from': 'logs_historical',
+              // 'register': 'changes',
+              // 'format': 'stat',
+              'index': false,
+              /**
+              * right now needed to match OUTPUT 'id' with this query (need to @fix)
+              **/
+              'q': [
+                // {
+                //   'metadata': [
+                //     'timestamp',
+                //     'path'
+                //   ]
+                // },
+                'data',
+                'metadata'
+              ],
+              'transformation': [
+                {
+                  'orderBy': { 'index': 'r.desc(timestamp)' }
+                }
+              ],
+              filter: filter
+              // 'filter': [
+              //   { 'metadata': vm.filter },
+              //   "r.row('metadata')('type').eq('hour')"
+              // ]
+
+            }
+          }]
+
+          break
+
         // case 'historical.day.once':
         //   // START = END - DAY
         //   START = (END - DAY >= 0) ? END - DAY : 0
@@ -504,7 +400,7 @@ const host_once_component = {
       }
     }
 
-    // debug('MyChart periodical KEY ', key, source)
+    debug('MyChart periodical KEY ', key, source)
 
     return { key, source }
   },

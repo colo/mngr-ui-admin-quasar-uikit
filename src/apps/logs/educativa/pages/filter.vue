@@ -51,16 +51,72 @@
     </vk-card>
 
     <vk-card class="uk-background-secondary">
-      <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="'Per CGI count'" :id="'cgi_count'" :zoom="apply_zoom"/>
-      <!-- :label="format_time(periodical.timestamp)" -->
+      <q-tabs
+        v-model="range_tab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+        narrow-indicator
+      >
+        <q-tab name="periodical" label="Now" />
+        <q-tab name="minute" label="Last Minute" />
+        <q-tab name="hour" label="Last Hour" />
+      </q-tabs>
 
-      <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'" :zoom="apply_zoom"/>
+      <q-separator />
 
-      <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'" :zoom="apply_zoom"/>
+      <q-tab-panels v-model="range_tab" animated>
+        <q-tab-panel name="periodical">
+          <bar-race :categoryY="'cgi'" :valueX="'count'" :values="periodical.cgi_count" :label="'Per CGI count'" :id="'cgi_count'" :zoom="apply_zoom"/>
+          <!-- :label="format_time(periodical.timestamp)" -->
 
-      <bar-race :categoryY="'host'" :valueX="'count'" :values="periodical.per_host" :label="'Per HOST - CGI count'" :id="'per_host_count'" :zoom="apply_zoom"/>
+          <bar-race :categoryY="'domain'" :valueX="'count'" :values="periodical.per_domain" :label="'Per DOMAIN - CGI count'" :id="'per_domain_count'" :zoom="apply_zoom"/>
 
-      <bar-race :categoryY="'host'" :valueX="'sum'" :values="periodical.per_host" :label="'Per HOST - total duration'" :id="'per_host_sum'" :zoom="apply_zoom"/>
+          <bar-race :categoryY="'domain'" :valueX="'sum'" :values="periodical.per_domain" :label="'Per DOMAIN - total duration'" :id="'per_domain_sum'" :zoom="apply_zoom"/>
+
+          <bar-race :categoryY="'host'" :valueX="'count'" :values="periodical.per_host" :label="'Per HOST - CGI count'" :id="'per_host_count'" :zoom="apply_zoom"/>
+
+          <bar-race :categoryY="'host'" :valueX="'sum'" :values="periodical.per_host" :label="'Per HOST - total duration'" :id="'per_host_sum'" :zoom="apply_zoom"/>
+
+          <div v-for="(count, cgi) in periodical.cgi_count" :key="'cgi_count.'+cgi">
+            periodical.cgi_count: {{cgi}} - {{count}} <br/>
+          </div>
+
+          <hr>
+
+          <div v-for="(val, domain) in periodical.per_domain" :key="'per_domain.'+domain">
+            periodical.per_domain: {{domain}} - {{val}} <br/>
+          </div>
+
+          <hr>
+
+          <div v-for="(val, stat) in periodical.duration_stats" :key="'duration_stats.'+stat">
+            periodical.duration_stats: {{stat}} - {{val}} <br/>
+          </div>
+
+          <hr>
+
+        </q-tab-panel>
+
+        <q-tab-panel name="minute">
+          <bar-race :categoryY="'domain'" :valueX="'hits'" :values="minute.per_domain" :label="'Minute Per DOMAIN - CGI count'" :id="'minute_per_domain_sum'"/>
+          <!-- :zoom="apply_zoom" -->
+
+          <bar-race :categoryY="'host'" :valueX="'hits'" :values="minute.per_host" :label="'Minute Per HOST - CGI count'" :id="'minute_per_host_sum'"/>
+          <!-- :zoom="apply_zoom" -->
+
+        </q-tab-panel>
+
+        <q-tab-panel name="hour">
+          <bar-race :categoryY="'domain'" :valueX="'hits'" :values="hour.per_domain" :label="'Hour Per DOMAIN - CGI count'" :id="'hour_per_domain_sum'"/>
+          <!-- :zoom="apply_zoom" -->
+
+          <bar-race :categoryY="'host'" :valueX="'hits'" :values="hour.per_host" :label="'Hour Per HOST - CGI count'" :id="'hour_per_host_sum'" />
+          <!-- :zoom="apply_zoom" -->
+        </q-tab-panel>
+      </q-tab-panels>
 
       <!-- :label="format_time(periodical.timestamp) -->
 
@@ -88,28 +144,11 @@
 
       <hr> -->
 
-      <div v-for="(count, cgi) in periodical.cgi_count" :key="'cgi_count.'+cgi">
-        periodical.cgi_count: {{cgi}} - {{count}} <br/>
-      </div>
-
-      <hr>
-
       <!-- <div v-for="(count, domain) in periodical.domain_count" :key="'domain_count.'+domain">
         periodical.domain_count: {{domain}} - {{count}} <br/>
       </div>
 
       <hr> -->
-      <div v-for="(val, domain) in periodical.per_domain" :key="'per_domain.'+domain">
-        periodical.per_domain: {{domain}} - {{val}} <br/>
-      </div>
-
-      <hr>
-
-      <div v-for="(val, stat) in periodical.duration_stats" :key="'duration_stats.'+stat">
-        periodical.duration_stats: {{stat}} - {{val}} <br/>
-      </div>
-
-      <hr>
 
       <!--
       <div v-for="(val, city) in periodical.city_counter" :key="'city.'+city">
@@ -307,9 +346,11 @@ import JSPipeline from 'js-pipeline'
 
 import PeriodicalPipeline from '@apps/logs/educativa/pipelines/filter/periodical'
 import MinutePipeline from '@apps/logs/educativa/pipelines/filter/minute'
+import HourPipeline from '@apps/logs/educativa/pipelines/filter/hour'
 
 import * as PeriodicalSources from '@apps/logs/educativa/sources/filter/periodical/index'
 import * as MinuteSources from '@apps/logs/educativa/sources/filter/minute/index'
+import * as HourSources from '@apps/logs/educativa/sources/filter/hour/index'
 
 // const MAX_FEED_DATA = 10
 import moment from 'moment'
@@ -325,6 +366,8 @@ export default {
     return {
       id: 'logs.educativa.filter',
       path: 'all',
+
+      range_tab: 'minute',
 
       day: {
         // body_bytes_sent: {},
@@ -343,6 +386,9 @@ export default {
         // type_counter: {}
       },
       hour: {
+        per_domain: {},
+
+        per_host: {}
         // body_bytes_sent: {},
         // geoip: {},
         // qs: {},
@@ -359,6 +405,9 @@ export default {
         // type_counter: {}
       },
       minute: {
+        per_domain: {},
+
+        per_host: {}
         // body_bytes_sent: {},
         // geoip: {},
         // qs: {},
@@ -411,7 +460,7 @@ export default {
       },
 
       store: false,
-      pipeline_id: ['input.logs.educativa.filter.periodical', 'input.logs.educativa.filter.minute'], // 'input.logs.educativa.filter.minute'
+      pipeline_id: ['input.logs.educativa.filter.periodical', 'input.logs.educativa.filter.minute', 'input.logs.educativa.filter.hour'],
 
       // logs: [],
 
@@ -486,6 +535,21 @@ export default {
             // }
             source: {
               requests: MinuteSources.requests
+
+              // store: store
+            }
+          }
+        },
+        'input.logs.educativa.filter.hour': {
+          range: {
+            // source: {
+            //   requests: {
+            //     once: [],
+            //     periodical: []
+            //   }
+            // }
+            source: {
+              requests: HourSources.requests
 
               // store: store
             }
@@ -581,7 +645,7 @@ export default {
         //   this.$options.pipelines['input.logs.educativa.filter'].get_input_by_id('input.os').conn_pollers[0].fireEvent('onPeriodicalRequestsUpdated')
         // }
       } else {
-        const pipelines = [PeriodicalPipeline, MinutePipeline]
+        const pipelines = [PeriodicalPipeline, MinutePipeline, HourPipeline]
         Array.each(pipelines, function (Pipeline) {
           let template = Object.clone(Pipeline)
 

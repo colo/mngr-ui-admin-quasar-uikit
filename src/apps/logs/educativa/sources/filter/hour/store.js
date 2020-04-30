@@ -1,5 +1,5 @@
 import * as Debug from 'debug'
-const debug = Debug('apps:logs:educativa:sources:filter:minute:store')
+const debug = Debug('apps:logs:educativa:sources:filter:hour:store')
 
 // const nginx_os_enabled = {
 //   params: {
