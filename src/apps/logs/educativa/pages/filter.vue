@@ -101,19 +101,19 @@
         </q-tab-panel>
 
         <q-tab-panel name="minute">
-          <bar-race :categoryY="'domain'" :valueX="'hits'" :values="minute.per_domain" :label="'Minute Per DOMAIN - CGI count'" :id="'minute_per_domain_sum'"/>
+          <bar-race :categoryY="'domain'" :valueX="'hits'" :values="minute.per_domain" :label="'Minute Per DOMAIN - CGI count'" :id="'minute_per_domain_sum'" :zoom="apply_zoom"/>
           <!-- :zoom="apply_zoom" -->
 
-          <bar-race :categoryY="'host'" :valueX="'hits'" :values="minute.per_host" :label="'Minute Per HOST - CGI count'" :id="'minute_per_host_sum'"/>
+          <bar-race :categoryY="'host'" :valueX="'hits'" :values="minute.per_host" :label="'Minute Per HOST - CGI count'" :id="'minute_per_host_sum'" :zoom="apply_zoom"/>
           <!-- :zoom="apply_zoom" -->
 
         </q-tab-panel>
 
         <q-tab-panel name="hour">
-          <bar-race :categoryY="'domain'" :valueX="'hits'" :values="hour.per_domain" :label="'Hour Per DOMAIN - CGI count'" :id="'hour_per_domain_sum'"/>
+          <bar-race :categoryY="'domain'" :valueX="'hits'" :values="hour.per_domain" :label="'Hour Per DOMAIN - CGI count'" :id="'hour_per_domain_sum'" :zoom="apply_zoom"/>
           <!-- :zoom="apply_zoom" -->
 
-          <bar-race :categoryY="'host'" :valueX="'hits'" :values="hour.per_host" :label="'Hour Per HOST - CGI count'" :id="'hour_per_host_sum'" />
+          <bar-race :categoryY="'host'" :valueX="'hits'" :values="hour.per_host" :label="'Hour Per HOST - CGI count'" :id="'hour_per_host_sum'" :zoom="apply_zoom"/>
           <!-- :zoom="apply_zoom" -->
         </q-tab-panel>
       </q-tab-panels>
